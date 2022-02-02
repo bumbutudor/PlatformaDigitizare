@@ -1,0 +1,47 @@
+# FRONTEND
+# working files
+.vim/viminfo
+.vim/swaps/*
+.vim/undo
+
+# git credential file
+.gitconfig.local
+
+# no thx
+frontend/node_modules
+frontend/coverage
+frontend/src/digitizare/dist
+frontend/npm-debug.log
+
+# Folder view configuration files
+.DS_Store
+Desktop.ini
+
+# Thumbnail cache files
+._*
+Thumbs.db
+
+# Files that might appear on external disks
+.Spotlight-V100
+.Trashes
+
+# Compiled Python files
+*.pyc
+
+# fish shell
+fishd.*
+.config/fish/fish_history
+fish/fish_history
+
+# extra
+.extra
+
+# random
+shilocation
+# END OF FRONTEND
+
+# BACKEND
+# environment
+backend/venv
+backend/media
+# END OF BACKEND
