@@ -42,7 +42,7 @@ export default class DigitizationSteps extends Component {
   render() {
     const steps = [
       {
-        name: "Pasul1",
+        name: "1. Încarcă fișierele",
         component: (
           <Step1
             getStore={() => this.getStore()}
@@ -53,7 +53,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "Pasul2",
+        name: "2. Preprocesează imaginea",
         component: (
           <Step2
             getStore={() => this.getStore()}
@@ -64,7 +64,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "Pasul3",
+        name: "3. OCR",
         component: (
           <Step3
             getStore={() => this.getStore()}
@@ -75,7 +75,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "Pasul4",
+        name: "4. Verifică OCR",
         component: (
           <Step4
             getStore={() => this.getStore()}
@@ -86,7 +86,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "Pasul5",
+        name: "5. Transliterează",
         component: (
           <Step5
             getStore={() => this.getStore()}
@@ -97,7 +97,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "Pasul6",
+        name: "6. Verifică transliterația",
         component: (
           <Step6
             getStore={() => this.getStore()}
@@ -108,7 +108,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "Pasul7",
+        name: "7. Folosește rezultatele",
         component: (
           <Step7
             getStore={() => this.getStore()}
