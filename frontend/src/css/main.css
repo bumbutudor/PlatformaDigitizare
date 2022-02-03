@@ -1,4 +1,4 @@
-/* ol.progtrckr {
+ol.progtrckr {
   list-style-type: none;
   padding: 0;
 }
@@ -93,8 +93,8 @@ ol.progtrckr li.progtrckr-done:before {
 
 ol.progtrckr li.progtrckr-done:hover:before {
   color: #333;
-} */
-.App {
+}
+/* .App {
   margin-top: 10%;
 }
 .stepsWrapper {
@@ -181,4 +181,4 @@ ol.progtrckr li.progtrckr-done:before {
 }
 ol.progtrckr li.progtrckr-done:hover:before {
   color: #333;
-}
+} */

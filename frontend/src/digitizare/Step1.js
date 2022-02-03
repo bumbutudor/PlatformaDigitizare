@@ -22,9 +22,9 @@ export default class Step1 extends Component {
           <form id="Form" className="form-horizontal">
             <div className="form-group">
               <label className="col-md-12 control-label">
-                <h1>Pasul 1: Incarcă fisierul scanat</h1>
-                <h3>
-                  Fișierele scanate pot fi de tipul: .jpg, .jpeg, .png, .pdf,
+                <h1>Pasul 1: Incarcă imagini sau fișiere PDF</h1>
+                <h3 className="info">
+                  Fișierele pot fi de tipul: .jpg, .jpeg, .png, .tif, .pdf.
                 </h3>
               </label>
               <FileUpload />
