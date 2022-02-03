@@ -28,17 +28,6 @@ export default class Step1 extends Component {
                 </h3>
               </label>
               <FileUpload />
-
-              <div className="col-md-12 eg-jump-lnk">
-                <h3>
-                  Daca ai deja textul chirilic in format .txt sau .docx, poti
-                  omite acest past și sari la pasul 5 cu transliterarea
-                  textului.
-                </h3>
-                <a href="#" onClick={() => props.jumpToStep(1)}>
-                  Sari la pasul 5
-                </a>
-              </div>
             </div>
           </form>
         </div>
