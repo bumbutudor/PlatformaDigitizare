@@ -10,6 +10,7 @@ export default class Step3 extends Component {
       email: props.getStore().email,
       gender: props.getStore().gender
     };
+    
 
     this._validateOnDemand = true; // this flag enables onBlur validation as user fills forms
 

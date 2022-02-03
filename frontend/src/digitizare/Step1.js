@@ -15,7 +15,7 @@ export default class Step1 extends Component {
   // not required as this component has no forms or user entry
   // isValidated() {}
 
-  render() {
+  render() {    
     return (
       <div className="step step1">
         <div className="row">
@@ -27,7 +27,10 @@ export default class Step1 extends Component {
                   Fișierele pot fi de tipul: .jpg, .jpeg, .png, .tif, .pdf.
                 </h3>
               </label>
-              <FileUpload />
+              <FileUpload getStore={() => this.props.getStore()}
+            updateStore={(u) => {
+              this.props.updateStore(u);
+            }}/>
             </div>
           </form>
         </div>

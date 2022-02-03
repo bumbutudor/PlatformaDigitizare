@@ -3,20 +3,24 @@ import "react-dropzone-uploader/dist/styles.css";
 import Dropzone from "react-dropzone-uploader";
 import { getDroppedOrSelectedFiles } from "html5-file-selector";
 
-const FileUpload = () => {
+
+const FileUpload = (props) => {
   const fileParams = ({ file, meta }) => {
     const body = new FormData();
     body.append("profile_pic", file);
+    console.log(file);
     return { url: "http://127.0.0.1:8000/get_file/", body }; // localhost
   };
 
   const onFileChange = ({ meta, file }, status) => {
-    console.log(status, meta, file);
+    console.log(file, meta, status);
   };
 
-  const onSubmit = (files, allFiles) => {
-    allFiles.forEach((f) => f.show());
-  };
+  const handleSubmit = (files) => { 
+    props.updateStore({sourceFiles: ["saasfasf"]}); 
+    // files.map(f => f.meta)
+  }
+  
 
   const getFilesFromEvent = (e) => {
     return new Promise((resolve) => {
@@ -28,7 +32,7 @@ const FileUpload = () => {
 
   const selectFileInput = ({ accept, onFiles, files, getFilesFromEvent }) => {
     const textMsg =
-      files.length > 0 ? "Mai încarcă un fișier" : "Selectează fișierele";
+      files.length > 0 ? "Mai selectează un fișier" : "Selectează fișierele din calculatorul tău";
 
     return (
       <label className="btn btn-danger mt-4">
@@ -50,7 +54,7 @@ const FileUpload = () => {
 
   return (
     <Dropzone
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       onChangeStatus={onFileChange}
       InputComponent={selectFileInput}
       getUploadParams={fileParams}

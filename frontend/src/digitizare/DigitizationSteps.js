@@ -21,6 +21,7 @@ export default class DigitizationSteps extends Component {
       email: "",
       gender: "",
       savedToCloud: false,
+      sourceFiles: [],
     };
   }
 
