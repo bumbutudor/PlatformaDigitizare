@@ -1,13 +1,15 @@
-import React, { Component, useEffect, useState, useRef } from "react";
-import PropTypes from "prop-types";
-import Promise from "promise";
+import React, {
+  Component, useEffect, useState, useRef
+} from 'react';
+import PropTypes from 'prop-types';
+import Promise from 'promise';
 
 export default function StepZilla(props) {
   const [compState, setCompState] = useState(props.startAtStep);
   const [navState, setNavState] = useState(null);
 
   const hidden = {
-    display: "none",
+    display: 'none'
   };
 
   useEffect(() => {
@@ -19,12 +21,12 @@ export default function StepZilla(props) {
     const styles = [];
 
     for (let i = 0; i < length; i++) {
-      if (i < indx || (!props.prevBtnOnLastStep && indx === length - 1)) {
-        styles.push("done");
+      if (i < indx || (!props.prevBtnOnLastStep && (indx === length - 1))) {
+        styles.push('done');
       } else if (i === indx) {
-        styles.push("doing");
+        styles.push('doing');
       } else {
-        styles.push("todo");
+        styles.push('todo');
       }
     }
 
@@ -45,9 +47,7 @@ export default function StepZilla(props) {
     // second to last step change next btn text if supplied as props
     if (currentStep === props.steps.length - 2) {
       // if user did not give a custom nextTextOnFinalActionStep, the nextButtonText becomes the default
-      const nextTextOnFinalActionStep = props.nextTextOnFinalActionStep
-        ? props.nextTextOnFinalActionStep
-        : props.nextButtonText;
+      const nextTextOnFinalActionStep = (props.nextTextOnFinalActionStep) ? props.nextTextOnFinalActionStep : props.nextButtonText;
       nextStepText = nextTextOnFinalActionStep || nextStepText;
     }
 
@@ -60,7 +60,7 @@ export default function StepZilla(props) {
     return {
       showPreviousBtn,
       showNextBtn,
-      nextStepText,
+      nextStepText
     };
   };
 
@@ -85,9 +85,9 @@ export default function StepZilla(props) {
   // handles keydown on enter being pressed in any Child component input area. in this case it goes to the next (ignore textareas as they should allow line breaks)
   const handleKeyDown = (evt) => {
     if (evt.which === 13) {
-      if (!props.preventEnterSubmission && evt.target.type !== "textarea") {
+      if (!props.preventEnterSubmission && evt.target.type !== 'textarea') {
         next();
-      } else if (evt.target.type !== "textarea") {
+      } else if (evt.target.type !== 'textarea') {
         evt.preventDefault();
       }
     }
@@ -95,11 +95,10 @@ export default function StepZilla(props) {
 
   // this utility method lets Child components invoke a direct jump to another step
   const jumpToStep = (evt) => {
-    if (typeof evt.target === "undefined") {
+    if (typeof evt.target === 'undefined') {
       // a child step wants to invoke a jump between steps. in this case 'evt' is the numeric step number and not the JS event
       adjustNavState(evt);
-    } else {
-      // the main navigation step ui is invoking a jump between steps
+    } else { // the main navigation step ui is invoking a jump between steps
       // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
       if (!props.stepsNavigation || evt.target.value === compState) {
         evt.preventDefault();
@@ -119,7 +118,7 @@ export default function StepZilla(props) {
         .then((valid) => {
           // validation was a success (promise or sync validation). In it was a Promise's resolve()
           // ... then proceed will be undefined, so make it true. Or else 'proceed' will carry the true/false value from sync
-          proceed = typeof valid === "undefined" ? true : valid;
+          proceed = typeof valid === 'undefined' ? true : valid;
 
           if (!movingBack) {
             updateStepValidationFlag(proceed);
@@ -151,23 +150,19 @@ export default function StepZilla(props) {
         .then(() => {
           // this is like finally(), executes if error no no error
           if (proceed && !passThroughStepsNotValid) {
-            if (
-              evt.target.value === props.steps.length - 1 &&
-              compState === props.steps.length - 1
-            ) {
+            if (evt.target.value === (props.steps.length - 1)
+              && compState === (props.steps.length - 1)) {
               adjustNavState(props.steps.length);
             } else {
               adjustNavState(evt.target.value);
             }
           }
         })
-        .catch((e) => {
+        .catch(e => {
           if (e) {
             // see note below called "CatchRethrowing"
             // ... plus the finally then() above is what throws the JS Error so we need to catch that here specifically
-            setTimeout(() => {
-              throw e;
-            });
+            setTimeout(() => { throw e; });
           }
         });
     }
@@ -191,9 +186,7 @@ export default function StepZilla(props) {
           // ... during the render, if there are JS errors thrown (e.g. ReferenceError) it gets swallowed by the Promise library and comes in here (catch)
           // ... so we need to rethrow it outside the execution stack so it behaves like a notmal JS error (i.e. halts and prints to console)
           //
-          setTimeout(() => {
-            throw e;
-          });
+          setTimeout(() => { throw e; });
         }
 
         // Promise based validation was a fail (i.e reject())
@@ -229,10 +222,7 @@ export default function StepZilla(props) {
         // the user is using a higer order component (HOC) for validation (e.g react-validation-mixin), this wraps the StepZilla steps as a HOC,
         // so use hocValidationAppliedTo to determine if this step needs the aync validation as per react-validation-mixin interface
         proceed = activeComponentRef.current.refs.component.isValidated();
-      } else if (
-        activeComponentRef.current === null ||
-        typeof activeComponentRef.current.isValidated === "undefined"
-      ) {
+      } else if (activeComponentRef.current === null || typeof activeComponentRef.current.isValidated === 'undefined') {
         // if its a form component, it should have implemeted a public isValidated class (also pure componenets wont even have refs - i.e. a empty object). If not then continue
         proceed = true;
       } else {
@@ -245,11 +235,7 @@ export default function StepZilla(props) {
   };
 
   const isStepAtIndexHOCValidationBased = (stepIndex) => {
-    return (
-      props.hocValidationAppliedTo &&
-      props.hocValidationAppliedTo.length > 0 &&
-      props.hocValidationAppliedTo.indexOf(stepIndex) > -1
-    );
+    return (props.hocValidationAppliedTo && props.hocValidationAppliedTo.length > 0 && props.hocValidationAppliedTo.indexOf(stepIndex) > -1);
   };
 
   // a validation method is each step can be sync or async (Promise based), this utility abstracts the wrapper stepMoveAllowed to be Promise driven regardless of validation return type
@@ -259,14 +245,14 @@ export default function StepZilla(props) {
 
   // get the classmame of steps
   const getClassName = (className, i) => {
-    let liClassName = "";
+    let liClassName = '';
 
     if (navState && navState.styles) {
       liClassName = `${className}-${navState.styles[i]}`;
 
       // if step ui based navigation is disabled, then dont highlight step
       if (!props.stepsNavigation) {
-        liClassName += " no-hl";
+        liClassName += ' no-hl';
       }
     }
 
@@ -276,28 +262,20 @@ export default function StepZilla(props) {
   // render the steps as stepsNavigation
   const renderSteps = () => {
     return props.steps.map((s, i) => (
-      <li
-        className={getClassName("progtrckr", i)}
-        onClick={(evt) => {
-          jumpToStep(evt);
-        }}
-        key={i}
-        value={i}
-      >
+      <li className={getClassName('progtrckr', i)} onClick={(evt) => { jumpToStep(evt); }} key={i} value={i}>
         <em>{i + 1}</em>
         <span>{props.steps[i].name}</span>
       </li>
     ));
   };
 
-  const { nextStepText, showNextBtn, showPreviousBtn } =
-    getPrevNextBtnLayout(compState);
+  const { nextStepText, showNextBtn, showPreviousBtn } = getPrevNextBtnLayout(compState);
 
   // clone the step component dynamically and tag it as activeComponent so we can validate it on next. also bind the jumpToStep piping method
   const cloneExtensions = {
     jumpToStep: (t) => {
       jumpToStep(t);
-    },
+    }
   };
 
   let componentPointer = null;
@@ -311,21 +289,15 @@ export default function StepZilla(props) {
     // ... we only can do this if its a (1) React Class based component or (2) A Hooks based stateful component wrapped in forwardRef
 
     // (1) can only update refs if its a regular React component (not a pure component - i.e. function components with no state), so lets check that
-    if (
-      componentPointer instanceof Component ||
-      (componentPointer.type &&
-        componentPointer.type.prototype instanceof Component)
-    ) {
+    if (componentPointer instanceof Component
+      || (componentPointer.type && componentPointer.type.prototype instanceof Component)) {
       // unit test deteceted that instanceof Component can be in either of these locations so test both (not sure why this is the case)
       cloneExtensions.ref = activeComponentRef;
     } else {
       // (2) after react hooks was released, functional components can have state and therefore support refs
       // ... we do this via forwardRefs. So we need to support this as well
       // ... after testing, if both the below types are objects then it's a hooks function component wrapped in forwardRef
-      if (
-        typeof componentPointer === "object" &&
-        typeof componentPointer.type === "object"
-      ) {
+      if (typeof componentPointer === 'object' && typeof componentPointer.type === 'object') {
         cloneExtensions.ref = activeComponentRef;
       }
     }
@@ -336,30 +308,22 @@ export default function StepZilla(props) {
 
   // main render of stepzilla container
   return (
-    <div
-      className="multi-step"
-      onKeyDown={(evt) => {
-        handleKeyDown(evt);
-      }}
-    >
-      {props.showSteps ? (
-        <ol className="progtrckr">{renderSteps()}</ol>
-      ) : (
-        <span></span>
-      )}
+    <div className="multi-step" onKeyDown={(evt) => { handleKeyDown(evt); }}>
+      {
+        props.showSteps
+          ? <ol className="progtrckr">
+            {renderSteps()}
+          </ol>
+          : <span></span>
+      }
 
       {compToRender}
-      <div
-        style={props.showNavigation ? {} : hidden}
-        className="footer-buttons"
-      >
+      <div style={props.showNavigation ? {} : hidden} className="footer-buttons">
         <button
           type="button"
           style={showPreviousBtn ? {} : hidden}
           className={props.backButtonCls}
-          onClick={() => {
-            previous();
-          }}
+          onClick={() => { previous(); }}
           id="prev-button"
         >
           {props.backButtonText}
@@ -368,9 +332,7 @@ export default function StepZilla(props) {
           type="button"
           style={showNextBtn ? {} : hidden}
           className={props.nextButtonCls}
-          onClick={() => {
-            next();
-          }}
+          onClick={() => { next(); }}
           id="next-button"
         >
           {nextStepText}
@@ -388,21 +350,21 @@ StepZilla.defaultProps = {
   dontValidate: false,
   preventEnterSubmission: false,
   startAtStep: 0,
-  nextButtonText: "Pasul urmator",
-  nextButtonCls: "btn btn-prev btn-primary btn-lg float-end",
-  backButtonText: "Pasul anterior",
-  backButtonCls: "btn btn-next btn-primary btn-lg float-start",
-  hocValidationAppliedTo: [],
+  nextButtonText: 'Pasul următor',
+  nextButtonCls: 'btn btn-next btn-primary btn-lg float-end',
+  backButtonText: 'Pasul anterior',
+  backButtonCls: 'btn btn-prev btn-primary btn-lg float-start',
+  hocValidationAppliedTo: []
 };
 
 StepZilla.propTypes = {
-  steps: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
-        .isRequired,
-      component: PropTypes.element.isRequired,
-    })
-  ).isRequired,
+  steps: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.object
+    ]).isRequired,
+    component: PropTypes.element.isRequired
+  })).isRequired,
   showSteps: PropTypes.bool,
   showNavigation: PropTypes.bool,
   stepsNavigation: PropTypes.bool,
@@ -415,5 +377,5 @@ StepZilla.propTypes = {
   backButtonCls: PropTypes.string,
   backButtonText: PropTypes.string,
   hocValidationAppliedTo: PropTypes.array,
-  onStepChange: PropTypes.func,
+  onStepChange: PropTypes.func
 };

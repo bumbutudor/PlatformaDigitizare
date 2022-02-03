@@ -19,7 +19,7 @@ gulp.task("lint", function (done) {
   done();
 
   return gulp
-    .src("./src/main.js")
+    .src("./src/components/StepZilla.js")
     .pipe($.plumber())
     .pipe($.eslint())
     .pipe($.eslint.format())
@@ -48,7 +48,7 @@ gulp.task(
   "test-watch",
   gulp.series("lint", "test", function (done) {
     gulp.watch(
-      ["./tests/**/*.spec.js", "./src/main.js"],
+      ["./tests/**/*.spec.js", "./src/components/StepZilla.js"],
       gulp.series("lint", "test")
     );
 
@@ -63,7 +63,7 @@ gulp.task(
     done();
 
     return gulp
-      .src("./src/main.js")
+      .src("./src/components/StepZilla.js")
       .pipe($.babel()) //this will also handle react transformations
       .pipe(gulp.dest("./dist"));
   })

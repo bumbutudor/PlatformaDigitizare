@@ -1,7 +1,7 @@
 "use strict";
 
 import React, { Component } from "react";
-import StepZilla from "../components/stepzilla";
+import StepZilla from "../components/StepZilla";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
@@ -25,9 +25,9 @@ export default class DigitizationSteps extends Component {
     };
   }
 
-  componentDidMount() {}
+  componentDidMount() { }
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   getStore() {
     return this.sampleStore;
