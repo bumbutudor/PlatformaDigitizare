@@ -5,8 +5,8 @@ from django.core.files.storage import FileSystemStorage
 
 
 def get_file(request):
-    print(request.FILES['profile_pic'])
-    myfile = request.FILES['profile_pic']
+    # print(request.FILES['uploadedFile'])
+    myfile = request.FILES['uploadedFile']
     fs = FileSystemStorage()
     filename = fs.save(myfile.name, myfile)
     uploaded_file_url = fs.url(filename)

@@ -1,5 +1,5 @@
 {
-  "name": "react-stepzilla",
+  "name": "frontend",
   "version": "7.0.0",
   "description": "A react multi-step, wizard component for managing data collection via forms and sub components",
   "main": "./dist/main.js",
@@ -86,6 +86,7 @@
   "dependencies": {
     "html5-file-selector": "^2.1.0",
     "react-awesome-lightbox": "^1.8.1",
-    "react-dropzone-uploader": "^2.11.0"
+    "react-dropzone-uploader": "^2.11.0",
+    "react-pdf": "^5.7.0"
   }
 }
