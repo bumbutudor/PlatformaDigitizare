@@ -7,20 +7,28 @@ import { getDroppedOrSelectedFiles } from "html5-file-selector";
 const FileUpload = (props) => {
   const fileParams = ({ file, meta }) => {
     const body = new FormData();
-    body.append("profile_pic", file);
+    body.append("uploadedFile", file);
     console.log(file);
-    return { url: "http://127.0.0.1:8000/get_file/", body }; // localhost
+    return { url: "http://127.0.0.1:8000/get_file/", body }; // localhost http://127.0.0.1:8000/get_file/
   };
 
   const onFileChange = ({ meta, file }, status) => {
-    console.log(file, meta, status);
+    // console.log(file, meta, status);
   };
 
-  const handleSubmit = (files) => { 
-    props.updateStore({sourceFiles: ["saasfasf"]}); 
-    // files.map(f => f.meta)
+
+  const handleFilePath = (filePath) => {
+    return 'http://127.0.0.1:8000/media/' + filePath;
   }
-  
+
+  const handleSubmit = (files, allFiles) => {
+    console.log(props.get)
+    props.updateStore({ sourceFiles: files.map(f => handleFilePath(f.meta.name)) });
+    // console.log(props)
+    allFiles.forEach(f => f.remove())
+    props.jumpToStep(1);
+  }
+
 
   const getFilesFromEvent = (e) => {
     return new Promise((resolve) => {
@@ -61,9 +69,10 @@ const FileUpload = (props) => {
       getFilesFromEvent={getFilesFromEvent}
       accept=".jpg,.jpeg,.png,.pdf,.doc"
       maxFiles={5}
-      inputContent="Trage sau click pentru a selecta fisiere"
+      inputContent="Trage sau click pentru a selecta fișiere"
+      submitButtonContent="Continuă"
       styles={{
-        dropzone: { width: 900, height: 300, overflow: "hidden" },
+        dropzone: { width: 900, height: 300, border: "2px dashed", borderRadius: 5, overflow: "hidden" },
       }}
     />
   );

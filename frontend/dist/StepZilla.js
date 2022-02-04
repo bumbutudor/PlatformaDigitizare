@@ -372,10 +372,10 @@ StepZilla.defaultProps = {
   dontValidate: false,
   preventEnterSubmission: false,
   startAtStep: 0,
-  nextButtonText: 'Next',
-  nextButtonCls: 'btn btn-prev btn-primary btn-lg pull-right',
-  backButtonText: 'Previous',
-  backButtonCls: 'btn btn-next btn-primary btn-lg pull-left',
+  nextButtonText: 'Pasul următor',
+  nextButtonCls: 'btn btn-next btn-primary btn-lg float-end',
+  backButtonText: 'Pasul anterior',
+  backButtonCls: 'btn btn-prev btn-primary btn-lg float-start',
   hocValidationAppliedTo: []
 };
 StepZilla.propTypes = {

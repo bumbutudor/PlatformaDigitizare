@@ -25,15 +25,15 @@ const Step2 = (props) => (
         </div>
       </form>
       {props.getStore().sourceFiles.map((src, index) => (
-              <img
-                src={src}
-                onClick={() => openImageViewer(index)}
-                width="300"
-                key={index}
-                style={{ margin: "2px" }}
-                alt=""
-              />
-            ))}
+        <img
+          src={src}
+          onClick={() => openImageViewer(index)}
+          width="300"
+          key={index}
+          style={{ margin: "2px" }}
+          alt=""
+        />
+      ))}
 
 
     </div>

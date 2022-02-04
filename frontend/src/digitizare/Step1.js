@@ -8,14 +8,14 @@ export default class Step1 extends Component {
     super(props);
     this.state = {};
   }
-  componentDidMount() {}
+  componentDidMount() { }
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   // not required as this component has no forms or user entry
   // isValidated() {}
 
-  render() {    
+  render() {
     return (
       <div className="step step1">
         <div className="row">
@@ -25,12 +25,16 @@ export default class Step1 extends Component {
                 <h1>Pasul 1: Incarcă imagini sau fișiere PDF</h1>
                 <h3 className="info">
                   Fișierele pot fi de tipul: .jpg, .jpeg, .png, .tif, .pdf.
+                  <a href="#" onClick={() => this.props.jumpToStep(1)}>Hopa!</a>
                 </h3>
               </label>
-              <FileUpload getStore={() => this.props.getStore()}
-            updateStore={(u) => {
-              this.props.updateStore(u);
-            }}/>
+              <FileUpload
+                jumpToStep={(i) => this.props.jumpToStep(i)}
+                getStore={() => this.props.getStore()}
+                updateStore={(u) => {
+                  this.props.updateStore(u);
+                }}
+              />
             </div>
           </form>
         </div>
