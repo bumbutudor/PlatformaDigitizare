@@ -166,7 +166,7 @@ const Step2 = (props) => {
         </Form>
       </div>
 
-      {/* iamge */}
+      {/* source image and preprocessed images */}
       <div className="row">
         <div className="col-md-12 d-flex justify-content-around">
           <div className="col-sm">

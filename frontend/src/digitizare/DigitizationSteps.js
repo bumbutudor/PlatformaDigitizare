@@ -20,7 +20,9 @@ export default class DigitizationSteps extends Component {
     this.sampleStore = {
       email: "",
       gender: "",
-      period: "SecolulXX",
+      period: "secolulXX",
+      typography: "",
+      alphabet: "cyrillic",
       savedToCloud: false,
       sourceFiles: [],
       preprocessedFiles: [],

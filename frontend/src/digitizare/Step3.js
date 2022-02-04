@@ -2,6 +2,7 @@
 
 import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
+import Accordion from 'react-bootstrap/Accordion';
 
 export default class Step3 extends Component {
   constructor(props) {
@@ -10,7 +11,10 @@ export default class Step3 extends Component {
     this.state = {
       email: props.getStore().email,
       period: props.getStore().period,
-      preprocessedFiles: props.getStore().preprocessedFiles
+      typography: props.getStore().typography,
+      preprocessedFiles: props.getStore().preprocessedFiles,
+      alphabet: props.getStore().alphabet,
+      sourceFiles: props.getStore().sourceFiles,
     };
 
 
@@ -106,7 +110,7 @@ export default class Step3 extends Component {
           <Form className="form-horizontal">
             <Form.Group>
               <label className="col-md-12 control-label">
-                <h1>Pasul 3: Recunoașterea optică a caracterelor din imagine </h1>
+                <h1>Pasul 3: Recunoașterea optică a caracterelor - OCR </h1>
               </label>
             </Form.Group>
 
@@ -119,7 +123,7 @@ export default class Step3 extends Component {
                   type="radio"
                   id="radio1"
                   value="secolulXX"
-                  checked={this.state.period == "secolulXX"}
+                  checked={this.state.period === "secolulXX"}
                   onChange={() => { this.setState({ period: "secolulXX" }); this.props.updateStore({ period: "secolulXX" }); }}
                 />
                 <Form.Check
@@ -128,7 +132,7 @@ export default class Step3 extends Component {
                   type="radio"
                   id="radio2"
                   value="secolulXIX"
-                  checked={this.state.period == "secolulXIX"}
+                  checked={this.state.period === "secolulXIX"}
                   onChange={() => { this.setState({ period: "secolulXIX" }); this.props.updateStore({ period: "secolulXIX" }); }}
                 />
                 <Form.Check
@@ -137,7 +141,7 @@ export default class Step3 extends Component {
                   type="radio"
                   id="radio3"
                   value="secolulXVIII"
-                  checked={this.state.period == "secolulXVIII"}
+                  checked={this.state.period === "secolulXVIII"}
                   onChange={() => { this.setState({ period: "secolulXVIII" }); this.props.updateStore({ period: "secolulXVIII" }); }}
 
                 />
@@ -147,55 +151,137 @@ export default class Step3 extends Component {
                   type="radio"
                   id="radio4"
                   value="secolulXVII"
-                  checked={this.state.period == "secolulXVII"}
+                  checked={this.state.period === "secolulXVII"}
                   onChange={() => { this.setState({ period: "secolulXVII" }); this.props.updateStore({ period: "secolulXVII" }); }}
                 />
               </Form.Group>
+              <div className="col-sm mb-3">
+                {this.state.period === "secolulXX" && <>
+                  <Form.Group className="mb-3">
+                    <Form.Label>3.2 Selectează alfabetul documentului:</Form.Label>
+                    <Form.Check
+                      label="Alfabetul chirilic sovietic"
+                      name="group6"
+                      type="checkbox"
+                      id="radio11"
+                      value="cyrillic"
+                      checked={this.state.alphabet === "cyrillic"}
+                      onChange={() => { this.setState({ alphabet: "cyrillic" }); this.props.updateStore({ alphabet: "cyrillic" }); }}
+                    />
+
+                    <Form.Check
+                      label="Alfabetul românesc (latin)"
+                      name="group6"
+                      type="checkbox"
+                      id="radio12"
+                      value="latin"
+                      checked={this.state.alphabet === "latin"}
+                      onChange={() => { this.setState({ alphabet: "latin" }); this.props.updateStore({ alphabet: "latin" }); }}
+                    />
+                  </Form.Group>
+
+                </>}
+                {this.state.period === "secolulXIX" && <>TODO</>}
+                {this.state.period === "secolulXVIII" && <>TODO</>}
+                {this.state.period === "secolulXVII" && <>
+                  <Form.Group className="">
+                    <Form.Label>3.2 Selectează tipografia din Secolul XVII</Form.Label>
+                    <Form.Select value={this.state.typography} onChange={(e) => { this.setState({ typography: e.target.value }); this.props.updateStore({ typography: e.target.value }); }}>
+
+                      <option value="">Lista tipografiilor:</option>
+                      <option value="typography1">Tipariul cel Domnesc (Iași)</option>
+                      <option value="typography2">Casa Sfintei Mitropolii (Iași)</option>
+                      <option value="typography3">Tiparnița Tărâi (Iași)</option>
+                      <option value="typography4">Scaunul Mitropolii Bucureștilor (București)</option>
+                      <option value="typography5">Tipografia Domnească (Belgrad)</option>
+                      <option value="typography6">Mitropolia Belgradului (Belgrad)</option>
+                      <option value="typography7">Sfânta Mitropolie a Târgoviştii (Târgoviște)</option>
+                      <option value="typography8">Sfînta Mănăstire Uniev (Uniev)</option>
+                      <option value="typography9">Tipograf[ia] Noao (Sas Sebeș)</option>
+                      <option value="typography10">Tipografiia Domnească în Sfânta Mănăstire în Snagov (Snagov )</option>
+                      <option value="typography11">Tipografiia Domnească, la Episcupiia dela Buzău (Buzău)</option>
+
+                    </Form.Select>
+                    <span className='m-2' />
+                    <Form.Check
+                      label="Identifică automat fontul documentului"
+                      name="group7"
+                      type="checkbox"
+                      id="radio5"
+                      value="typographyAuto"
+                      checked={this.state.typography === "typographyAuto"}
+                      onChange={() => { this.setState({ typography: "typographyAuto" }); this.props.updateStore({ typography: "typographyAuto" }); }}
+
+                    />
+                  </Form.Group>
+                </>}
+              </div>
+
+
               <div className="col-md-12">
                 <div className="form-group col-md-12 content form-block-holder">
-                  <label className="control-label col-md-4">
-                    Perioada cand a fost tiparită:
-                  </label>
-                  <div className={notValidClasses.periodCls}>
-                    <select
-                      ref="period"
-                      autoComplete="off"
-                      className="form-control"
-                      required
-                      defaultValue={this.state.period}
-                      onBlur={this.validationCheck}>
-                      <option value="">Selectează perioada:</option>
-                      <option value="secolulXX">Secolul XX</option>
-                      <option value="secolulXIX">Secolul XIX</option>
-                      <option value="secolulXVIII">Secolul XVIII</option>
-                      <option value="secolulXVII">Secolul XVII</option>
-                    </select>
-                    <div className={notValidClasses.periodValGrpCls}>{this.state.periodValMsg}</div>
-                  </div>
+
                 </div>
               </div>
 
             </div>
-
-            <div className="form-group col-md-12 content form-block-holder">
-              <label className="control-label col-md-4">
-                Email
-              </label>
-              <div className={notValidClasses.emailCls}>
-                <input
-                  ref="email"
-                  autoComplete="off"
-                  type="email"
-                  placeholder="john.smith@example.com"
-                  className="form-control"
-                  required
-                  defaultValue={this.state.email}
-                  onBlur={this.validationCheck} />
-                <div className={notValidClasses.emailValGrpCls}>{this.state.emailValMsg}</div>
-              </div>
-            </div>
           </Form>
         </div>
+
+        {/* preprocessed image and reognized text */}
+        <div className="row">
+          <div className="col-md-12 d-flex justify-content-around">
+            <div className="col-sm">
+              {this.state.sourceFiles.length != 0 && <>
+                <Accordion defaultActiveKey={['0']} alwaysOpen>
+                  <Accordion.Item eventKey="0">
+                    <Accordion.Header>Source</Accordion.Header>
+                    <Accordion.Body>
+                      {
+                        this.state.sourceFiles.map((src, index) => (
+                          <img
+                            src={src}
+                            onClick={() => openImageViewer(index)}
+                            width="300"
+                            key={index}
+                            style={{ margin: "2px" }}
+                            alt=""
+                          />
+                        ))
+                      }
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
+              </>}
+            </div>
+
+            <div className="col-sm">
+              {this.state.sourceFiles.length != 0 && <>
+                <Accordion defaultActiveKey={['0']} alwaysOpen>
+                  <Accordion.Item eventKey="0">
+                    <Accordion.Header>Target</Accordion.Header>
+                    <Accordion.Body>
+                      {
+                        this.state.sourceFiles.map((src, index) => (
+                          <img
+                            src={src}
+                            onClick={() => openImageViewer(index)}
+                            width="300"
+                            key={index}
+                            style={{ margin: "2px" }}
+                            alt=""
+                          />
+                        ))
+                      }
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
+              </>}
+            </div>
+          </div>
+        </div>
+
+
       </div>
     )
   }

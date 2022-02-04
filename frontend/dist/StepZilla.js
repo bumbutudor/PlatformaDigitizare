@@ -86,7 +86,8 @@ function StepZilla(props) {
 
     return {
       showPreviousBtn: showPreviousBtn,
-      showNextBtn: showNextBtn,
+
+      /* showNextBtn, */
       nextStepText: nextStepText
     };
   }; // which step are we in?
@@ -294,7 +295,7 @@ function StepZilla(props) {
         },
         key: i,
         value: i
-      }, _react.default.createElement("em", null, i + 1), _react.default.createElement("span", null, props.steps[i].name));
+      }, _react.default.createElement("em", null, " ", i + 1, " "), " ", _react.default.createElement("span", null, " ", props.steps[i].name, " "), " ");
     });
   };
 
@@ -340,9 +341,9 @@ function StepZilla(props) {
     onKeyDown: function onKeyDown(evt) {
       handleKeyDown(evt);
     }
-  }, props.showSteps ? _react.default.createElement("ol", {
+  }, " ", props.showSteps ? _react.default.createElement("ol", {
     className: "progtrckr"
-  }, renderSteps()) : _react.default.createElement("span", null), compToRender, _react.default.createElement("div", {
+  }, " ", renderSteps(), " ") : _react.default.createElement("span", null, " "), compToRender, " ", _react.default.createElement("div", {
     style: props.showNavigation ? {} : hidden,
     className: "footer-buttons"
   }, _react.default.createElement("button", {
@@ -353,7 +354,7 @@ function StepZilla(props) {
       previous();
     },
     id: "prev-button"
-  }, props.backButtonText), _react.default.createElement("button", {
+  }, " ", props.backButtonText, " "), " ", _react.default.createElement("button", {
     type: "button",
     style: showNextBtn ? {} : hidden,
     className: props.nextButtonCls,
@@ -361,7 +362,7 @@ function StepZilla(props) {
       next();
     },
     id: "next-button"
-  }, nextStepText)));
+  }, " ", nextStepText, " "), " "), " ");
 }
 
 StepZilla.defaultProps = {
