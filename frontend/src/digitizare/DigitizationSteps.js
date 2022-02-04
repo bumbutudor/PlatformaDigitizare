@@ -22,6 +22,18 @@ export default class DigitizationSteps extends Component {
       gender: "",
       savedToCloud: false,
       sourceFiles: [],
+      preprocessWith: "",
+      preprocessFR: {
+        correctResolution: true,
+        convertToBlackAndWhite: true,
+        straightenTextLines: true,
+        removeNoise: true,
+      },
+      preprocessOpenCV: {
+        setResolution: true,
+        resolution: 300,
+        removeNoise: true,
+      }
     };
   }
 
