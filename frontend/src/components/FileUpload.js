@@ -5,77 +5,79 @@ import { getDroppedOrSelectedFiles } from "html5-file-selector";
 
 
 const FileUpload = (props) => {
-  const fileParams = ({ file, meta }) => {
-    const body = new FormData();
-    body.append("uploadedFile", file);
-    console.log(file);
-    return { url: "http://127.0.0.1:8000/get_file/", body }; // localhost http://127.0.0.1:8000/get_file/
-  };
+    const fileParams = ({ file, meta }) => {
+        const body = new FormData();
+        body.append("uploadedFile", file);
+        console.log(file);
+        return { url: "https://httpbin.org/post", body }; // localhost http://127.0.0.1:8000/get_file/
+    };
 
-  const onFileChange = ({ meta, file }, status) => {
-    // console.log(file, meta, status);
-  };
-
-
-  const handleFilePath = (filePath) => {
-    return 'http://127.0.0.1:8000/media/' + filePath;
-  }
-
-  const handleSubmit = (files, allFiles) => {
-    console.log(props.get)
-    props.updateStore({ sourceFiles: files.map(f => handleFilePath(f.meta.name)) });
-    // console.log(props)
-    allFiles.forEach(f => f.remove())
-    props.jumpToStep(1);
-  }
+    const onFileChange = ({ meta, file }, status) => {
+        // console.log(file, meta, status);
+    };
 
 
-  const getFilesFromEvent = (e) => {
-    return new Promise((resolve) => {
-      getDroppedOrSelectedFiles(e).then((chosenFiles) => {
-        resolve(chosenFiles.map((f) => f.fileObject));
-      });
-    });
-  };
+    const handleFilePath = (filePath) => {
+        return 'http://127.0.0.1:8000/media/' + filePath;
+    }
 
-  const selectFileInput = ({ accept, onFiles, files, getFilesFromEvent }) => {
-    const textMsg =
-      files.length > 0 ? "Mai selectează un fișier" : "Selectează fișierele din calculatorul tău";
+    const handleSubmit = (files, allFiles) => {
+        console.log(props.get)
+        props.updateStore({ sourceFiles: files.map(f => handleFilePath(f.meta.name)) });
+        // console.log(props)
+        allFiles.forEach(f => f.remove())
+        props.jumpToStep(1);
+    }
 
-    return (
-      <label className="btn btn-danger mt-4">
-        {textMsg}
-        <input
-          style={{ display: "none" }}
-          type="file"
-          accept={accept}
-          multiple
-          onChange={(e) => {
-            getFilesFromEvent(e).then((chosenFiles) => {
-              onFiles(chosenFiles);
+
+    const getFilesFromEvent = (e) => {
+        return new Promise((resolve) => {
+            getDroppedOrSelectedFiles(e).then((chosenFiles) => {
+                resolve(chosenFiles.map((f) => f.fileObject));
             });
-          }}
-        />
-      </label>
-    );
-  };
+        });
+    };
 
-  return (
-    <Dropzone
-      onSubmit={handleSubmit}
-      onChangeStatus={onFileChange}
-      InputComponent={selectFileInput}
-      getUploadParams={fileParams}
-      getFilesFromEvent={getFilesFromEvent}
-      accept=".jpg,.jpeg,.png,.pdf,.doc"
-      maxFiles={5}
-      inputContent="Trage sau click pentru a selecta fișiere"
-      submitButtonContent="Continuă"
-      styles={{
-        dropzone: { width: 900, height: 300, border: "2px dashed" },
-      }}
-    />
-  );
+    const selectFileInput = ({ accept, onFiles, files, getFilesFromEvent }) => {
+        const textMsg =
+            files.length > 0 ? "Mai selectează un fișier" : "Selectează fișierele din calculatorul tău";
+
+        return ( <
+            label className = "btn btn-danger mt-4 btn_upload" > { textMsg } <
+            input style = {
+                { display: "none" }
+            }
+            type = "file"
+            accept = { accept }
+            multiple onChange = {
+                (e) => {
+                    getFilesFromEvent(e).then((chosenFiles) => {
+                        onFiles(chosenFiles);
+                    });
+                }
+            }
+            /> < /
+            label >
+        );
+    };
+
+    return ( <
+        Dropzone onSubmit = { handleSubmit }
+        onChangeStatus = { onFileChange }
+        InputComponent = { selectFileInput }
+        getUploadParams = { fileParams }
+        getFilesFromEvent = { getFilesFromEvent }
+        accept = ".jpg,.jpeg,.png,.pdf,.doc"
+        maxFiles = { 5 }
+        inputContent = "Trage sau click pentru a selecta fișiere"
+        submitButtonContent = "Continuă"
+        styles = {
+            {
+                dropzone: { height: 300, border: "2px dashed" },
+            }
+        }
+        />
+    );
 };
 
 export default FileUpload;

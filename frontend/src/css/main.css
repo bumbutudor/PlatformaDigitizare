@@ -4,7 +4,7 @@ ol.progtrckr {
 }
 
 ol.progtrckr li {
-    display: inline-block;
+    /* display: inline-block; */
     text-align: center;
     line-height: 4.5rem;
     cursor: pointer;
@@ -34,17 +34,21 @@ ol.progtrckr li span {
 
 ol.progtrckr li.progtrckr-todo {
     color: silver;
-    border-bottom: 4px solid silver;
+    border-bottom: 1px solid silver;
 }
 
 ol.progtrckr li.progtrckr-doing {
-    color: black;
-    border-bottom: 4px solid #cccccc;
+    color: #fff;
+    border-bottom: 1px solid #cccccc;
+    background: #65a3dc;
+    font-weight: 500;
 }
 
 ol.progtrckr li.progtrckr-done {
-    color: black;
-    border-bottom: 4px solid #5cb85c;
+    color: #fff;
+    border-bottom: 1px solid #cccccc;
+    background: #1c5d99;
+    font-weight: 500;
 }
 
 ol.progtrckr li:after {
@@ -148,11 +152,17 @@ ol.progtrckr li.progtrckr-done:hover:before {
 }
 
 .dzu-submitButton {
-    padding: 15px;
-    padding-left: 25px;
-    padding-right: 25px;
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    padding: .45rem .75rem;
     font-size: 1rem;
-    border-radius: 10px;
+    font-family: 'Open Sans', monospace;
+}
+
+.multi-step {
+    display: flex;
+    flex-direction: row;
 }
 
 
