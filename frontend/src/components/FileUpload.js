@@ -30,6 +30,7 @@ const FileUpload = (props) => {
   }
 
 
+
   const getFilesFromEvent = (e) => {
     return new Promise((resolve) => {
       getDroppedOrSelectedFiles(e).then((chosenFiles) => {
@@ -42,40 +43,59 @@ const FileUpload = (props) => {
     const textMsg =
       files.length > 0 ? "Mai selectează un fișier" : "Selectează fișierele din calculatorul tău";
 
-    return (
-      <label className="btn btn-danger mt-4">
-        {textMsg}
-        <input
-          style={{ display: "none" }}
-          type="file"
-          accept={accept}
-          multiple
-          onChange={(e) => {
+    return (<
+            label className="btn btn-danger mt-4 btn_upload" > {textMsg} <
+        input style={
+          { display: "none" }
+        }
+        type="file"
+        accept={accept}
+        multiple onChange={
+          (e) => {
             getFilesFromEvent(e).then((chosenFiles) => {
               onFiles(chosenFiles);
             });
-          }}
-        />
-      </label>
-    );
+          }
+        }
+      /> < /
+            label >
+      );
+    };
+
+      return ( <
+        Dropzone onSubmit={handleSubmit}
+        onChangeStatus={onFileChange}
+        InputComponent={selectFileInput}
+        getUploadParams={fileParams}
+        getFilesFromEvent={getFilesFromEvent}
+        accept=".jpg,.jpeg,.png,.pdf,.doc"
+        maxFiles={5}
+        inputContent="Trage sau click pentru a selecta fisiere"
+        styles={
+          {
+            dropzone: {},
+          }
+        }
+      />
+      );
   };
 
-  return (
-    <Dropzone
-      onSubmit={handleSubmit}
-      onChangeStatus={onFileChange}
-      InputComponent={selectFileInput}
-      getUploadParams={fileParams}
-      getFilesFromEvent={getFilesFromEvent}
-      accept=".jpg,.jpeg,.png,.pdf,.doc"
-      maxFiles={5}
-      inputContent="Trage sau click pentru a selecta fișiere"
-      submitButtonContent="Continuă"
-      styles={{
-        dropzone: { width: 900, height: 300, border: "2px dashed", borderRadius: 5, overflow: "hidden" },
-      }}
-    />
-  );
+      return (
+      <Dropzone
+        onSubmit={handleSubmit}
+        onChangeStatus={onFileChange}
+        InputComponent={selectFileInput}
+        getUploadParams={fileParams}
+        getFilesFromEvent={getFilesFromEvent}
+        accept=".jpg,.jpeg,.png,.pdf,.doc"
+        maxFiles={5}
+        inputContent="Trage sau click pentru a selecta fișiere"
+        submitButtonContent="Continuă"
+        styles={{
+          dropzone: { width: 900, height: 300, border: "2px dashed", borderRadius: 5, overflow: "hidden" },
+        }}
+      />
+      );
 };
 
-export default FileUpload;
+      export default FileUpload;
