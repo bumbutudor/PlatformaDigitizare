@@ -4,7 +4,7 @@ ol.progtrckr {
 }
 
 ol.progtrckr li {
-    display: inline-block;
+    /* display: inline-block; */
     text-align: center;
     line-height: 4.5rem;
     cursor: pointer;
@@ -148,11 +148,17 @@ ol.progtrckr li.progtrckr-done:hover:before {
 }
 
 .dzu-submitButton {
-    padding: 15px;
-    padding-left: 25px;
-    padding-right: 25px;
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    padding: .45rem .75rem;
     font-size: 1rem;
-    border-radius: 10px;
+    font-family: 'Open Sans', monospace;
+}
+
+.multi-step {
+    display: flex;
+    flex-direction: row;
 }
 
 

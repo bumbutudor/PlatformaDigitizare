@@ -39,12 +39,20 @@
         }
         
         .example {
-            margin-top: 20px;
+            margin-top: 80px;
         }
         
         .progtrckr {
+            width: 30%;
             text-align: center;
             padding-bottom: 16px;
+            /* margin-top: 20px;
+            margin-bottom: 20px; */
+            margin-right: 40px;
+            background: #ffffff;
+            padding: 20px;
+            box-shadow: -15px 15px 50px -1px rgb(56 103 234 / 15%);
+            border-radius: 10px;
         }
         
         .progtrckr li {
@@ -59,6 +67,7 @@
         }
         
         .step {
+            width: 70%;
             background-color: #fff;
             /* min-height: 450px; */
             padding: 20px;
@@ -151,17 +160,43 @@
         #header {
             padding: 8px;
             text-align: center;
+            background: #1c5d99;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #e4edf6;
+            box-shadow: 0px 5px 10px rgba(56, 103, 234, 0.15);
+            transition: box-shadow 0.2s, -webkit-transform 0.2s;
+            padding: 8px;
+            border-bottom: 0;
+            height: 60px;
+        }
+        
+        #header .content {
+            margin-right: auto;
+            margin-left: auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            width: 1100px;
+            height: 100%;
         }
         
         #header .title {
-            font-weight: bold;
-            font-size: 1.5rem;
+            font-weight: 600;
+            font-size: 1.3rem;
             font-size: 28px;
+            color: #ffffff;
+        }
+        
+        #header .img_header {
+            height: 100%;
+            float: left;
         }
         
         .container {
             display: none;
-            max-width: 1200px !important;
+            max-width: 1300px !important;
         }
     </style>
 </head>
@@ -176,7 +211,10 @@
     <![endif]-->
 
     <div id="header">
-        <div class="title">Platforma Digitizare - Demo</div>
+        <div class="content">
+            <img class="img_header" src="/src/assets/Vector.png" />
+            <div class="title">Platforma Digitizare - Demo</div>
+        </div>
     </div>
 
     <div id="root" class="container"></div>
