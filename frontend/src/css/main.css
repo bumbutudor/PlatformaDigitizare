@@ -1,99 +1,161 @@
 ol.progtrckr {
-  list-style-type: none;
-  padding: 0;
+    list-style-type: none;
+    padding: 0;
 }
 
 ol.progtrckr li {
-  display: inline-block;
-  text-align: center;
-  line-height: 4.5rem;
-  cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    line-height: 4.5rem;
+    cursor: pointer;
 }
 
 ol.progtrckr li span {
-  padding: 0 1.5rem;
+    padding: 0 1.5rem;
 }
 
 @media (max-width: 650px) {
-  .progtrckr li span {
-    display: none;
-  }
+    .progtrckr li span {
+        display: none;
+    }
 }
+
 .progtrckr em {
-  display: none;
-  font-weight: 700;
-  padding-left: 1rem;
+    display: none;
+    font-weight: 700;
+    padding-left: 1rem;
 }
 
 @media (max-width: 650px) {
-  .progtrckr em {
-    display: inline;
-  }
+    .progtrckr em {
+        display: inline;
+    }
 }
 
 ol.progtrckr li.progtrckr-todo {
-  color: silver;
-  border-bottom: 4px solid silver;
+    color: silver;
+    border-bottom: 4px solid silver;
 }
 
 ol.progtrckr li.progtrckr-doing {
-  color: black;
-  border-bottom: 4px solid #cccccc;
+    color: black;
+    border-bottom: 4px solid #cccccc;
 }
 
 ol.progtrckr li.progtrckr-done {
-  color: black;
-  border-bottom: 4px solid #5cb85c;
+    color: black;
+    border-bottom: 4px solid #5cb85c;
 }
 
 ol.progtrckr li:after {
-  content: "\00a0\00a0";
+    content: "\00a0\00a0";
 }
 
 ol.progtrckr li:before {
-  position: relative;
-  bottom: -3.7rem;
-  float: left;
-  left: 50%;
+    position: relative;
+    bottom: -3.7rem;
+    float: left;
+    left: 50%;
 }
 
 ol.progtrckr li.progtrckr-todo:before {
-  content: "\039F";
-  color: silver;
-  background-color: white;
-  width: 1.2em;
-  line-height: 1.4em;
+    content: "\039F";
+    color: silver;
+    background-color: white;
+    width: 1.2em;
+    line-height: 1.4em;
 }
 
 ol.progtrckr li.progtrckr-todo:hover:before {
-  color: #ff4500;
+    color: #ff4500;
 }
 
 ol.progtrckr li.progtrckr-doing:before {
-  content: "\2022";
-  color: white;
-  background-color: #cccccc;
-  width: 1.2em;
-  line-height: 1.2em;
-  border-radius: 1.2em;
+    content: "\2022";
+    color: white;
+    background-color: #cccccc;
+    width: 1.2em;
+    line-height: 1.2em;
+    border-radius: 1.2em;
 }
 
 ol.progtrckr li.progtrckr-doing:hover:before {
-  color: #ff4500;
+    color: #ff4500;
 }
 
 ol.progtrckr li.progtrckr-done:before {
-  content: "\2713";
-  color: white;
-  background-color: #5cb85c;
-  width: 1.2em;
-  line-height: 1.2em;
-  border-radius: 1.2em;
+    content: "\2713";
+    color: white;
+    background-color: #5cb85c;
+    width: 1.2em;
+    line-height: 1.2em;
+    border-radius: 1.2em;
 }
 
 ol.progtrckr li.progtrckr-done:hover:before {
-  color: #333;
+    color: #333;
 }
+
+.dzu-dropzone {
+    width: 100%;
+    overflow: hidden;
+    min-height: 250px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    background-color: rgb(224, 224, 224);
+    border: 0px;
+    border-radius: 10px;
+    flex-direction: row;
+    padding: 20px;
+    padding-bottom: 55px;
+}
+
+.btn_upload {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translate(-50%, 0%);
+}
+
+.dzu-previewContainer {
+    flex-direction: column;
+    width: 300px;
+    margin: 20px;
+    padding: 10px;
+    background: rgb(255, 255, 255);
+    padding-top: 30px;
+    padding-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 8px 15px -1px rgba(0, 0, 0, 0.15);
+}
+
+.dzu-previewImage {
+    width: 100%;
+    max-height: 100px;
+    object-fit: contain;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(213, 213, 213, 0.4);
+}
+
+.dzu-previewStatusContainer {
+    flex-direction: column;
+}
+
+.dzu-previewButton {
+    margin-left: 0px;
+    margin-top: 10px;
+}
+
+.dzu-submitButton {
+    padding: 15px;
+    padding-left: 25px;
+    padding-right: 25px;
+    font-size: 1rem;
+    border-radius: 10px;
+}
+
+
 /* .App {
   margin-top: 10%;
 }
