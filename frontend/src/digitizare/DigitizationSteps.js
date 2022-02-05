@@ -27,11 +27,12 @@ export default class DigitizationSteps extends Component {
       sourceFiles: [],
       preprocessedFiles: [],
       preprocessWith: "",
+      ocrResults: [],
       preprocessFR: {
         correctResolution: true,
         convertToBlackAndWhite: true,
         straightenTextLines: true,
-        removeNoise: true,
+        reduceNoise: true,
       },
       preprocessOpenCV: {
         setResolution: true,

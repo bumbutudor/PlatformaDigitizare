@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Accordion from 'react-bootstrap/Accordion';
+import Button from 'react-bootstrap/Button';
 
 export default class Step3 extends Component {
   constructor(props) {
@@ -15,42 +16,48 @@ export default class Step3 extends Component {
       preprocessedFiles: props.getStore().preprocessedFiles,
       alphabet: props.getStore().alphabet,
       sourceFiles: props.getStore().sourceFiles,
+      ocrResults: props.getStore().ocrResults,
     };
 
 
-    this._validateOnDemand = true; // this flag enables onBlur validation as user fills forms
+    // this._validateOnDemand = true; // this flag enables onBlur validation as user fills forms
 
-    this.validationCheck = this.validationCheck.bind(this);
-    this.isValidated = this.isValidated.bind(this);
+    // this.validationCheck = this.validationCheck.bind(this);
+    // this.isValidated = this.isValidated.bind(this);
+  }
+
+  handleFilePath(filePath) {
+    if (filePath.length > 0) return 'http://127.0.0.1:8000/media/' + filePath;
+    return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   }
 
   componentDidMount() { }
 
   componentWillUnmount() { }
 
-  isValidated() {
-    const userInput = this._grabUserInput(); // grab user entered vals
-    const validateNewInput = this._validateData(userInput); // run the new input against the validator
-    let isDataValid = false;
+  // isValidated() {
+  //   const userInput = this._grabUserInput(); // grab user entered vals
+  //   const validateNewInput = this._validateData(userInput); // run the new input against the validator
+  //   let isDataValid = false;
 
-    // if full validation passes then save to store and pass as valid
-    if (Object.keys(validateNewInput).every((k) => { return validateNewInput[k] === true })) {
-      if (this.props.getStore().email != userInput.email || this.props.getStore().period != userInput.period) { // only update store of something changed
-        this.props.updateStore({
-          ...userInput,
-          savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
-        });  // Update store here (this is just an example, in reality you will do it via redux or flux)
-      }
+  //   // if full validation passes then save to store and pass as valid
+  //   if (Object.keys(validateNewInput).every((k) => { return validateNewInput[k] === true })) {
+  //     if (this.props.getStore().email != userInput.email || this.props.getStore().period != userInput.period) { // only update store of something changed
+  //       this.props.updateStore({
+  //         ...userInput,
+  //         savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
+  //       });  // Update store here (this is just an example, in reality you will do it via redux or flux)
+  //     }
 
-      isDataValid = true;
-    }
-    else {
-      // if anything fails then update the UI validation state but NOT the UI Data State
-      this.setState(Object.assign(userInput, validateNewInput, this._validationErrors(validateNewInput)));
-    }
+  //     isDataValid = true;
+  //   }
+  //   else {
+  //     // if anything fails then update the UI validation state but NOT the UI Data State
+  //     this.setState(Object.assign(userInput, validateNewInput, this._validationErrors(validateNewInput)));
+  //   }
 
-    return isDataValid;
-  }
+  //   return isDataValid;
+  // }
 
   validationCheck() {
     if (!this._validateOnDemand)
@@ -62,48 +69,64 @@ export default class Step3 extends Component {
     this.setState(Object.assign(userInput, validateNewInput, this._validationErrors(validateNewInput)));
   }
 
-  _validateData(data) {
-    return {
-      periodVal: (data.period != 0), // required: anything besides N/A
-      emailVal: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(data.email), // required: regex w3c uses in html5
-    }
-  }
+  // _validateData(data) {
+  //   return {
+  //     periodVal: (data.period != 0), // required: anything besides N/A
+  //     emailVal: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(data.email), // required: regex w3c uses in html5
+  //   }
+  // }
 
-  _validationErrors(val) {
-    const errMsgs = {
-      periodValMsg: val.periodVal ? '' : 'A period selection is required',
-      emailValMsg: val.emailVal ? '' : 'A valid email is required'
-    }
-    return errMsgs;
-  }
+  // _validationErrors(val) {
+  //   const errMsgs = {
+  //     periodValMsg: val.periodVal ? '' : 'A period selection is required',
+  //     emailValMsg: val.emailVal ? '' : 'A valid email is required'
+  //   }
+  //   return errMsgs;
+  // }
 
-  _grabUserInput() {
-    return {
-      period: this.refs.period.value,
-      email: this.refs.email.value
-    };
-  }
+  // _grabUserInput() {
+  //   return {
+  //     period: this.refs.period.value,
+  //     email: this.refs.email.value
+  //   };
+  // }
+
 
   render() {
     // explicit class assigning based on validation
-    let notValidClasses = {};
+    // let notValidClasses = {};
 
-    if (typeof this.state.periodVal == 'undefined' || this.state.periodVal) {
-      notValidClasses.periodCls = 'no-error col-md-8';
-    }
-    else {
-      notValidClasses.periodCls = 'has-error col-md-8';
-      notValidClasses.periodValGrpCls = 'val-err-tooltip';
+    const handleOCRRequest = async () => {
+      const ocrAPI = "http://127.0.0.1:8000/ocr/";
+
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.state)
+      };
+      const response = await fetch(ocrAPI, requestOptions);
+      const data = await response.json();
+
+      this.setState({ ocrResults: data.ocrResults });
+      this.props.updateStore({ ocrResults: data.ocrResults });
+      console.log(data)
     }
 
-    if (typeof this.state.emailVal == 'undefined' || this.state.emailVal) {
-      notValidClasses.emailCls = 'no-error col-md-8';
-    }
-    else {
-      notValidClasses.emailCls = 'has-error col-md-8';
-      notValidClasses.emailValGrpCls = 'val-err-tooltip';
-    }
-    console.log(this.props.getStore());
+    // if (typeof this.state.periodVal == 'undefined' || this.state.periodVal) {
+    //   notValidClasses.periodCls = 'no-error col-md-8';
+    // }
+    // else {
+    //   notValidClasses.periodCls = 'has-error col-md-8';
+    //   notValidClasses.periodValGrpCls = 'val-err-tooltip';
+    // }
+
+    // if (typeof this.state.emailVal == 'undefined' || this.state.emailVal) {
+    //   notValidClasses.emailCls = 'no-error col-md-8';
+    // }
+    // else {
+    //   notValidClasses.emailCls = 'has-error col-md-8';
+    //   notValidClasses.emailValGrpCls = 'val-err-tooltip';
+    // }
     return (
       <div className="step step3">
         <div className="row">
@@ -218,10 +241,9 @@ export default class Step3 extends Component {
               </div>
 
 
-              <div className="col-md-12">
-                <div className="form-group col-md-12 content form-block-holder">
-
-                </div>
+              <div className="mt-5 mb-3 col-md-12 d-flex justify-content-center">
+                {this.state.period ? <Button variant="primary" onClick={handleOCRRequest}>Start OCR</Button> : ""}
+                {/* {!show && <> <Button variant="primary mx-4" onClick={() => props.jumpToStep(2)}>Mergi la pasul următor</Button> </>} */}
               </div>
 
             </div>
@@ -238,9 +260,9 @@ export default class Step3 extends Component {
                     <Accordion.Header>Source</Accordion.Header>
                     <Accordion.Body>
                       {
-                        this.state.sourceFiles.map((src, index) => (
+                        this.state.preprocessedFiles.map((src, index) => (
                           <img
-                            src={src}
+                            src={this.handleFilePath(src)}
                             onClick={() => openImageViewer(index)}
                             width="300"
                             key={index}
@@ -256,21 +278,14 @@ export default class Step3 extends Component {
             </div>
 
             <div className="col-sm">
-              {this.state.sourceFiles.length != 0 && <>
+              {this.state.ocrResults != 0 && <>
                 <Accordion defaultActiveKey={['0']} alwaysOpen>
                   <Accordion.Item eventKey="0">
                     <Accordion.Header>Target</Accordion.Header>
                     <Accordion.Body>
                       {
-                        this.state.sourceFiles.map((src, index) => (
-                          <img
-                            src={src}
-                            onClick={() => openImageViewer(index)}
-                            width="300"
-                            key={index}
-                            style={{ margin: "2px" }}
-                            alt=""
-                          />
+                        this.state.ocrResults.map((text, index) => (
+                          <span key={index} alt="">{text}</span>
                         ))
                       }
                     </Accordion.Body>

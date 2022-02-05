@@ -7,23 +7,18 @@ import { getDroppedOrSelectedFiles } from "html5-file-selector";
 const FileUpload = (props) => {
     const fileParams = ({ file, meta }) => {
         const body = new FormData();
-        body.append("uploadedFile", file);
+        body.append("uploadedFiles", file);
         console.log(file);
-        return { url: "https://httpbin.org/post", body }; // localhost http://127.0.0.1:8000/get_file/
+        return { url: "http://127.0.0.1:8000/get_file/", body }; // localhost http://127.0.0.1:8000/get_file/
     };
 
     const onFileChange = ({ meta, file }, status) => {
         // console.log(file, meta, status);
     };
 
-
-    const handleFilePath = (filePath) => {
-        return 'http://127.0.0.1:8000/media/' + filePath;
-    }
-
     const handleSubmit = (files, allFiles) => {
         console.log(props.get)
-        props.updateStore({ sourceFiles: files.map(f => handleFilePath(f.meta.name)) });
+        props.updateStore({ sourceFiles: files.map(f => f.meta) });
         // console.log(props)
         allFiles.forEach(f => f.remove())
         props.jumpToStep(1);
@@ -42,41 +37,39 @@ const FileUpload = (props) => {
         const textMsg =
             files.length > 0 ? "Mai selectează un fișier" : "Selectează fișierele din calculatorul tău";
 
-        return ( <
-            label className = "btn btn-danger mt-4 btn_upload" > { textMsg } <
-            input style = {
+        return (<label className="btn btn-danger mt-4 btn_upload" > {textMsg}
+            <input style={
                 { display: "none" }
             }
-            type = "file"
-            accept = { accept }
-            multiple onChange = {
-                (e) => {
-                    getFilesFromEvent(e).then((chosenFiles) => {
-                        onFiles(chosenFiles);
-                    });
+                type="file"
+                accept={accept}
+                multiple onChange={
+                    (e) => {
+                        getFilesFromEvent(e).then((chosenFiles) => {
+                            onFiles(chosenFiles);
+                        });
+                    }
                 }
-            }
-            /> < /
-            label >
+            /> </label>
         );
     };
 
-    return ( <
-        Dropzone onSubmit = { handleSubmit }
-        onChangeStatus = { onFileChange }
-        InputComponent = { selectFileInput }
-        getUploadParams = { fileParams }
-        getFilesFromEvent = { getFilesFromEvent }
-        accept = ".jpg,.jpeg,.png,.pdf,.doc"
-        maxFiles = { 5 }
-        inputContent = "Trage sau click pentru a selecta fișiere"
-        submitButtonContent = "Continuă"
-        styles = {
+    return (<
+        Dropzone onSubmit={handleSubmit}
+        onChangeStatus={onFileChange}
+        InputComponent={selectFileInput}
+        getUploadParams={fileParams}
+        getFilesFromEvent={getFilesFromEvent}
+        accept=".jpg,.jpeg,.png,.pdf,.doc"
+        maxFiles={5}
+        inputContent="Trage sau click pentru a selecta fișiere"
+        submitButtonContent="Continuă"
+        styles={
             {
                 dropzone: { height: 300, border: "2px dashed" },
             }
         }
-        />
+    />
     );
 };
 

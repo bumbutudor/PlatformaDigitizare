@@ -8,13 +8,18 @@ import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 import RangeSlider from 'react-bootstrap-range-slider';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
+import { mdiSourceCommitStartNextLocal } from "@mdi/js";
 
 const Step2 = (props) => {
   console.log(props.getStore());
 
+  const sourceFiles = props.getStore().sourceFiles;
+  const [preprocessedFiles, setpreprocessedFiles] = React.useState(props.getStore().preprocessedFiles);
+  const [preprocessFR, setPreprocessFR] = React.useState(props.getStore().preprocessFR);
+  const [preprocessOpenCV, setPreprocessOpenCV] = React.useState(props.getStore().preprocessOpenCV);
   const [resolutionOpenCV, setResolutionOpenCV] = React.useState(props.getStore().preprocessOpenCV.resolution);
   const [selectedOption, setSelectedOption] = React.useState(props.getStore().preprocessWith);
-  const [show, setShow] = React.useState(false);
+  const [show, setShow] = React.useState(true);
 
 
   const handleOptionChange = (e) => {
@@ -26,10 +31,44 @@ const Step2 = (props) => {
     setShow(true);
   };
 
+  // Preprocesare cu FineReader
+  const handlePreprocessFRChange = (e) => {
+    setPreprocessFR({ ...preprocessFR, [e.target.name]: e.target.checked });
+    props.updateStore({ preprocessFR: { ...preprocessFR, [e.target.name]: e.target.checked } });
+  }
+
+  // Preprocesare cu OpenCV
+  const handlePreprocessOpenCVChange = (e) => {
+    setPreprocessOpenCV({ ...preprocessOpenCV, [e.target.name]: e.target.checked });
+    props.updateStore({ preprocessOpenCV: { ...preprocessOpenCV, [e.target.name]: e.target.checked } });
+  }
 
   const handleResolutionChange = (e) => {
     setResolutionOpenCV(e.target.value)
     props.updateStore({ preprocessOpenCV: { ...props.getStore().preprocessOpenCV, resolution: e.target.value } });
+  }
+
+  // Fisierele sursa
+  const handleFilePath = (filePath) => {
+    if (filePath.length > 0) return 'http://127.0.0.1:8000/media/' + filePath;
+    return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
+  }
+
+  // Post request
+  const handlePreprocessRequest = async () => {
+    const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(props.getStore())
+    };
+    const response = await fetch(preprocessAPI, requestOptions);
+    const data = await response.json();
+
+    setpreprocessedFiles(data.preprocessedFiles);
+    setShow(false);
+    props.updateStore({ preprocessedFiles: data.preprocessedFiles });
   }
 
   return (
@@ -93,31 +132,35 @@ const Step2 = (props) => {
                 <Form.Group>
                   <Form.Check
                     label="Corectează rezoluția imaginii"
-                    name="group2"
+                    name="correctResolution"
                     id="checkboxFR1"
                     type="checkbox"
-                    checked={props.getStore().preprocessFR.correctResolution}
+                    checked={preprocessFR.correctResolution}
+                    onChange={handlePreprocessFRChange}
                   />
                   <Form.Check
                     label="Convertește imaginea în alb-negru"
-                    name="group2"
+                    name="convertToBlackAndWhite"
                     id="checkboxFR2"
                     type="checkbox"
-                    checked={props.getStore().preprocessFR.convertToBlackAndWhite}
+                    checked={preprocessFR.convertToBlackAndWhite}
+                    onChange={handlePreprocessFRChange}
                   />
                   <Form.Check
                     label="Reduce zgomotul ISO din text"
-                    name="group2"
+                    name="reduceNoise"
                     id="checkboxFR3"
                     type="checkbox"
-                    checked={props.getStore().preprocessFR.reduceNoise}
+                    checked={preprocessFR.reduceNoise}
+                    onChange={handlePreprocessFRChange}
                   />
                   <Form.Check
                     label="Îndreaptă rândurile de text"
-                    name="group2"
+                    name="straightenTextLines"
                     id="checkboxFR4"
                     type="checkbox"
-                    checked={props.getStore().preprocessFR.straightenTextLines}
+                    checked={preprocessFR.straightenTextLines}
+                    onChange={handlePreprocessFRChange}
                   />
                 </Form.Group>
               </>}
@@ -129,10 +172,11 @@ const Step2 = (props) => {
                 <Form.Group className="mb-5 display-flex" id="openCVResolution">
                   <Form.Check
                     label="Setează rezoluția imaginii"
-                    name="group3"
+                    name="setResolution"
                     id="checkboxCV1"
                     type="checkbox"
-                    checked={props.getStore().preprocessOpenCV.setResolution}
+                    checked={preprocessOpenCV.setResolution}
+                    onChange={handlePreprocessOpenCVChange}
                   />
                   {props.getStore().preprocessOpenCV.setResolution && <>
                     <RangeSlider
@@ -150,17 +194,19 @@ const Step2 = (props) => {
                 <Form.Group className="mb-3">
                   <Form.Check
                     label="Șterge zgomotul și neclaritatea din imagine"
-                    name="group4"
+                    name="removeNoise"
                     id="checkboxCV2"
                     type="checkbox"
-                    checked={props.getStore().preprocessOpenCV.removeNoise}
+                    checked={preprocessOpenCV.removeNoise}
+                    onChange={handlePreprocessOpenCVChange}
                   />
                 </Form.Group>
               </>}
             </div>
 
             <div className="mt-5 mb-3 col-md-12 d-flex justify-content-center">
-              {selectedOption ? <Button variant="primary" onClick={() => props.jumpToStep(2)}>Start preprocesare</Button> : <Button disabled variant="primary">Start preprocesare</Button>}
+              {selectedOption && show ? <Button variant="primary" onClick={handlePreprocessRequest}>Start preprocesare</Button> : <Button disabled variant="primary">Start preprocesare</Button>}
+              {!show && <> <Button variant="primary mx-4" onClick={() => props.jumpToStep(2)}>Mergi la pasul următor</Button> </>}
             </div>
           </div>
         </Form>
@@ -170,15 +216,15 @@ const Step2 = (props) => {
       <div className="row">
         <div className="col-md-12 d-flex justify-content-around">
           <div className="col-sm">
-            {props.getStore().sourceFiles.length != 0 && <>
+            {sourceFiles.length != 0 && <>
               <Accordion defaultActiveKey={['0']} alwaysOpen>
                 <Accordion.Item eventKey="0">
                   <Accordion.Header>Source</Accordion.Header>
                   <Accordion.Body>
                     {
-                      props.getStore().sourceFiles.map((src, index) => (
+                      sourceFiles.map((src, index) => (
                         <img
-                          src={src}
+                          src={handleFilePath(src.name)}
                           onClick={() => openImageViewer(index)}
                           width="300"
                           key={index}
@@ -194,15 +240,15 @@ const Step2 = (props) => {
           </div>
 
           <div className="col-sm">
-            {props.getStore().sourceFiles.length != 0 && <>
+            {preprocessedFiles.length != 0 && <>
               <Accordion defaultActiveKey={['0']} alwaysOpen>
                 <Accordion.Item eventKey="0">
                   <Accordion.Header>Target</Accordion.Header>
                   <Accordion.Body>
                     {
-                      props.getStore().sourceFiles.map((src, index) => (
+                      preprocessedFiles.map((src, index) => (
                         <img
-                          src={src}
+                          src={handleFilePath(src)}
                           onClick={() => openImageViewer(index)}
                           width="300"
                           key={index}
