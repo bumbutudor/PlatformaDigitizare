@@ -38,9 +38,6 @@ export default class Step1 extends Component {
                 </h1>
                 <h3 className="info">
                   Fișierele pot fi de tipul: .jpg, .jpeg, .png, .tif, .pdf.
-                  <a href="#" onClick={() => this.props.jumpToStep(1)}>
-                    Hopa!
-                  </a>
                 </h3>
               </label>
               <FileUpload
