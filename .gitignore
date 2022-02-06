@@ -45,3 +45,4 @@ shilocation
 backend/venv
 backend/media
 # END OF BACKEND
+backend/db.sqlite3
