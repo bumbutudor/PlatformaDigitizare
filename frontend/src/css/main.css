@@ -6,7 +6,7 @@ ol.progtrckr {
 ol.progtrckr li {
     /* display: inline-block; */
     text-align: center;
-    line-height: 4.5rem;
+    line-height: 2.5rem;
     cursor: pointer;
 }
 
@@ -35,6 +35,8 @@ ol.progtrckr li span {
 ol.progtrckr li.progtrckr-todo {
     color: silver;
     border-bottom: 1px solid silver;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 ol.progtrckr li.progtrckr-doing {
@@ -42,6 +44,8 @@ ol.progtrckr li.progtrckr-doing {
     border-bottom: 1px solid #cccccc;
     background: #65a3dc;
     font-weight: 500;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 ol.progtrckr li.progtrckr-done {
@@ -49,6 +53,8 @@ ol.progtrckr li.progtrckr-done {
     border-bottom: 1px solid #cccccc;
     background: #1c5d99;
     font-weight: 500;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 ol.progtrckr li:after {
@@ -57,7 +63,7 @@ ol.progtrckr li:after {
 
 ol.progtrckr li:before {
     position: relative;
-    bottom: -3.7rem;
+    bottom: -3.2rem;
     float: left;
     left: 50%;
 }
@@ -163,8 +169,12 @@ ol.progtrckr li.progtrckr-done:hover:before {
 .multi-step {
     display: flex;
     flex-direction: row;
+    justify-content: center;
 }
 
+.accordion-header {
+  margin-left: 0px;
+}
 
 /* .App {
   margin-top: 10%;
