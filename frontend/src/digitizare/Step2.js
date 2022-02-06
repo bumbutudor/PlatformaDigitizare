@@ -10,6 +10,7 @@ import RangeSlider from 'react-bootstrap-range-slider';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import { mdiSourceCommitStartNextLocal } from "@mdi/js";
 
+// Preprocess the images
 const Step2 = (props) => {
   console.log(props.getStore());
 
@@ -50,7 +51,7 @@ const Step2 = (props) => {
 
   // Fisierele sursa
   const handleFilePath = (filePath) => {
-    if (filePath.length > 0) return 'https://httpbin.org/media/' + filePath;
+    if (filePath.length > 0) return 'http://127.0.0.1:8000/media/' + filePath;
     //https://httpbin.org/post
     //http://127.0.0.1:8000/media/
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
@@ -221,16 +222,15 @@ const Step2 = (props) => {
             {sourceFiles.length != 0 && <>
               <Accordion defaultActiveKey={['0']} alwaysOpen>
                 <Accordion.Item eventKey="0">
-                  <Accordion.Header>Source</Accordion.Header>
+                  <Accordion.Header>Sursa - imagine originală </Accordion.Header>
                   <Accordion.Body>
                     {
                       sourceFiles.map((src, index) => (
                         <img
                           src={handleFilePath(src.name)}
                           onClick={() => openImageViewer(index)}
-                          width="300"
+                          width="90%"
                           key={index}
-                          style={{ margin: "2px" }}
                           alt=""
                         />
                       ))
@@ -245,16 +245,15 @@ const Step2 = (props) => {
             {preprocessedFiles.length != 0 && <>
               <Accordion defaultActiveKey={['0']} alwaysOpen>
                 <Accordion.Item eventKey="0">
-                  <Accordion.Header>Target</Accordion.Header>
+                  <Accordion.Header>Ținta - imagine preprocesată</Accordion.Header>
                   <Accordion.Body>
                     {
                       preprocessedFiles.map((src, index) => (
                         <img
                           src={handleFilePath(src)}
                           onClick={() => openImageViewer(index)}
-                          width="300"
+                          width="90%"
                           key={index}
-                          style={{ margin: "2px" }}
                           alt=""
                         />
                       ))

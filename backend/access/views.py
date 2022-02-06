@@ -24,18 +24,34 @@ def preprocess(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         preprocess_with = data['preprocessWith']
+        files = data['sourceFiles']
 
         preprocessedFilesURLS = []
         if preprocess_with == 'OpenCV':
-            for file in data['sourceFiles']:
-                print(file)
-                uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
-                processed_file_path =  settings.MEDIA_ROOT + '/pre/OpenCV/' + file["name"]
-                preprocessedFilesURLS.append('pre/OpenCV/' + file["name"])
-                process_image_for_ocr(uploaded_file_path, processed_file_path)
-            return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})
+            preprocess_opencv = data['preprocessOpenCV']
+            pre_path = '/pre/OpenCV/'
+            if preprocess_opencv['setResolution']:
+                resolution = int(preprocess_opencv['resolution'])
+                for file in files:
+                    print(file)
+                    uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
+                    processed_file_path =  settings.MEDIA_ROOT + pre_path + file["name"]
+                    preprocessedFilesURLS.append('pre/OpenCV/' + file["name"])
+                    process_image_for_ocr(uploaded_file_path, processed_file_path, resolution)
+                return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})
         elif preprocess_with == 'FR':
-            # TODO : Implement using FR
+            preprocess_fr = data['preprocessFR']
+            pre_path = '/pre/FR/'
+            if preprocess_fr['convertToBlackAndWhite']:
+                for file in files:
+                    pre_file_path = pre_path + '/' + os.path.splitext(file["name"])[0] + '.jpg'
+                    preprocessedFilesURLS.append(pre_file_path)
+                return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})
+            elif not preprocess_fr['convertToBlackAndWhite']:
+                for file in files:
+                    pre_file_path = pre_path + '/preNoBlackAndWhite' + os.path.splitext(file["name"])[0] + '.jpg'
+                    preprocessedFilesURLS.append(pre_file_path)
+                return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})
             pass
         elif preprocess_with == 'ScanTaylor':
             # TODO : Implement using Tesseract

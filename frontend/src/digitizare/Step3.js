@@ -5,10 +5,10 @@ import Form from 'react-bootstrap/Form';
 import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 
+// OCR
 export default class Step3 extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       email: props.getStore().email,
       period: props.getStore().period,
@@ -17,6 +17,7 @@ export default class Step3 extends Component {
       alphabet: props.getStore().alphabet,
       sourceFiles: props.getStore().sourceFiles,
       ocrResults: props.getStore().ocrResults,
+      show: true,
     };
 
 
@@ -109,7 +110,8 @@ export default class Step3 extends Component {
 
       this.setState({ ocrResults: data.ocrResults });
       this.props.updateStore({ ocrResults: data.ocrResults });
-      console.log(data)
+      console.log(data);
+      this.setState({ show: false });
     }
 
     // if (typeof this.state.periodVal == 'undefined' || this.state.periodVal) {
@@ -242,8 +244,8 @@ export default class Step3 extends Component {
 
 
               <div className="mt-5 mb-3 col-md-12 d-flex justify-content-center">
-                {this.state.period ? <Button variant="primary" onClick={handleOCRRequest}>Start OCR</Button> : ""}
-                {/* {!show && <> <Button variant="primary mx-4" onClick={() => props.jumpToStep(2)}>Mergi la pasul următor</Button> </>} */}
+                {this.state.period && this.state.show ? <Button variant="primary" onClick={handleOCRRequest}>Start OCR</Button> : <Button variant="primary" disabled>Start OCR</Button>}
+                {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(3)}>Mergi la pasul următor</Button> </>}
               </div>
 
             </div>
@@ -257,16 +259,15 @@ export default class Step3 extends Component {
               {this.state.sourceFiles.length != 0 && <>
                 <Accordion defaultActiveKey={['0']} alwaysOpen>
                   <Accordion.Item eventKey="0">
-                    <Accordion.Header>Source</Accordion.Header>
+                    <Accordion.Header>Sursa</Accordion.Header>
                     <Accordion.Body>
                       {
                         this.state.preprocessedFiles.map((src, index) => (
                           <img
                             src={this.handleFilePath(src)}
                             onClick={() => openImageViewer(index)}
-                            width="300"
+                            width="90%"
                             key={index}
-                            style={{ margin: "2px" }}
                             alt=""
                           />
                         ))
@@ -281,7 +282,7 @@ export default class Step3 extends Component {
               {this.state.ocrResults != 0 && <>
                 <Accordion defaultActiveKey={['0']} alwaysOpen>
                   <Accordion.Item eventKey="0">
-                    <Accordion.Header>Target</Accordion.Header>
+                    <Accordion.Header>Ținta</Accordion.Header>
                     <Accordion.Body>
                       {
                         this.state.ocrResults.map((text, index) => (

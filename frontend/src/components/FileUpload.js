@@ -9,7 +9,7 @@ const FileUpload = (props) => {
         const body = new FormData();
         body.append("uploadedFiles", file);
         console.log(file);
-        return { url: "https://httpbin.org/post", body }; // localhost http://127.0.0.1:8000/get_file/
+        return { url: "http://127.0.0.1:8000/get_file/", body }; // localhost http://127.0.0.1:8000/get_file/
     };
 
     const onFileChange = ({ meta, file }, status) => {

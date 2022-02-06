@@ -7,14 +7,15 @@ from PIL import Image
 IMAGE_SIZE = 1800
 BINARY_THREHOLD = 180
 
-def process_image_for_ocr(file_path, out_path):
+def process_image_for_ocr(file_path, out_path, resolution):
     # TODO : Implement using opencv
-    temp_filename = set_image_dpi(file_path)
+    resolution = (resolution, resolution)
+    temp_filename = set_image_dpi(file_path, dpi=resolution)
     im_new = remove_noise_and_smooth(temp_filename)
     cv2.imwrite(out_path, im_new)
     return im_new
 
-def set_image_dpi(file_path):
+def set_image_dpi(file_path, dpi = 300):
     im = Image.open(file_path)
     length_x, width_y = im.size
     factor = max(1, int(IMAGE_SIZE / length_x))
@@ -23,7 +24,7 @@ def set_image_dpi(file_path):
     im_resized = im.resize(size, Image.ANTIALIAS)
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
     temp_filename = temp_file.name
-    im_resized.save(temp_filename, dpi=(300, 300))
+    im_resized.save(temp_filename, dpi=dpi)
     return temp_filename
 
 def image_smoothening(img):
