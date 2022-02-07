@@ -259,17 +259,19 @@ export default class Step3 extends Component {
               {this.state.sourceFiles.length != 0 && <>
                 <Accordion defaultActiveKey={['0']} alwaysOpen>
                   <Accordion.Item eventKey="0">
-                    <Accordion.Header>Sursa</Accordion.Header>
+                    <Accordion.Header>Sursa - imagine preprocesată</Accordion.Header>
                     <Accordion.Body>
                       {
                         this.state.preprocessedFiles.map((src, index) => (
-                          <img
-                            src={this.handleFilePath(src)}
-                            onClick={() => openImageViewer(index)}
-                            width="90%"
-                            key={index}
-                            alt=""
-                          />
+                          <div key={index} className="preprocessedFile mb-2">
+                            <span className="ocrResultTitle text-info">{`Imaginea ${index + 1}:`}</span>
+                            <img
+                              src={this.handleFilePath(src)}
+                              onClick={() => openImageViewer(index)}
+                              width="90%"
+                              key={index}
+                              alt="" />
+                          </div>
                         ))
                       }
                     </Accordion.Body>
@@ -282,11 +284,14 @@ export default class Step3 extends Component {
               {this.state.ocrResults != 0 && <>
                 <Accordion defaultActiveKey={['0']} alwaysOpen>
                   <Accordion.Item eventKey="0">
-                    <Accordion.Header>Ținta</Accordion.Header>
+                    <Accordion.Header>Ținta - rezultatul OCR </Accordion.Header>
                     <Accordion.Body>
                       {
                         this.state.ocrResults.map((text, index) => (
-                          <span key={index} alt="">{text}</span>
+                          <div className="ocrResult mb-4" key={index}>
+                            <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span>
+                            <p key={index} alt="">{text}</p>
+                          </div>
                         ))
                       }
                     </Accordion.Body>
