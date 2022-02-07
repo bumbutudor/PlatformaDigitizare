@@ -28,17 +28,37 @@ export default class DigitizationSteps extends Component {
       preprocessedFiles: [],
       preprocessWith: "",
       ocrResults: [],
+      transResults: [],
       preprocessFR: {
         correctResolution: true,
         convertToBlackAndWhite: true,
         straightenTextLines: true,
         reduceNoise: true,
+        correctPageOrientation: true,
       },
       preprocessOpenCV: {
         setResolution: true,
         resolution: 300,
         removeNoise: true,
-      }
+      },
+      alphabetOptions: {
+        cyrillic: "alfabetul chirilic sovietic",
+        latin: "alfabetul românesc modern",
+        cyrillicRomanian: "alfabetul chirilic românesc",
+        transitionalRomanian: "alfabetul românesc de tranziție",
+      },
+      periodOptions: {
+        secolulXX: "secolul XX",
+        secolulXIX: "secolul XIX",
+        secolulXVIII: "secolul XVIII",
+        secolulXVII: "secolul XVII",
+      },
+
+      transOptions: {
+        actualizeWordForm: true,
+        writeA: true,
+        removeHyphen: true,
+      },
     };
   }
 

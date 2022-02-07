@@ -7,10 +7,10 @@ from PIL import Image
 IMAGE_SIZE = 1800
 BINARY_THREHOLD = 180
 
-def process_image_for_ocr(file_path, out_path, resolution):
+def process_image_for_ocr(file_path, out_path, resolution = 300):
     # TODO : Implement using opencv
-    resolution = (resolution, resolution)
-    temp_filename = set_image_dpi(file_path, dpi=resolution)
+    dpi = (resolution, resolution)
+    temp_filename = set_image_dpi(file_path, dpi=dpi)
     im_new = remove_noise_and_smooth(temp_filename)
     cv2.imwrite(out_path, im_new)
     return im_new
@@ -54,3 +54,10 @@ def load_txt(filename):
     # close the file
     file.close()
     return text
+
+periodOptions = {
+    'secolulXX': '0',
+    'secolulXIX': '1',
+    'secolulXVIII': '2',
+    'secolulXVII': '3',
+}

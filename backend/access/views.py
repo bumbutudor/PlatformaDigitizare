@@ -2,10 +2,11 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import File
 from django.core.files.storage import FileSystemStorage
-from .utils import process_image_for_ocr, load_txt
+from .utils import process_image_for_ocr, load_txt, periodOptions
 import os
 from django.conf import settings
 import json
+import requests
 
 def get_file(request):
     # print(request.FILES['uploadedFile'])
@@ -33,12 +34,20 @@ def preprocess(request):
             if preprocess_opencv['setResolution']:
                 resolution = int(preprocess_opencv['resolution'])
                 for file in files:
-                    print(file)
                     uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
                     processed_file_path =  settings.MEDIA_ROOT + pre_path + file["name"]
                     preprocessedFilesURLS.append('pre/OpenCV/' + file["name"])
                     process_image_for_ocr(uploaded_file_path, processed_file_path, resolution)
                 return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})
+            
+            else:
+                for file in files:
+                    uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
+                    processed_file_path =  settings.MEDIA_ROOT + pre_path + file["name"]
+                    preprocessedFilesURLS.append('pre/OpenCV/' + file["name"])
+                    process_image_for_ocr(uploaded_file_path, processed_file_path)
+                return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})
+
         elif preprocess_with == 'FR':
             preprocess_fr = data['preprocessFR']
             pre_path = '/pre/FR/'
@@ -92,3 +101,20 @@ def ocr(request):
     else:
         return JsonResponse({"code":500,"msg":"server error"})
 
+def transliterate(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        period = data['period']
+        alphabet = data['alphabet']
+        trans_options = data['transOptions']
+        ocr_results = data['ocrResults']
+        trans_results = []
+        for ocr_result in ocr_results:
+            data = {'cyrillicText': ocr_result, 'period': periodOptions[period], 'actualize':trans_options['actualizeWordForm']}
+            response = requests.post("http://translitera.cc/ProcessServlet", data=data)
+            trans_result = response.text
+            trans_results.append(trans_result)
+        return JsonResponse({"code":200,"msg":"success", "transResults":trans_results})
+    
+    else:
+        return JsonResponse({"code":500,"msg":"server error"})

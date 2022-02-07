@@ -142,9 +142,17 @@ const Step2 = (props) => {
                     onChange={handlePreprocessFRChange}
                   />
                   <Form.Check
+                    label="Îndreaptă orientarea paginii"
+                    name="correctPageOrientation"
+                    id="checkboxFR2"
+                    type="checkbox"
+                    checked={preprocessFR.correctPageOrientation}
+                    onChange={handlePreprocessFRChange}
+                  />
+                  <Form.Check
                     label="Convertește imaginea în alb-negru"
                     name="convertToBlackAndWhite"
-                    id="checkboxFR2"
+                    id="checkboxF3"
                     type="checkbox"
                     checked={preprocessFR.convertToBlackAndWhite}
                     onChange={handlePreprocessFRChange}
@@ -152,7 +160,7 @@ const Step2 = (props) => {
                   <Form.Check
                     label="Reduce zgomotul ISO din text"
                     name="reduceNoise"
-                    id="checkboxFR3"
+                    id="checkboxFR4"
                     type="checkbox"
                     checked={preprocessFR.reduceNoise}
                     onChange={handlePreprocessFRChange}
@@ -160,7 +168,7 @@ const Step2 = (props) => {
                   <Form.Check
                     label="Îndreaptă rândurile de text"
                     name="straightenTextLines"
-                    id="checkboxFR4"
+                    id="checkboxFR5"
                     type="checkbox"
                     checked={preprocessFR.straightenTextLines}
                     onChange={handlePreprocessFRChange}

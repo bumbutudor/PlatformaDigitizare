@@ -14,7 +14,7 @@ class Step4 extends Component {
       ocrResults: props.getStore().ocrResults,
       sourceFiles: props.getStore().sourceFiles,
       preprocessedFiles: props.getStore().preprocessedFiles,
-
+      emailEmergency: "john.smith@example.com"
     };
 
     this.validatorTypes = {
@@ -78,14 +78,17 @@ class Step4 extends Component {
               </label>
             </div>
             <div className="form-group col-md-12 content form-block-holder">
-              <label className="control-label">
+              <label className="control-label w-75">
+
                 {this.state.ocrResults && this.state.ocrResults.map((item, index) => {
                   return (
                     <div key={index}>
-                      <textarea class="form-control" rows="10">{item}</textarea>
+                      <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span>
+                      <textarea key={index} className="form-control" rows="20">{item}</textarea>
                     </div>
                   );
                 })}
+
               </label>
               <div className={notValidClasses.emailEmergencyCls}>
                 <input
@@ -97,7 +100,7 @@ class Step4 extends Component {
                   placeholder="john.smith@example.com"
                   required
                   defaultValue={this.state.emailEmergency}
-                  onBlur={this.props.handleValidation('emailEmergency')}
+                  // onBlur={this.props.handleValidation('emailEmergency')}
                   onChange={this.onChange.bind(this)}
                 />
 

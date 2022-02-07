@@ -238,6 +238,15 @@ export default class Step3 extends Component {
                       onChange={() => { this.setState({ typography: "typographyAuto" }); this.props.updateStore({ typography: "typographyAuto" }); }}
 
                     />
+                    <Form.Check
+                      label="Alfabetul chirilic românesc"
+                      name="group6"
+                      type="checkbox"
+                      id="radio13"
+                      value="cyrillicRomanian"
+                      checked={this.state.alphabet === "cyrillicRomanian"}
+                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian" }); this.props.updateStore({ alphabet: "cyrillicRomanian" }); }}
+                    />
                   </Form.Group>
                 </>}
               </div>
