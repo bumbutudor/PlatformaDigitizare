@@ -56,7 +56,7 @@ export default class DigitizationSteps extends Component {
 
       transOptions: {
         actualizeWordForm: true,
-        writeA: true,
+        replaceApostrophe: true,
         removeHyphen: true,
       },
     };

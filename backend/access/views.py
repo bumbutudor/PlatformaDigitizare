@@ -113,6 +113,9 @@ def transliterate(request):
             data = {'cyrillicText': ocr_result, 'period': periodOptions[period], 'actualize':trans_options['actualizeWordForm']}
             response = requests.post("http://translitera.cc/ProcessServlet", data=data)
             trans_result = response.text
+            if trans_options['replaceApostrophe']:
+                clean_text = trans_result.replace("’", "-").replace('\'', "-")
+                trans_results.append(clean_text)
             trans_results.append(trans_result)
         return JsonResponse({"code":200,"msg":"success", "transResults":trans_results})
     

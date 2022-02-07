@@ -153,7 +153,7 @@ export default class Step5 extends Component {
                 <Form.Group>
                   <Form.Label>5.3 Setări de transliterare:</Form.Label>
                   <Form.Check
-                    label="Actualizează forma cuvintelor (ex: trebue => trebuie)"
+                    label="Actualizează ortografia (gînd => gând)"
                     name="actualizeWordForm"
                     id="checkboxTrans1"
                     type="checkbox"
@@ -161,11 +161,11 @@ export default class Step5 extends Component {
                     onChange={this.handleTransOptionsChange.bind(this)}
                   />
                   <Form.Check
-                    label="Scrie 'â' în loc de 'î'"
-                    name="writeA"
+                    label="Înlocuiește apostroful cu cratima (n’ar => n-ar)"
+                    name="replaceApostrophe"
                     id="checkboxTrans2"
                     type="checkbox"
-                    checked={this.state.transOptions.writeA}
+                    checked={this.state.transOptions.replaceApostrophe}
                     onChange={this.handleTransOptionsChange.bind(this)}
                   />
                   <Form.Check
