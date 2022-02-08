@@ -30,6 +30,23 @@ class Step4 extends Component {
     this.getValidatorData = this.getValidatorData.bind(this);
     this.renderHelpText = this.renderHelpText.bind(this);
     this.isValidated = this.isValidated.bind(this);
+
+    this.cyrillicRomanianLayout = {
+      default: [
+        "` 1 2 3 4 5 6 7 8 9 0 - = {bksp}",
+        "{tab} ѳ ѡ е р т ї ꙋ и о п ъ ꙟ \\",
+        "{lock} а с д ф г х ж к л ц ш щ џ ѫ ' {enter}",
+        "{shift} з ѯ ч в б н м ѣ ѧ ѩ ю ѹ ь ѵ ѱ ѕ . / {shift}",
+        "{space}"
+      ],
+      shift: [
+        "~ ! @ # $ % ^ & * ( ) _ + {bksp}",
+        "{tab} Ѳ Ѡ Е Р Т Ї Ꙋ И О П Ъ Ꙟ |",
+        '{lock} А С Д Ф Г Х Ж К Л Ц Ш Щ Џ Ѫ " {enter}',
+        "{shift} З Ѯ Ч В Б Н М Ѣ Ѧ Ѩ Ю ОУ Ь Ѵ Ѱ Ѕ {shift}",
+        "{space}"
+      ]
+    };
   }
 
   isValidated() {
@@ -132,6 +149,7 @@ class Step4 extends Component {
                   layoutName={this.state.layoutName}
                   onChange={this.onInputFromKeyboardChange.bind(this)}
                   onKeyPress={this.onKeyPress.bind(this)}
+                  layout={this.cyrillicRomanianLayout}
                 />}
             </div>
           </form>
