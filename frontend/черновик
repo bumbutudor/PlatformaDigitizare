@@ -1,0 +1,44 @@
+{/* <ImgsViewer
+                        className="Accordion_image"
+                        imgs={[
+                          { src: "https://klike.net/uploads/posts/2019-05/1556708032_1.jpg" },
+                          { src: "https://klike.net/uploads/posts/2019-05/1556708032_1.jpg" },
+                        ]}
+                        imgs={handleFilePath(src.name)}
+                        currImg={this.state.currImg}
+                        isOpen={this.state.viewerIsOpen}
+                        onClickPrev={this.gotoPrevious}
+                        onClickNext={this.gotoNext}
+                        onClose={this.closeViewer}
+                      /> */}
+                      {/* {sourceFiles.map((src, index) => (
+                        <img
+                          className="Accordion_image"
+                          src={handleFilePath(src.name)}
+                          onClick={() => openImageViewer(index)}
+                          width="90%"
+                          key={index}
+                          alt=""
+                        />
+                      ))}<a
+                          class="div_photo"
+                          data-fancybox="gallery_1"
+                          data-src={handleFilePath(src.name)}
+                          data-caption="imagine originală"
+                        >
+                          <img
+                            class="img_do_posle"
+                            src={handleFilePath(src.name)}
+                          />
+                        </a> */}
+
+
+
+                        <img
+                          className="Accordion_image"
+                          src={handleFilePath(src)}
+                          onClick={() => openImageViewer(index)}
+                          width="90%"
+                          key={index}
+                          alt=""
+                        />

@@ -84,6 +84,7 @@
     "react-dom": "^17.0.2"
   },
   "dependencies": {
+    "@fancyapps/ui": "^4.0.23",
     "@mdi/js": "^6.5.95",
     "@mdi/react": "^1.5.0",
     "babel-polyfill": "^6.26.0",
@@ -95,6 +96,8 @@
     "react-bootstrap": "^2.1.2",
     "react-bootstrap-range-slider": "^3.0.3",
     "react-dropzone-uploader": "^2.11.0",
+    "react-fancybox": "^0.2.5",
+    "react-images-viewer": "^1.7.1",
     "react-pdf": "^5.7.0"
   }
 }
