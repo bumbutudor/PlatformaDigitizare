@@ -98,6 +98,7 @@
     "react-dropzone-uploader": "^2.11.0",
     "react-fancybox": "^0.2.5",
     "react-images-viewer": "^1.7.1",
-    "react-pdf": "^5.7.0"
+    "react-pdf": "^5.7.0",
+    "react-simple-keyboard": "^3.4.56"
   }
 }

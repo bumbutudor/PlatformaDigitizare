@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 import validation from 'react-validation-mixin';
 import strategy from 'joi-validation-strategy';
 import Joi from 'joi';
+import Keyboard from "react-simple-keyboard";
+import "react-simple-keyboard/build/css/index.css";
+import { flushSync } from 'react-dom';
 
 class Step4 extends Component {
   constructor(props) {
@@ -14,7 +17,10 @@ class Step4 extends Component {
       ocrResults: props.getStore().ocrResults,
       sourceFiles: props.getStore().sourceFiles,
       preprocessedFiles: props.getStore().preprocessedFiles,
-      emailEmergency: "john.smith@example.com"
+      emailEmergency: "john.smith@example.com",
+      layoutName: "default",
+      show: false,
+      // input: ""
     };
 
     this.validatorTypes = {
@@ -62,6 +68,36 @@ class Step4 extends Component {
     return (<div className="val-err-tooltip" key={id}><span>{message}</span></div>);
   };
 
+
+  // editor
+  onInputFromKeyboardChange(input) {
+    this.setState({ input });
+    console.log(input);
+  }
+
+  onKeyPress(button) {
+    if (button === "{shift}" || button === "{lock}") this.handleShift();
+  };
+
+  handleShift() {
+    const layoutName = this.state.layoutName;
+    this.setState({
+      layoutName: layoutName === "default" ? "shift" : "default"
+    });
+  };
+
+  onChangeInput(event) {
+    const input = event.target.value;
+    this.setState({ input });
+    this.keyboard.setInput(input);
+    console.log(input);
+  };
+
+
+  handleShow() {
+    this.setState({ show: false });
+  }
+
   render() {
     // explicit class assigning based on validation
     let notValidClasses = {};
@@ -79,40 +115,24 @@ class Step4 extends Component {
             </div>
             <div className="form-group col-md-12 content form-block-holder">
               <label className="control-label w-75">
-
                 {this.state.ocrResults && this.state.ocrResults.map((item, index) => {
                   return (
                     <div key={index}>
                       <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span>
-                      <textarea key={index} className="form-control" rows="20">{item}</textarea>
+                      <textarea key={index} value={item} onChange={this.on} className="form-control" rows="20"></textarea>
+
                     </div>
                   );
                 })}
-
               </label>
-              <div className={notValidClasses.emailEmergencyCls}>
-                <input
-                  ref="emailEmergency"
-                  name="emailEmergency"
-                  autoComplete="off"
-                  type="email"
-                  className="form-control"
-                  placeholder="john.smith@example.com"
-                  required
-                  defaultValue={this.state.emailEmergency}
-                  // onBlur={this.props.handleValidation('emailEmergency')}
-                  onChange={this.onChange.bind(this)}
-                />
-
-                {this.props.getValidationMessages('emailEmergency').map(this.renderHelpText)}
-              </div>
-            </div>
-            <div className="form-group hoc-alert col-md-12 form-block-holder">
-              <label className="col-md-12 control-label">
-                <h4>As shown in this example, you can also use <a href="https://github.com/jurassix/react-validation-mixin" target="_blank">react-validation-mixin</a> to handle your validations as well! (as of v4.3.2)!</h4>
-              </label>
-              <br />
-              <div className="green">... so StepZilla step Components can either use basic JS validation or Higer Order Component (HOC) based validation with react-validation-mixin.</div>
+              <button className='btn btn-primary' type='button' onClick={() => this.setState({ show: !this.state.show })}>Tatstatura Virtuală</button>
+              {this.state.show &&
+                <Keyboard
+                  keyboardRef={r => (this.keyboard = r)}
+                  layoutName={this.state.layoutName}
+                  onChange={this.onInputFromKeyboardChange.bind(this)}
+                  onKeyPress={this.onKeyPress.bind(this)}
+                />}
             </div>
           </form>
         </div>

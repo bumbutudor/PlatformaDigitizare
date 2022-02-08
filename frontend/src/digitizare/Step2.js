@@ -86,8 +86,9 @@ const Step2 = (props) => {
 
   // Post request
   const handlePreprocessRequest = async () => {
-    const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
+    setShow(false);
 
+    const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -95,9 +96,9 @@ const Step2 = (props) => {
     };
     const response = await fetch(preprocessAPI, requestOptions);
     const data = await response.json();
+    console.log(data);
 
     setpreprocessedFiles(data.preprocessedFiles);
-    setShow(false);
     props.updateStore({ preprocessedFiles: data.preprocessedFiles });
   };
 

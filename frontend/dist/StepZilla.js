@@ -37,7 +37,7 @@ function StepZilla(props) {
       setNavState = _useState4[1];
 
   var hidden = {
-    display: 'none'
+    display: "none"
   };
   (0, _react.useEffect)(function () {
     setNavState(getNavStates(props.startAtStep, props.steps.length));
@@ -48,11 +48,11 @@ function StepZilla(props) {
 
     for (var i = 0; i < length; i++) {
       if (i < indx || !props.prevBtnOnLastStep && indx === length - 1) {
-        styles.push('done');
+        styles.push("done");
       } else if (i === indx) {
-        styles.push('doing');
+        styles.push("doing");
       } else {
-        styles.push('todo');
+        styles.push("todo");
       }
     }
 
@@ -86,8 +86,7 @@ function StepZilla(props) {
 
     return {
       showPreviousBtn: showPreviousBtn,
-
-      /* showNextBtn, */
+      showNextBtn: showNextBtn,
       nextStepText: nextStepText
     };
   }; // which step are we in?
@@ -113,9 +112,9 @@ function StepZilla(props) {
 
   var handleKeyDown = function handleKeyDown(evt) {
     if (evt.which === 13) {
-      if (!props.preventEnterSubmission && evt.target.type !== 'textarea') {
+      if (!props.preventEnterSubmission && evt.target.type !== "textarea") {
         next();
-      } else if (evt.target.type !== 'textarea') {
+      } else if (evt.target.type !== "textarea") {
         evt.preventDefault();
       }
     }
@@ -123,7 +122,7 @@ function StepZilla(props) {
 
 
   var _jumpToStep = function jumpToStep(evt) {
-    if (typeof evt.target === 'undefined') {
+    if (typeof evt.target === "undefined") {
       // a child step wants to invoke a jump between steps. in this case 'evt' is the numeric step number and not the JS event
       adjustNavState(evt);
     } else {
@@ -146,7 +145,7 @@ function StepZilla(props) {
       abstractStepMoveAllowedToPromise(movingBack).then(function (valid) {
         // validation was a success (promise or sync validation). In it was a Promise's resolve()
         // ... then proceed will be undefined, so make it true. Or else 'proceed' will carry the true/false value from sync
-        proceed = typeof valid === 'undefined' ? true : valid;
+        proceed = typeof valid === "undefined" ? true : valid;
 
         if (!movingBack) {
           updateStepValidationFlag(proceed);
@@ -249,7 +248,7 @@ function StepZilla(props) {
         // the user is using a higer order component (HOC) for validation (e.g react-validation-mixin), this wraps the StepZilla steps as a HOC,
         // so use hocValidationAppliedTo to determine if this step needs the aync validation as per react-validation-mixin interface
         proceed = activeComponentRef.current.refs.component.isValidated();
-      } else if (activeComponentRef.current === null || typeof activeComponentRef.current.isValidated === 'undefined') {
+      } else if (activeComponentRef.current === null || typeof activeComponentRef.current.isValidated === "undefined") {
         // if its a form component, it should have implemeted a public isValidated class (also pure componenets wont even have refs - i.e. a empty object). If not then continue
         proceed = true;
       } else {
@@ -272,13 +271,13 @@ function StepZilla(props) {
 
 
   var getClassName = function getClassName(className, i) {
-    var liClassName = '';
+    var liClassName = "";
 
     if (navState && navState.styles) {
       liClassName = "".concat(className, "-").concat(navState.styles[i]); // if step ui based navigation is disabled, then dont highlight step
 
       if (!props.stepsNavigation) {
-        liClassName += ' no-hl';
+        liClassName += " no-hl";
       }
     }
 
@@ -289,7 +288,7 @@ function StepZilla(props) {
   var renderSteps = function renderSteps() {
     return props.steps.map(function (s, i) {
       return _react.default.createElement("li", {
-        className: getClassName('progtrckr', i),
+        className: getClassName("progtrckr", i),
         onClick: function onClick(evt) {
           _jumpToStep(evt);
         },
@@ -326,7 +325,7 @@ function StepZilla(props) {
       // (2) after react hooks was released, functional components can have state and therefore support refs
       // ... we do this via forwardRefs. So we need to support this as well
       // ... after testing, if both the below types are objects then it's a hooks function component wrapped in forwardRef
-      if (_typeof(componentPointer) === 'object' && _typeof(componentPointer.type) === 'object') {
+      if (_typeof(componentPointer) === "object" && _typeof(componentPointer.type) === "object") {
         cloneExtensions.ref = activeComponentRef;
       }
     } // E: ref binding -----
@@ -336,14 +335,7 @@ function StepZilla(props) {
   } // main render of stepzilla container
 
 
-  return _react.default.createElement("div", {
-    className: "multi-step",
-    onKeyDown: function onKeyDown(evt) {
-      handleKeyDown(evt);
-    }
-  }, " ", props.showSteps ? _react.default.createElement("ol", {
-    className: "progtrckr"
-  }, " ", renderSteps(), " ") : _react.default.createElement("span", null, " "), compToRender, " ", _react.default.createElement("div", {
+  return _react.default.createElement("div", null, _react.default.createElement("div", {
     style: props.showNavigation ? {} : hidden,
     className: "footer-buttons"
   }, _react.default.createElement("button", {
@@ -354,7 +346,7 @@ function StepZilla(props) {
       previous();
     },
     id: "prev-button"
-  }, " ", props.backButtonText, " "), " ", _react.default.createElement("button", {
+  }, props.backButtonText), _react.default.createElement("button", {
     type: "button",
     style: showNextBtn ? {} : hidden,
     className: props.nextButtonCls,
@@ -362,7 +354,14 @@ function StepZilla(props) {
       next();
     },
     id: "next-button"
-  }, " ", nextStepText, " "), " "), " ");
+  }, nextStepText)), " ", _react.default.createElement("div", {
+    className: "multi-step",
+    onKeyDown: function onKeyDown(evt) {
+      handleKeyDown(evt);
+    }
+  }, props.showSteps ? _react.default.createElement("ol", {
+    className: "progtrckr"
+  }, " ", renderSteps(), " ") : _react.default.createElement("span", null, " "), compToRender, " "));
 }
 
 StepZilla.defaultProps = {
@@ -373,10 +372,10 @@ StepZilla.defaultProps = {
   dontValidate: false,
   preventEnterSubmission: false,
   startAtStep: 0,
-  nextButtonText: 'Pasul următor',
-  nextButtonCls: 'btn btn-next btn-primary btn-lg float-end',
-  backButtonText: 'Pasul anterior',
-  backButtonCls: 'btn btn-prev btn-primary btn-lg float-start',
+  nextButtonText: "Pasul următor",
+  nextButtonCls: "btn btn-next btn-primary btn-lg float-end",
+  backButtonText: "Pasul anterior",
+  backButtonCls: "btn btn-prev btn-primary btn-lg float-start",
   hocValidationAppliedTo: []
 };
 StepZilla.propTypes = {

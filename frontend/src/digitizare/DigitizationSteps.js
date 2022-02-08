@@ -165,7 +165,7 @@ export default class DigitizationSteps extends Component {
             steps={steps}
             preventEnterSubmission={true}
             nextTextOnFinalActionStep={"Save"}
-            hocValidationAppliedTo={[3]}
+            // hocValidationAppliedTo={[3]}
             startAtStep={
               window.sessionStorage.getItem("step")
                 ? parseFloat(window.sessionStorage.getItem("step"))
