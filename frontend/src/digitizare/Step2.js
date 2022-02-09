@@ -273,7 +273,7 @@ const Step2 = (props) => {
                     variant="primary mx-4"
                     onClick={() => props.jumpToStep(2)}
                   >
-                    Mergi la pasul următor
+                    Mergi la pasul următor - OCR
                   </Button>{" "}
                 </>
               )}

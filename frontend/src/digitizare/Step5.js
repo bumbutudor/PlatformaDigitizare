@@ -182,7 +182,7 @@ export default class Step5 extends Component {
 
               <div className="mt-5 mb-3 col-md-12 d-flex justify-content-center">
                 {this.state.period && this.state.show ? <Button variant="primary" onClick={handleTransRequest}>Start Transliterare</Button> : <Button variant="primary" disabled>Start Transliterare</Button>}
-                {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(5)}>Mergi la pasul următor</Button> </>}
+                {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(5)}>Verifică și editează rezultatul</Button> </>}
               </div>
 
             </div>
