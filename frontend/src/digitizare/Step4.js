@@ -23,7 +23,7 @@ class Step4 extends Component {
       // input: ""
       inputID: 0,
     };
-    this.keyboard = React.createRef();
+    // this.keyboard = React.createRef();
 
     this.cyrillicRomanianLayout = layouts[props.getStore().alphabet];
   }
@@ -57,12 +57,14 @@ class Step4 extends Component {
     this.state.ocrResults[this.state.inputID] = input;
     this.setState({ ocrResults: [...this.state.ocrResults] });
     this.keyboard.setInput(input);
-    console.log(input);
   };
 
-  onChangeKeyboardInput(input) {
-    // this.state.ocrResults[this.state.inputID] = input;
-    // this.setState({ ocrResults: [...this.state.ocrResults] });
+  onChangeKeyboardInput(input, a) {
+    console.log(input, a);
+    const inputID = this.state.inputID;
+    const ocrResults = this.state.ocrResults;
+    ocrResults[inputID] = input;
+    this.setState({ ocrResults: [...ocrResults] });
   }
 
   render() {
@@ -112,11 +114,12 @@ class Step4 extends Component {
                           </button>
                           <textarea
                             key={index}
+                            id={index}
+                            onFocus={this.setActiveInput.bind(this)}
                             value={item}
-                            onChange={this.on}
-                            className="form-control"
-                            rows="20"
-                          ></textarea>
+                            onChange={this.onChangeInput.bind(this)}
+                            className="form-control mb-4" rows="10">
+                          </textarea>
 
                         </div>
                       );
@@ -127,7 +130,7 @@ class Step4 extends Component {
                   <Keyboard
                     keyboardRef={(r) => (this.keyboard = r)}
                     layoutName={this.state.layoutName}
-                    onChange={this.onInputFromKeyboardChange.bind(this)}
+                    onChange={inputs => this.onChangeKeyboardInput(inputs, this.state.ocrResults[this.state.inputID]).bind(this)}
                     onKeyPress={this.onKeyPress.bind(this)}
                     layout={this.cyrillicRomanianLayout.layout}
                   />
