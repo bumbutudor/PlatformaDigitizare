@@ -101,6 +101,7 @@
     "react-pdf": "^5.7.0",
     "react-simple-keyboard": "^3.4.56",
     "simple-keyboard": "^3.4.46",
+    "simple-keyboard-autocorrect": "^2.2.350",
     "simple-keyboard-layouts": "^3.1.46"
   }
 }
