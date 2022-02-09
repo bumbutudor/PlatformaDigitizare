@@ -254,7 +254,7 @@ export default class Step3 extends Component {
 
               <div className="mt-5 mb-3 col-md-12 d-flex justify-content-center">
                 {this.state.period && this.state.show ? <Button variant="primary" onClick={handleOCRRequest}>Start OCR</Button> : <Button variant="primary" disabled>Start OCR</Button>}
-                {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(3)}>Mergi la pasul următor</Button> </>}
+                {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(3)}>Verifică și editează rezultatul</Button> </>}
               </div>
 
             </div>
