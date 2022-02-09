@@ -2,17 +2,17 @@
 
 import React, { Component, useRef } from "react";
 import FileUpload from "../components/FileUpload";
-import Icon from '@mdi/react'
-import { mdiInformation } from '@mdi/js'
+import Icon from "@mdi/react";
+import { mdiInformation } from "@mdi/js";
 
 export default class Step1 extends Component {
   constructor(props) {
     super(props);
     this.state = {};
   }
-  componentDidMount() { }
+  componentDidMount() {}
 
-  componentWillUnmount() { }
+  componentWillUnmount() {}
 
   // not required as this component has no forms or user entry
   // isValidated() {}
@@ -26,7 +26,8 @@ export default class Step1 extends Component {
               <label className="col-md-12 control-label">
                 <h1>
                   <span>Pasul 1: Incarcă imagini sau fișiere PDF</span>
-                  <Icon path={mdiInformation}
+                  <Icon
+                    path={mdiInformation}
                     className="mx-2"
                     title="information"
                     size={1}
@@ -36,9 +37,9 @@ export default class Step1 extends Component {
                     title="Fișierele pot fi de tipul: .jpg, .jpeg, .png, .tif, .pdf."
                   />
                 </h1>
-                <h3 className="info">
+                <label className="mx-2">
                   Fișierele pot fi de tipul: .jpg, .jpeg, .png, .tif, .pdf.
-                </h3>
+                </label>
               </label>
               <FileUpload
                 jumpToStep={(i) => this.props.jumpToStep(i)}
@@ -54,8 +55,6 @@ export default class Step1 extends Component {
     );
   }
 }
-
-
 
 /*
 
