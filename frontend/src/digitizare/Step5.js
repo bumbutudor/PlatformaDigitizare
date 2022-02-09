@@ -53,6 +53,7 @@ export default class Step5 extends Component {
     const handleTransRequest = async () => {
       const transAPI = "http://127.0.0.1:8000/transliterate/";
 
+      this.setState({ show: false });
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -64,7 +65,7 @@ export default class Step5 extends Component {
       this.setState({ transResults: data.transResults });
       this.props.updateStore({ transResults: data.transResults });
       console.log(data);
-      this.setState({ show: false });
+
     }
 
 

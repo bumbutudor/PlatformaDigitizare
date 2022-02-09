@@ -164,7 +164,7 @@ export default class DigitizationSteps extends Component {
           <StepZilla
             steps={steps}
             preventEnterSubmission={true}
-            nextTextOnFinalActionStep={"Save"}
+            nextTextOnFinalActionStep={"Salvează rezultatele"}
             // hocValidationAppliedTo={[3]}
             startAtStep={
               window.sessionStorage.getItem("step")

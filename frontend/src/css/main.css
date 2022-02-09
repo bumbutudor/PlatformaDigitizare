@@ -161,15 +161,15 @@ ol.progtrckr li.progtrckr-done:hover:before {
   position: absolute;
   bottom: 5%;
   right: 5%;
-  padding: .45rem .75rem;
+  padding: 0.45rem 0.75rem;
   font-size: 1rem;
-  font-family: 'Open Sans', monospace;
+  font-family: "Open Sans", monospace;
 }
 
 .multi-step {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  /* justify-content: center; */
 }
 
 .accordion-header {
@@ -181,7 +181,7 @@ ol.progtrckr li.progtrckr-done:hover:before {
   margin-bottom: 20px;
   border-radius: 4px;
   box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.15);
-  transition: .2s;
+  transition: 0.2s;
 }
 
 .Accordion_image:hover {
@@ -196,7 +196,8 @@ ol.progtrckr li.progtrckr-done:hover:before {
   height: auto;
 }
 
-.form-block-image {}
+.form-block-image {
+}
 
 .btn-keyboard {
   color: #444 !important;
@@ -209,7 +210,6 @@ ol.progtrckr li.progtrckr-done:hover:before {
 
 .image_ocr_a {
   vertical-align: top;
-
 }
 
 .image_ocr {
@@ -218,7 +218,7 @@ ol.progtrckr li.progtrckr-done:hover:before {
   margin-bottom: 20px;
   border-radius: 4px;
   box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.15);
-  transition: .2s;
+  transition: 0.2s;
 }
 
 .image_ocr:hover {
@@ -235,9 +235,9 @@ ol.progtrckr li.progtrckr-done:hover:before {
   bottom: 0%;
   padding-left: 10%;
   padding-right: 10%;
-  transition: .2s;
+  transition: 0.2s;
   animation-name: keyboard-anim;
-  animation-duration: .3s;
+  animation-duration: 0.3s;
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -266,7 +266,7 @@ ol.progtrckr li.progtrckr-done:hover:before {
   -moz-appearance: none;
   appearance: none;
   border-radius: 0.25rem;
-  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 html .step1 label,
