@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import File
 from django.core.files.storage import FileSystemStorage
-from .utils import process_image_for_ocr, load_txt, periodOptions
+from .utils import process_image_for_ocr, load_txt, periodOptions, remove_hyphen
 import os
 from django.conf import settings
 import json
@@ -115,10 +115,16 @@ def transliterate(request):
             data = {'cyrillicText': ocr_result, 'period': periodOptions[period], 'actualize':trans_options['actualizeWordForm']}
             response = requests.post("http://translitera.cc/ProcessServlet", data=data)
             trans_result = response.text
-            if trans_options['replaceApostrophe']:
+            if trans_options['replaceApostrophe'] and trans_options["removeHyphen"]:
+                text_no_apostrophe = trans_result.replace("’", "-").replace('\'', "-")
+                clean_text = remove_hyphen(text_no_apostrophe)
+                trans_results.append(clean_text)
+            elif trans_options['replaceApostrophe'] and not trans_options["removeHyphen"]:
                 clean_text = trans_result.replace("’", "-").replace('\'', "-")
                 trans_results.append(clean_text)
-            trans_results.append(trans_result)
+            elif not trans_options['replaceApostrophe'] and trans_options["removeHyphen"]:
+                clean_text = remove_hyphen(trans_result)
+                trans_results.append(clean_text)
         return JsonResponse({"code":200,"msg":"success", "transResults":trans_results})
     
     else:

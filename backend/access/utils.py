@@ -3,6 +3,10 @@ import tempfile
 import cv2
 import numpy as np
 from PIL import Image
+import spacy
+import nltk
+import re
+
 
 IMAGE_SIZE = 1800
 BINARY_THREHOLD = 180
@@ -54,6 +58,31 @@ def load_txt(filename):
     # close the file
     file.close()
     return text
+
+
+def remove_hyphen(trans_text):
+    nlp = spacy.load("ro_core_news_lg")
+    lista1=[]
+    lista2=[]
+    doc = nlp(trans_text)
+
+    for token in doc:
+        lista1.append(token.text)
+        lista1.append(token.pos_)
+        lista2.append(lista1)
+        lista1=[]
+
+
+
+    for word in lista2:
+        if word[0][-1]!="-":
+            if "-" in word[0]:
+                cuvant=word[0].replace("-","")
+                trans_text=trans_text.replace(word[0],cuvant)
+    return trans_text
+
+
+
 
 periodOptions = {
     'secolulXX': '0',
