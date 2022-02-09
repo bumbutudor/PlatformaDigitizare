@@ -1,10 +1,10 @@
 "use strict";
 
-import React, { Component, useRef } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component, useRef } from "react";
+import PropTypes from "prop-types";
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
-import layouts from '../components/KeyboardLayouts';
+import layouts from "../components/KeyboardLayouts";
 
 class Step4 extends Component {
   constructor(props) {
@@ -28,7 +28,7 @@ class Step4 extends Component {
     this.cyrillicRomanianLayout = layouts[props.getStore().alphabet];
   }
 
-  componentDidMount() { };
+  componentDidMount() {}
 
   onChange(e) {
     let newState = {};
@@ -59,7 +59,7 @@ class Step4 extends Component {
     console.log(this.state.ocrResults);
     this.props.updateStore({ ocrResults: this.state.ocrResults });
     // this.keyboard.setInput(input);
-  };
+  }
 
   onChangeKeyboardInput(input, a) {
     console.log(input, a);
@@ -70,7 +70,6 @@ class Step4 extends Component {
   }
 
   render() {
-
     // Fisierele sursa
     const handleFilePath = (filePath) => {
       if (filePath.length > 0) return "http://127.0.0.1:8000/media/" + filePath;
@@ -91,38 +90,67 @@ class Step4 extends Component {
               </label>
             </div>
             <div className="row mt-3">
-              <div className="form-group col-md-9 content form-block-holder">
-                <label className="control-label col-11">
+              <div className="form-group col-md-12 content form-block-holder">
+                <label className="control-label col-12">
                   {this.state.ocrResults &&
                     this.state.ocrResults.map((item, index) => {
                       return (
                         <div key={index}>
-                          <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1
-                            }:`}</span>
-                          <button
-                            className="btn btn-secondary col-1"
-                            type="button"
-                            title="Tatstatura Virtuală"
-                            onClick={() =>
-                              this.setState({ show: !this.state.show })
-                            }
-                          >
-                            <svg className="svg_keyboard" viewBox="0 0 24 24">
-                              <path
-                                fill="currentColor"
-                                d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
-                              />
-                            </svg>
-                          </button>
+                          <div className="row mb-3">
+                            <span className="ocrResultTitle text-info col-12">
+                              {`Rezultatul OCR pentru imaginea ${index + 1}:`}
+                              <button
+                                className="btn btn-keyboard col-1"
+                                type="button"
+                                title="Tatstatura Virtuală"
+                                onClick={() =>
+                                  this.setState({ show: !this.state.show })
+                                }
+                              >
+                                <svg
+                                  className="svg_keyboard"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="currentColor"
+                                    d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
+                                  />
+                                </svg>
+                              </button>
+                            </span>
+                          </div>
                           <textarea
                             key={index}
                             id={index}
                             onFocus={this.setActiveInput.bind(this)}
                             value={item}
                             onChange={this.onChangeInput.bind(this)}
-                            className="form-control mb-4" rows="10">
-                          </textarea>
-
+                            className="form-control mb-4"
+                            rows="10"
+                          ></textarea>
+                          <a
+                            className="image_ocr_a"
+                            data-fancybox="gallery_2"
+                            data-src={
+                              this.state.preprocessedFiles[index] != undefined
+                                ? handleFilePath(
+                                    this.state.preprocessedFiles[index]
+                                  )
+                                : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
+                            }
+                            data-caption="imagine originală"
+                          >
+                            <img
+                              className="image_ocr"
+                              src={
+                                this.state.preprocessedFiles[index] != undefined
+                                  ? handleFilePath(
+                                      this.state.preprocessedFiles[index]
+                                    )
+                                  : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
+                              }
+                            />
+                          </a>
                         </div>
                       );
                     })}
@@ -132,14 +160,19 @@ class Step4 extends Component {
                   <Keyboard
                     keyboardRef={(r) => (this.keyboard = r)}
                     layoutName={this.state.layoutName}
-                    onChange={inputs => this.onChangeKeyboardInput(inputs, this.state.ocrResults[this.state.inputID]).bind(this)}
+                    onChange={(inputs) =>
+                      this.onChangeKeyboardInput(
+                        inputs,
+                        this.state.ocrResults[this.state.inputID]
+                      ).bind(this)
+                    }
                     onKeyPress={this.onKeyPress.bind(this)}
                     layout={this.cyrillicRomanianLayout.layout}
                   />
                 )}
               </div>
-              <div className="form-group col-md-3 content form-block-image">
-                {/* {this.state.preprocessedFiles[0]} */}
+              {/* <div className="form-group col-md-3 content form-block-image">
+                
                 {this.state.preprocessedFiles.map((src, index) => (
                   <a
                     className=""
@@ -154,7 +187,7 @@ class Step4 extends Component {
                     />
                   </a>
                 ))}
-              </div>
+              </div> */}
             </div>
           </form>
         </div>

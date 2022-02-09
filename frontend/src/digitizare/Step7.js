@@ -1,22 +1,32 @@
-'use strict';
+"use strict";
 
-import React, { Component } from 'react';
-import Promise from 'promise';
+import React, { Component } from "react";
+import Promise from "promise";
+import "react-awesome-lightbox/build/style.css";
+import Form from "react-bootstrap/Form";
+import Accordion from "react-bootstrap/Accordion";
+import Button from "react-bootstrap/Button";
+import RangeSlider from "react-bootstrap-range-slider";
+import "react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css";
+import { mdiSourceCommitStartNextLocal } from "@mdi/js";
+import ImgsViewer from "react-images-viewer";
+import { Fancybox } from "@fancyapps/ui/src/Fancybox/Fancybox.js";
+import "@fancyapps/ui/dist/fancybox.css";
 
 export default class Step7 extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      saving: false
+      saving: false,
     };
 
     this.isValidated = this.isValidated.bind(this);
   }
 
-  componentDidMount() { }
+  componentDidMount() {}
 
-  componentWillUnmount() { }
+  componentWillUnmount() {}
 
   // This review screen had the 'Save' button, on clicking this is called
   isValidated() {
@@ -36,16 +46,16 @@ export default class Step7 extends Component {
     */
 
     this.setState({
-      saving: true
+      saving: true,
     });
 
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         this.setState({
-          saving: true
+          saving: true,
         });
 
-        this.props.updateStore({ savedToCloud: true });  // Update store here (this is just an example, in reality you will do it via redux or flux)
+        this.props.updateStore({ savedToCloud: true }); // Update store here (this is just an example, in reality you will do it via redux or flux)
 
         // call resolve() to indicate that server validation or other aync method was a success.
         // ... only then will it move to the next step. reject() will indicate a fail
@@ -61,7 +71,13 @@ export default class Step7 extends Component {
   }
 
   render() {
-    const savingCls = this.state.saving ? 'saving col-md-12 show' : 'saving col-md-12 hide';
+    const sourceFiles = props.getStore().sourceFiles;
+    const [preprocessedFiles, setpreprocessedFiles] = React.useState(
+      props.getStore().preprocessedFiles
+    );
+    const savingCls = this.state.saving
+      ? "saving col-md-12 show"
+      : "saving col-md-12 hide";
 
     return (
       <div className="step step7 review">
@@ -73,7 +89,37 @@ export default class Step7 extends Component {
               </label>
             </div>
             <div className="form-group">
-              <div className="col-md-12 control-label">
+              <div className="col-sm">
+                {preprocessedFiles.length != 0 && (
+                  <>
+                    <Accordion defaultActiveKey={["0"]} alwaysOpen>
+                      <Accordion.Item eventKey="0">
+                        <Accordion.Header>
+                          Ținta - imagine preprocesată
+                        </Accordion.Header>
+                        <Accordion.Body>
+                          {preprocessedFiles.map((src, index) => (
+                            <a
+                              className=""
+                              data-fancybox="gallery_2"
+                              data-src={handleFilePath(src)}
+                              data-caption="imagine originală"
+                              key={index}
+                            >
+                              <img
+                                className="Accordion_image"
+                                src={handleFilePath(src)}
+                              />
+                            </a>
+                          ))}
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    </Accordion>
+                  </>
+                )}
+              </div>
+
+              {/* <div className="col-md-12 control-label">
                 <div className="col-md-12 txt">
                   <div className="col-md-4">
                     Data
@@ -83,11 +129,11 @@ export default class Step7 extends Component {
                   </div>
                 </div>
                 <h2 className={savingCls}></h2>
-              </div>
+              </div> */}
             </div>
           </form>
         </div>
       </div>
-    )
+    );
   }
 }
