@@ -190,13 +190,67 @@ ol.progtrckr li.progtrckr-done:hover:before {
   filter: brightness(1.1);
   box-shadow: 0px 5px 8px rgba(0, 0, 0, 0.3);
 }
+
 .svg_keyboard {
   width: 24px;
   height: auto;
 }
-.form-block-image {
-  
+
+.form-block-image {}
+
+.btn-keyboard {
+  color: #444 !important;
 }
+
+.form-control {
+  width: 70% !important;
+  display: inline !important;
+}
+
+.image_ocr_a {
+  vertical-align: top;
+
+}
+
+.image_ocr {
+  margin-left: 4%;
+  width: 25%;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.15);
+  transition: .2s;
+}
+
+.image_ocr:hover {
+  cursor: pointer;
+  transform: scale(1.02);
+  filter: brightness(1.1);
+  box-shadow: 0px 5px 8px rgba(0, 0, 0, 0.3);
+}
+
+.react-simple-keyboard {
+  position: fixed;
+  width: 100%;
+  left: 0%;
+  bottom: 0%;
+  padding-left: 10%;
+  padding-right: 10%;
+  transition: .2s;
+  animation-name: keyboard-anim;
+  animation-duration: .3s;
+  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes keyboard-anim {
+  from {
+    bottom: -40%;
+  }
+
+  to {
+    bottom: 0%;
+  }
+}
+
 /* .App {
   margin-top: 10%;
 }
