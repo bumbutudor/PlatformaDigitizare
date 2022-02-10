@@ -86,8 +86,16 @@ export default class Step7 extends Component {
     this.props.jumpToStep(toStep - 1); // The StepZilla library injects this jumpToStep utility into each component
   }
 
-  save_image(event) {
+  handleFilePath(filePath) {
+    if (filePath.length > 0) return "http://127.0.0.1:8000/media/" + filePath;
+    //https://httpbin.org/post
+    //http://127.0.0.1:8000/media/
+    return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
+  };
 
+  save_image(event) {
+    const file_url = this.handleFilePath(this.state.preprocessedFiles[0]);
+    saveAs(file_url, 'image.jpg')
   }
   save_ocr(event) {
     var blob = new Blob(["Textul recunoscut ", "\n\n", this.state.ocrResults], {
@@ -104,12 +112,7 @@ export default class Step7 extends Component {
 
   render() {
     // Fisierele sursa
-    const handleFilePath = (filePath) => {
-      if (filePath.length > 0) return "http://127.0.0.1:8000/media/" + filePath;
-      //https://httpbin.org/post
-      //http://127.0.0.1:8000/media/
-      return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
-    };
+
     const sourceFiles = this.props.getStore().sourceFiles;
     const [preprocessedFiles, setpreprocessedFiles] =
       this.props.getStore().preprocessedFiles;
@@ -143,13 +146,13 @@ export default class Step7 extends Component {
                               <a
                                 className=""
                                 data-fancybox="gallery_2"
-                                data-src={handleFilePath(src)}
+                                data-src={this.handleFilePath(src)}
                                 data-caption={"imagine preprocesată"}
                                 key={index}
                               >
                                 <img
                                   className="Accordion_image"
-                                  src={handleFilePath(src)}
+                                  src={this.handleFilePath(src)}
                                 />
                               </a>
                             ))}
