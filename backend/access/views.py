@@ -93,9 +93,18 @@ def ocr(request):
         elif period == 'secolulXX' and alphabet == 'latin':
             # TODO : Implement using F
             pass
-        elif period == 'ScanTaylor':
-            # TODO : Implement using Tesseract
-            pass
+        elif period == 'secolulXVII':
+            ocr_path = '/ocr/secolulXVII/'
+            ocr_model_path = '/ocr/secolulXVII/models/FR15_secXVII_NT/batch.options.xml'
+            for file in files:
+                uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
+                ocr_file_path = settings.MEDIA_ROOT + ocr_path + '/' + os.path.splitext(file["name"])[0] + '.txt'
+                command = 'finecmd.exe ' + uploaded_file_path + ' /OptionsFile ' + ocr_model_path + ' /out ' + ocr_file_path
+                os.system(command)
+                print(os.system(command))
+                ocr_result = load_txt(ocr_file_path)
+                ocr_results.append(ocr_result)
+            return JsonResponse({"code":200,"msg":"success", "ocrResults":ocr_results})
         elif period == 'Gimp':
             # TODO : Implement using Gimp
             pass
@@ -125,6 +134,8 @@ def transliterate(request):
             elif not trans_options['replaceApostrophe'] and trans_options["removeHyphen"]:
                 clean_text = remove_hyphen(trans_result)
                 trans_results.append(clean_text)
+            elif not trans_options['replaceApostrophe'] and not trans_options["removeHyphen"]:
+                trans_results.append(trans_result)
         return JsonResponse({"code":200,"msg":"success", "transResults":trans_results})
     
     else:

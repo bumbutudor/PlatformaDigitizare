@@ -144,7 +144,7 @@ export default class Step7 extends Component {
                                 className=""
                                 data-fancybox="gallery_2"
                                 data-src={handleFilePath(src)}
-                                data-caption="imagine originală"
+                                data-caption={"imagine preprocesată"}
                                 key={index}
                               >
                                 <img
@@ -244,7 +244,14 @@ export default class Step7 extends Component {
               </div> */}
             </div>
           </form>
+          <div className="col-2 m-4">
+            <button className="btn btn-secondary" onClick={() =>
+              this.setState({ show: !this.state.show })
+            }>Obiectul digitizat</button>
+            {this.state.show && (JSON.stringify(this.props.getStore()))}
+          </div>
         </div>
+
       </div>
     );
   }

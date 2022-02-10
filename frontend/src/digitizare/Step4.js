@@ -138,7 +138,7 @@ class Step4 extends Component {
                                 )
                                 : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
                             }
-                            data-caption="imagine originală"
+                            data-caption={"imagine preprocesată"}
                           >
                             <img
                               className="image_ocr"

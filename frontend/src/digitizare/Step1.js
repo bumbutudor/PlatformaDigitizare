@@ -10,9 +10,9 @@ export default class Step1 extends Component {
     super(props);
     this.state = {};
   }
-  componentDidMount() {}
+  componentDidMount() { }
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   // not required as this component has no forms or user entry
   // isValidated() {}
@@ -34,7 +34,8 @@ export default class Step1 extends Component {
                     horizontal
                     vertical
                     color="orange"
-                    title="Fișierele pot fi de tipul: .jpg, .jpeg, .png, .tif, .pdf."
+                    title="Se acceptă următoarele formate ale documentelor: png, jpg, tiff și pdf. Pot fi incarcate mai multe documente intr-un singur ciclu de digitizare. Calitatea imaginilor incarcate se pune in proportionalitate directa cu rezultele obtinute. Un singur fisier incarcat nu va trece limita de 100MB.
+                    Toate fisierele incarcate la un singur ciclu de digitizare nu vor trece limita de 700MB. Este posibilitatea de a sterge unele documente care au fost intamplator selectate in acest pas."
                   />
                 </h1>
                 <label className="mx-2">

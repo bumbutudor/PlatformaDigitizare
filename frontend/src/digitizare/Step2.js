@@ -329,7 +329,7 @@ const Step2 = (props) => {
                           className=""
                           data-fancybox="gallery_2"
                           data-src={handleFilePath(src)}
-                          data-caption="imagine originală"
+                          data-caption="imagine preprocesată"
                           key={index}
                         >
                           <img

@@ -18,8 +18,8 @@ export default class DigitizationSteps extends Component {
     this.state = {};
 
     this.sampleStore = {
-      email: "",
-      gender: "",
+      // email: "",
+      // gender: "",
       period: "secolulXX",
       typography: "",
       alphabet: "cyrillic",
