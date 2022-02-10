@@ -13,14 +13,17 @@ Platforma pentru preprocesarea, recunoasterea, transliterarea si editarea docume
 
 ### Backend setup (make sure you have python 3 on your machine)
 
-1. Create virtual environment with the name _venv_
+1. Enter backend folder
+   `cd backend`
+
+2. Create virtual environment with the name _venv_
    `python -m venv venv`
 
-2. Activate the virual environment
+3. Activate the virual environment
    `.\venv\Scripts\activate`
 
-3. Install the packages with pip
+4. Install the packages with pip
    `pip install -r requirements.txt`
 
-4. Run the server
+5. Run the server
    `python manage.py runserver`
