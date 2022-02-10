@@ -2,7 +2,7 @@
 
 Platforma pentru preprocesarea, recunoasterea, transliterarea si editarea documentelor chirilice
 
-# FrontEnd setup (make sure you have npm installed on your machine)
+### FrontEnd setup (make sure you have npm installed on your machine)
 
 1. Enter frontend folder
    `cd frontend`
@@ -11,7 +11,7 @@ Platforma pentru preprocesarea, recunoasterea, transliterarea si editarea docume
 3. Run the server
    `npm start`
 
-# Backend setup (make sure you have python 3 on your machine)
+### Backend setup (make sure you have python 3 on your machine)
 
 1. Create virtual environment with the name _venv_
    `python -m venv venv`
