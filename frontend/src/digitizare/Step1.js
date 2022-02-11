@@ -4,7 +4,6 @@ import React, { Component, useRef, useState, useEffect } from "react";
 import FileUpload from "../components/FileUpload";
 import Icon from "@mdi/react";
 import { mdiInformation } from "@mdi/js";
-
 import "tui-image-editor/dist/tui-image-editor.css";
 import ImageEditor from "@toast-ui/react-image-editor";
 
@@ -51,31 +50,13 @@ export default class Step1 extends Component {
                   Fișierele pot fi de tipul: .jpg, .jpeg, .png, .tif, .pdf.
                 </label>
               </label>
-              <ImageEditor
-                includeUI={{
-                  menu: ["shape", "filter"],
-                  initMenu: "filter",
-                  uiSize: {
-                    width: "100%",
-                    height: "500px",
-                  },
-                  menuBarPosition: "bottom",
-                }}
-                cssMaxHeight={500}
-                cssMaxWidth={700}
-                selectionStyle={{
-                  cornerSize: 20,
-                  rotatingPointOffset: 70,
-                }}
-                usageStatistics={true}
-              />
-              {/* <FileUpload
+              <FileUpload
                 jumpToStep={(i) => this.props.jumpToStep(i)}
                 getStore={() => this.props.getStore()}
                 updateStore={(u) => {
                   this.props.updateStore(u);
                 }}
-              /> */}
+              />
             </div>
           </form>
         </div>
