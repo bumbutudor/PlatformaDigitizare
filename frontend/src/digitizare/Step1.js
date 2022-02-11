@@ -57,12 +57,12 @@ export default class Step1 extends Component {
                   initMenu: "filter",
                   uiSize: {
                     width: "100%",
-                    height: "500px",
+                    height: "650px",
                   },
                   menuBarPosition: "bottom",
                 }}
-                cssMaxHeight={500}
-                cssMaxWidth={700}
+                cssMaxHeight={350}
+                cssMaxWidth={600}
                 selectionStyle={{
                   cornerSize: 20,
                   rotatingPointOffset: 70,
