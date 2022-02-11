@@ -278,6 +278,15 @@ html .step7 label {
   text-align: left;
 }
 
+.tui-image-editor-container {
+  margin-top: 20px;
+  margin-bottom: 15px;
+  border-radius: 15px;
+}
+
+.tui-image-editor-header-logo {
+  display: none;
+}
 /* .App {
   margin-top: 10%;
 }
