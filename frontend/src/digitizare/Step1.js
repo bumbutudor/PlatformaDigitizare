@@ -1,22 +1,30 @@
 "use strict";
 
-import React, { Component, useRef } from "react";
+import React, { Component, useRef, useState, useEffect } from "react";
 import FileUpload from "../components/FileUpload";
 import Icon from "@mdi/react";
 import { mdiInformation } from "@mdi/js";
+import "tui-image-editor/dist/tui-image-editor.css";
+import ImageEditor from "@toast-ui/react-image-editor";
 
 export default class Step1 extends Component {
   constructor(props) {
     super(props);
     this.state = {};
   }
-  componentDidMount() { }
 
-  componentWillUnmount() { }
+  componentDidMount() {}
+
+  componentWillUnmount() {}
 
   // not required as this component has no forms or user entry
   // isValidated() {}
 
+  handleClickButton() {
+    const editorInstance = this.editorRef.current.getInstance();
+
+    editorInstance.flipX();
+  }
   render() {
     return (
       <div className="step step1">
