@@ -98,16 +98,32 @@ export default class Step7 extends Component {
     saveAs(file_url, 'image.jpg')
   }
   save_ocr(event) {
+    /* let exampleText = "My text"; */
+    /* this.state.ocrResults */
     var blob = new Blob(["Textul recunoscut ", "\n\n", this.state.ocrResults], {
       type: "text/plain;charset=utf-8",
     });
     saveAs(blob, "OCR" + ".txt");
+  }
+  save_ocr_doc(event) {
+    /* let exampleText = "My text docx"; */
+    /* this.state.ocrResults */
+    var blob = new Blob(["Textul recunoscut ", "\n\n", this.state.ocrResults], {
+      type: "application/msword",
+    });
+    saveAs(blob, "OCR" + ".doc");
   }
   save_trans(event) {
     var blob = new Blob(["Textul transliterat: ", "\n\n", this.state.transResults], {
       type: "text/plain;charset=utf-8",
     });
     saveAs(blob, "Transliterat" + ".txt");
+  }
+  save_trans_doc(event) {
+    var blob = new Blob(["Textul transliterat: ", "\n\n", this.state.transResults], {
+      type: "application/msword",
+    });
+    saveAs(blob, "Transliterat" + ".doc");
   }
 
   render() {
@@ -195,7 +211,14 @@ export default class Step7 extends Component {
                         className="btn btn-primary col-12"
                         onClick={this.save_ocr.bind(this)}
                       >
-                        Download
+                        Download (.txt)
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary col-12 mt-2"
+                        onClick={this.save_ocr_doc.bind(this)}
+                      >
+                        Download (.doc)
                       </button>
                     </Accordion.Body>
                   </Accordion.Item>
@@ -227,7 +250,14 @@ export default class Step7 extends Component {
                         className="btn btn-primary col-12"
                         onClick={this.save_trans.bind(this)}
                       >
-                        Download
+                        Download (.txt)
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary col-12 mt-2"
+                        onClick={this.save_trans_doc.bind(this)}
+                      >
+                        Download (.doc)
                       </button>
                     </Accordion.Body>
                   </Accordion.Item>
