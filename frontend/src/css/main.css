@@ -375,3 +375,18 @@ ol.progtrckr li.progtrckr-done:before {
 ol.progtrckr li.progtrckr-done:hover:before {
   color: #333;
 } */
+
+.playflix-button {
+  position: relative;
+  display: flex;
+  font-size: 0.75em;
+  height: 3em;
+  border-radius: 0.25em;
+  overflow: hidden;
+  counter-reset: playflix-counter 5;
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s;
+  animation: playflix-text 5s linear infinite forwards;
+}
