@@ -287,6 +287,10 @@ html .step7 label {
 .tui-image-editor-header-logo {
   display: none;
 }
+
+.popover {
+  max-width: 400px !important;
+}
 /* .App {
   margin-top: 10%;
 }

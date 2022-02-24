@@ -1,3 +1,4 @@
+from click import command
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import File
@@ -64,8 +65,11 @@ def preprocess(request):
                 return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})
             pass
         elif preprocess_with == 'ScanTaylor':
-            # TODO : Implement using Tesseract
-            pass
+            if data["preprocessMode"] == 'desktop':
+                command = "scantailor.exe"
+                a = os.system(command)
+                print(a)
+                return JsonResponse({"code":200,"msg":"success", "uploadFolder":settings.MEDIA_ROOT})
         elif preprocess_with == 'Gimp':
             # TODO : Implement using Gimp
             pass

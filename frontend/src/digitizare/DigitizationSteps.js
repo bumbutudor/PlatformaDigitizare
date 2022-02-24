@@ -20,13 +20,15 @@ export default class DigitizationSteps extends Component {
     this.sampleStore = {
       // email: "",
       // gender: "",
-      period: "secolulXX",
+      period: "secolulXX", //default is 20th century
       typography: "",
-      alphabet: "cyrillic",
+      alphabet: "cyrillic", //default is cyrillic
       savedToCloud: false,
+      uploadFolder: "C:\\Users\\bumbu\\OneDrive\\Desktop\\Projects\\PlatformaDigitizare\\backend\\media",
       sourceFiles: [],
       preprocessedFiles: [],
       preprocessWith: "",
+      preprocessMode: "desktop",
       ocrResults: [],
       transResults: [],
       preprocessFR: {
