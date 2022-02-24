@@ -22,6 +22,31 @@ export default {
         }
     },
 
+
+    /**
+    * Layout: Romanian Transitional alphabet
+    */
+
+    cyrillicTransitional: {
+        layout: {
+            default: [
+                "` 1 2 3 4 5 6 7 8 9 0 - = {bksp}",
+                "{tab} ѳ ѡ е р т t ї ĭ ꙋ i о п ъ ꙟ ѫ î",
+                "{lock} а с d ф г х ж к л ц ш щ џ ' {enter}",
+                "{shift} з ѯ ч в б n m ѣ ѧ ѩ ю ѹ ь ѵ ѱ ѕ . / {shift}",
+                "{space}"
+            ],
+            shift: [
+                "~ ! @ # $ % ^ & * ( ) _ + {bksp}",
+                "{tab} Ѳ Ѡ Е Р Т Ї Ĭ Ꙋ И О П Ъ Ꙟ Ѫ Î",
+                '{lock} А С Д Ф Г Х Ж К Л Ц Ш Щ Џ " {enter}',
+                "{shift} З Ѯ Ч В Б Н М Ѣ Ѧ Ѩ Ю ОУ Ь Ѵ Ѱ Ѕ {shift}",
+                "{space}"
+            ]
+
+        }
+    },
+
     /**
     * Layout: Romanian Cyrrilic
     */
