@@ -27,7 +27,7 @@ class Step6 extends Component {
       inputID: 0,
     };
     // this.keyboard = React.createRef();
-
+    this.romanian = layouts["latin"];
     this.cyrillicRomanianLayout = layouts[props.getStore().alphabet];
   }
 
@@ -169,7 +169,7 @@ class Step6 extends Component {
                       ).bind(this)
                     }
                     onKeyPress={this.onKeyPress.bind(this)}
-                    layout={this.cyrillicRomanianLayout.layout}
+                    layout={this.romanian.layout}
                   />
                 )}
               </div>

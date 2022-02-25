@@ -177,7 +177,7 @@ export default class Step3 extends Component {
                   id="radio4"
                   value="secolulXVII"
                   checked={this.state.period === "secolulXVII"}
-                  onChange={() => { this.setState({ period: "secolulXVII" }); this.props.updateStore({ period: "secolulXVII" }); }}
+                  onChange={() => { this.setState({ period: "secolulXVII", alphabet: "cyrillicRomanian" }); this.props.updateStore({ period: "secolulXVII", alphabet: "cyrillicRomanian" }); }}
                 />
               </Form.Group>
               <div className="col-sm mb-3">
@@ -239,6 +239,7 @@ export default class Step3 extends Component {
 
                     />
                     <Form.Check
+                      disabled
                       label="Alfabetul chirilic românesc"
                       name="group6"
                       type="checkbox"
