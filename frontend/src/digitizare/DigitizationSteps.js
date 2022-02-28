@@ -43,6 +43,16 @@ export default class DigitizationSteps extends Component {
         resolution: 300,
         removeNoise: true,
       },
+      preprocessScanTaylor: {
+        resolution: 600, //default is 600 --dpi=<number>  -- sets x and y dpi. default: 600 --dpi-x=<number> --dpi-y=<number> --output-dpi=<number>  -- sets x and y output dpi. default: 600 --output-dpi-x=<number> --output-dpi-y=<number>
+        color_mode: "black_and_white", //default is black_and_white <black_and_white|color_grayscale|mixed>
+        white_margins: false, //default is false
+        despeckle: "normal", //default is normal <off|cautious|normal|aggressive>
+        orientation: "none", //default is portrait <left|right|upsidedown|none>
+        content_detection: "normal", //default is normal <cautious|normal|aggressive>
+        normalize_illumination: "false", //default: false
+        threshold: 0, //n<0 thinner, n>0 thicker; default: 0
+      },
       alphabetOptions: {
         cyrillic: "alfabetul chirilic sovietic",
         latin: "alfabetul românesc modern",
