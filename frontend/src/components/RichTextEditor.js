@@ -1,14 +1,25 @@
 import React, { Component, useRef } from "react";
-import { Editor, EditorState, getDefaultKeyBinding, RichUtils } from "draft-js";
+import {
+  Editor,
+  EditorState,
+  getDefaultKeyBinding,
+  RichUtils,
+  ContentState,
+  convertFromHTML,
+} from "draft-js";
 import "./RichText.css";
 import "../../node_modules/draft-js/dist/Draft.css";
 
 class RichTextEditor extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { editorState: EditorState.createEmpty() };
 
-    console.log(this.state.editorState._immutable._map);
+    this.state = {
+      editorState: EditorState.createWithContent(
+        ContentState.createFromBlockArray(convertFromHTML(props.editorState))
+      ),
+    };
+
     this.focus = () => this.refs.editor.focus();
     this.onChange = (editorState) => this.setState({ editorState });
 
@@ -28,12 +39,8 @@ class RichTextEditor extends React.Component {
   }
 
   _mapKeyToEditorCommand(e) {
-    if (e.keyCode === 9 ) {
-      const newEditorState = RichUtils.onTab(
-        e,
-        this.state.editorState,
-        4 
-      );
+    if (e.keyCode === 9) {
+      const newEditorState = RichUtils.onTab(e, this.state.editorState, 4);
       if (newEditorState !== this.state.editorState) {
         this.onChange(newEditorState);
       }
@@ -63,7 +70,7 @@ class RichTextEditor extends React.Component {
         className += " RichEditor-hidePlaceholder";
       }
     }
-
+    console.log(contentState);
     return (
       <div className="RichEditor-root">
         <BlockStyleControls
@@ -85,6 +92,7 @@ class RichTextEditor extends React.Component {
             placeholder="Tell a story..."
             ref="editor"
             spellCheck={true}
+            value="123"
           />
         </div>
       </div>
