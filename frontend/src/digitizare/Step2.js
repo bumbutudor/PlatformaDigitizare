@@ -17,6 +17,7 @@ import { Fancybox } from "@fancyapps/ui/src/Fancybox/Fancybox.js";
 import "@fancyapps/ui/dist/fancybox.css";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
+import ScanTaylor from "../components/ScanTaylor";
 
 // Preprocess the images
 const Step2 = (props) => {
@@ -47,7 +48,7 @@ const Step2 = (props) => {
   // console.log(props.getStore());
 
   const sourceFiles = props.getStore().sourceFiles;
-  const [uploadFolder, setUploadFolder] = React.useState(props.getStore().uploadFolder);
+
   const [preprocessedFiles, setpreprocessedFiles] = React.useState(
     props.getStore().preprocessedFiles
   );
@@ -64,7 +65,6 @@ const Step2 = (props) => {
     props.getStore().preprocessWith
   );
   const [show, setShow] = React.useState(true);
-  const [tab, setTab] = React.useState('desktop');
 
   const handleOptionChange = (e) => {
     // this.setState({
@@ -131,25 +131,6 @@ const Step2 = (props) => {
     if (data.preprocessedFiles) {
       setpreprocessedFiles(data.preprocessedFiles);
       props.updateStore({ preprocessedFiles: data.preprocessedFiles });
-    }
-
-  };
-
-
-  const handleOpenScanTaylorRequest = async () => {
-
-    const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(props.getStore()),
-    };
-    const response = await fetch(preprocessAPI, requestOptions);
-    const data = await response.json();
-    console.log(data);
-    if (data.uploadFolder) {
-      setUploadFolder(data.uploadFolder);
-      // props.updateStore({ preprocessedFiles: data.preprocessedFiles });
     }
 
   };
@@ -283,19 +264,24 @@ const Step2 = (props) => {
                       onChange={handlePreprocessOpenCVChange}
                     />
                     {props.getStore().preprocessOpenCV.setResolution && (
-                      <>
-                        <RangeSlider
-                          value={resolutionOpenCV}
-                          tooltipLabel={(resolutionOpenCV) =>
-                            `${resolutionOpenCV}dpi`
-                          }
-                          onChange={handleResolutionChange}
-                          tooltip="on"
-                          min={75}
-                          max={1200}
-                          step={25}
-                        />
-                      </>
+                      <div className="row mt-2">
+                        <div className="col-9">
+                          <RangeSlider
+                            value={resolutionOpenCV}
+                            tooltipLabel={(resolutionOpenCV) =>
+                              `${resolutionOpenCV} dpi`
+                            }
+                            onChange={handleResolutionChange}
+                            // tooltip="on"
+                            min={75}
+                            max={1200}
+                            step={25}
+                          />
+                        </div>
+                        <div className="col-3 text-warning">
+                          <Form.Control value={resolutionOpenCV} onChange={handleResolutionChange} />
+                        </div>
+                      </div>
                     )}
                   </Form.Group>
                   <Form.Group className="mb-3">
@@ -314,58 +300,15 @@ const Step2 = (props) => {
               {/* Preprocesare cu ScanTaylor */}
               {selectedOption === "ScanTaylor" && (
                 <>
-                  <Tabs
-                    id="controlled-tab-example"
-                    activeKey={tab}
-                    onSelect={(k) => setTab(k)}
-                    className="mb-3"
-                  >
-                    <Tab eventKey="desktop" title="Desktop">
-                      <Form.Group>
-                        <Form.Label className="bg-warning p-2">
-                          Preprocesare cu ScanTaylor este disponibilă doar în versiunea Desktop a platformei. <br></br>
-                          Urmează pașii de mai jos pentru a continua.
-                        </Form.Label>
-                        <ListGroup as="ol" numbered>
-                          <ListGroup.Item as="li">Click pe butonul Deschide ScanTaylor de mai jos.
-                            <em className="text-secondary mx-2">Înainte de a deschide aplicația citește toți pașii!</em>
-                          </ListGroup.Item>
-                          <ListGroup.Item as="li">Din fereastra ScanTaylor, alege <code>New Project...</code> </ListGroup.Item>
-                          <ListGroup.Item as="li">Copie și lipește <samp className="bg-warning">{uploadFolder}</samp> în <code>Input Directory</code> </ListGroup.Item>
-                          <ListGroup.Item as="li">Apasă pe <code>Select All</code> &nbsp;&nbsp;&nbsp; din
-                            <code>Files Not In Project</code>&nbsp;&nbsp;&nbsp;&nbsp; click pe <code>&#62;&#62;</code>&nbsp;&nbsp;&nbsp;&nbsp; și butonul <code>OK</code>
-                          </ListGroup.Item>
-                          <ListGroup.Item as="li">Din fereastra Fix DPI, selectează <code>All Pages</code>&nbsp;&nbsp;&nbsp;
-                            după care setează valorile <code>DPI (se recomandă 600*600 dpi)</code>
-                          </ListGroup.Item>
-                          <ListGroup.Item as="li">Este recomandat să treci prin următorii pași de preprocesare:
-                            Fix Orientation, Deskew, Select Conntent pană a ajunge la pasul Output
-                          </ListGroup.Item>
-                        </ListGroup>
-                      </Form.Group>
-                    </Tab>
-                    <Tab eventKey="web" title="Web">
-                      <Form.Group>
-                        <Form.Label>
-                          2.2 Opțiuni de preprocesare cu ScanTaylor recomandate:
-                        </Form.Label>
-                      </Form.Group>
-                    </Tab>
-                  </Tabs>
+                  <ScanTaylor getStore={() => props.getStore()}
+                    updateStore={(u) => {
+                      props.updateStore(u);
+                    }} />
                 </>
               )}
             </div>
 
             <div className="mt-5 mb-3 col-md-12 d-flex justify-content-center">
-              {selectedOption === "ScanTaylor" && tab === "desktop" && (
-                <Button
-                  className="btn btn-secondary mx-2"
-                  onClick={handleOpenScanTaylorRequest}>
-                  Deschide ScanTaylor
-                </Button>
-              )
-
-              }
 
               {selectedOption && show ? (<>
                 <Button variant="primary" onClick={handlePreprocessRequest}>
