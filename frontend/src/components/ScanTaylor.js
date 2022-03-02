@@ -16,10 +16,18 @@ const ScanTaylor = (props) => {
         props.getStore().preprocessScanTaylor.colorMode
     );
 
+    const [selectedDespeckleOption, setSelectedDespeckleOption] = React.useState(
+        props.getStore().preprocessScanTaylor.despeckle
+    );
+
     const [tab, setTab] = React.useState(props.getStore().preprocessMode);
 
     const [resolution, setResolution] = React.useState(
         props.getStore().preprocessScanTaylor.resolution
+    );
+
+    const [whiteMargins, setWhiteMargins] = React.useState(
+        props.getStore().preprocessScanTaylor.whiteMargins
     );
 
     const handleTabChange = (event) => {
@@ -37,12 +45,32 @@ const ScanTaylor = (props) => {
         });
     };
 
+    const handleDespeckleOptionChange = (e) => {
+        setSelectedDespeckleOption(e.target.value);
+        props.updateStore({
+            preprocessScanTaylor: {
+                ...props.getStore().preprocessScanTaylor,
+                despeckle: e.target.value
+            }
+        });
+    };
+
     const handleResolutionChange = (e) => {
         setResolution(e.target.value);
         props.updateStore({
             preprocessScanTaylor: {
                 ...props.getStore().preprocessScanTaylor,
                 resolution: e.target.value,
+            },
+        });
+    };
+
+    const handleWhiteMargins = (e) => {
+        setWhiteMargins(e.target.checked);
+        props.updateStore({
+            preprocessScanTaylor: {
+                ...props.getStore().preprocessScanTaylor,
+                whiteMargins: e.target.checked,
             },
         });
     };
@@ -110,6 +138,8 @@ const ScanTaylor = (props) => {
                         Deschide ScanTaylor
                     </Button>
                 </Tab>
+
+                {/* web functionalities */}
                 <Tab eventKey="web" title="Web">
                     <Form.Group as={Row} className="mb-4">
                         <Form.Label className="mb-4">
@@ -136,7 +166,7 @@ const ScanTaylor = (props) => {
                         <Col>
                             <Form.Label>Setează culoarea imaginii preprocesate:</Form.Label>
                             <Form.Check
-                                className="form-check-inline"
+                                // className="form-check-inline"
                                 label="Alb-negru"
                                 name="colorMode"
                                 type="radio"
@@ -146,7 +176,7 @@ const ScanTaylor = (props) => {
                                 onChange={handleColorModeChange}
                             />
                             <Form.Check
-                                className="form-check-inline"
+                                // className="form-check-inline"
                                 label="Grayscale"
                                 name="colorMode"
                                 type="radio"
@@ -156,7 +186,7 @@ const ScanTaylor = (props) => {
                                 onChange={handleColorModeChange}
                             />
                             <Form.Check
-                                className="form-check-inline"
+                                // className="form-check-inline"
                                 label="Mixed"
                                 name="colorMode"
                                 type="radio"
@@ -167,6 +197,65 @@ const ScanTaylor = (props) => {
                             />
                         </Col>
                     </Form.Group>
+                    <Form.Group as={Row} className="mb-4">
+                        <Col>
+                            <Form.Label>Selectează opțiunea de reducere a zgomotului din imagine:</Form.Label>
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Off"
+                                name="despeckle"
+                                type="radio"
+                                id="off"
+                                value="off"
+                                checked={selectedDespeckleOption === "off"}
+                                onChange={handleDespeckleOptionChange}
+                            />
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Cautious"
+                                name="despeckle"
+                                type="radio"
+                                id="cautious"
+                                value="cautious"
+                                checked={selectedDespeckleOption === "cautious"}
+                                onChange={handleDespeckleOptionChange}
+                            />
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Normal"
+                                name="despeckle"
+                                type="radio"
+                                id="normal"
+                                value="normal"
+                                checked={selectedDespeckleOption === "normal"}
+                                onChange={handleDespeckleOptionChange}
+                            />
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Aggressive"
+                                name="despeckle"
+                                type="radio"
+                                id="aggressive"
+                                value="aggressive"
+                                checked={selectedDespeckleOption === "aggressive"}
+                                onChange={handleDespeckleOptionChange}
+                            />
+                        </Col>
+                    </Form.Group>
+
+                    <Form.Group as={Row} className="mb-3">
+                        <Col>
+                            <Form.Check
+                                label="Adaugă margini albe"
+                                name="whiteMargins"
+                                id="white_margins"
+                                type="checkbox"
+                                checked={whiteMargins}
+                                onChange={handleWhiteMargins}
+                            />
+                        </Col>
+                    </Form.Group>
+
                 </Tab>
             </Tabs >
         </>
