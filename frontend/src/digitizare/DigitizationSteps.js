@@ -28,7 +28,7 @@ export default class DigitizationSteps extends Component {
       sourceFiles: [],
       preprocessedFiles: [],
       preprocessWith: "",
-      preprocessMode: "desktop",
+      preprocessMode: "web",
       ocrResults: [],
       transResults: [],
       preprocessFR: {
@@ -50,7 +50,7 @@ export default class DigitizationSteps extends Component {
         despeckle: "normal", //default is normal <off|cautious|normal|aggressive>
         orientation: "none", //default is portrait <left|right|upsidedown|none>
         contentDetection: "normal", //default is normal <cautious|normal|aggressive>
-        normalizeIllumination: "false", //default: false
+        normalizeIllumination: false, //default: false
         threshold: 0, //n<0 thinner, n>0 thicker; default: 0
       },
       alphabetOptions: {

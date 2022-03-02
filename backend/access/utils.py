@@ -1,6 +1,7 @@
 import tempfile
 
 import cv2
+from cv2 import threshold
 import numpy as np
 from PIL import Image
 import spacy
@@ -49,6 +50,12 @@ def remove_noise_and_smooth(file_name):
     or_image = cv2.bitwise_or(img, closing)
     return or_image
 
+def preprocess_scantailor_cli(input_file, options, output):
+    dpi = str(options['resolution'])
+    threshold = str(options['threshold'])
+    color_mode = options['colorMode']
+    command = "scantailor-cli --dpi=" + dpi + " --color-mode=" + color_mode + " --threshold=" + threshold + " " + input_file + " " + output
+    return command
 
 def load_txt(filename):
     # open the file readonly

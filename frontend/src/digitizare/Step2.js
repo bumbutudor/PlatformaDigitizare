@@ -152,6 +152,16 @@ const Step2 = (props) => {
             <Form.Group className="mb-3 col-sm">
               <Form.Label>2.1 Selectează motorul de preprocesare:</Form.Label>
               <Form.Check
+                // disabled
+                label="ScanTaylor"
+                name="group1"
+                type="radio"
+                id="radio3"
+                value="ScanTaylor"
+                checked={selectedOption === "ScanTaylor"}
+                onChange={handleOptionChange}
+              />
+              <Form.Check
                 label="FineReader"
                 name="group1"
                 type="radio"
@@ -167,16 +177,6 @@ const Step2 = (props) => {
                 id="radio2"
                 value="OpenCV"
                 checked={selectedOption === "OpenCV"}
-                onChange={handleOptionChange}
-              />
-              <Form.Check
-                // disabled
-                label="ScanTaylor (disabled)"
-                name="group1"
-                type="radio"
-                id="radio3"
-                value="ScanTaylor"
-                checked={selectedOption === "ScanTaylor"}
                 onChange={handleOptionChange}
               />
               <Form.Check

@@ -20,14 +20,30 @@ const ScanTaylor = (props) => {
         props.getStore().preprocessScanTaylor.despeckle
     );
 
+    const [orientation, setOrientation] = React.useState(
+        props.getStore().preprocessScanTaylor.orientation
+    );
+
+    const [selectedContentDetectionMode, setSelectedContentDetectionMode] = React.useState(
+        props.getStore().preprocessScanTaylor.contentDetection
+    );
+
     const [tab, setTab] = React.useState(props.getStore().preprocessMode);
 
     const [resolution, setResolution] = React.useState(
         props.getStore().preprocessScanTaylor.resolution
     );
 
+    const [threshold, setThreshold] = React.useState(
+        props.getStore().preprocessScanTaylor.threshold
+    );
+
     const [whiteMargins, setWhiteMargins] = React.useState(
         props.getStore().preprocessScanTaylor.whiteMargins
+    );
+
+    const [normalizeIllumination, setNormalizeIllumination] = React.useState(
+        props.getStore().preprocessScanTaylor.normalizeIllumination
     );
 
     const handleTabChange = (event) => {
@@ -45,12 +61,33 @@ const ScanTaylor = (props) => {
         });
     };
 
+
+    const handleContentDetectionModeChange = (e) => {
+        setSelectedContentDetectionMode(e.target.value);
+        props.updateStore({
+            preprocessScanTaylor: {
+                ...props.getStore().preprocessScanTaylor,
+                contentDetection: e.target.value
+            }
+        });
+    };
+
     const handleDespeckleOptionChange = (e) => {
         setSelectedDespeckleOption(e.target.value);
         props.updateStore({
             preprocessScanTaylor: {
                 ...props.getStore().preprocessScanTaylor,
                 despeckle: e.target.value
+            }
+        });
+    };
+
+    const handleOrientationChange = (e) => {
+        setOrientation(e.target.value);
+        props.updateStore({
+            preprocessScanTaylor: {
+                ...props.getStore().preprocessScanTaylor,
+                orientation: e.target.value
             }
         });
     };
@@ -65,12 +102,33 @@ const ScanTaylor = (props) => {
         });
     };
 
+    const handleThresholdChange = (e) => {
+        setThreshold(e.target.value);
+        props.updateStore({
+            preprocessScanTaylor: {
+                ...props.getStore().preprocessScanTaylor,
+                threshold: e.target.value,
+            },
+        });
+    };
+
     const handleWhiteMargins = (e) => {
         setWhiteMargins(e.target.checked);
         props.updateStore({
             preprocessScanTaylor: {
                 ...props.getStore().preprocessScanTaylor,
                 whiteMargins: e.target.checked,
+            },
+        });
+    };
+
+
+    const handleNormalizeIllumination = (e) => {
+        setNormalizeIllumination(e.target.checked);
+        props.updateStore({
+            preprocessScanTaylor: {
+                ...props.getStore().preprocessScanTaylor,
+                normalizeIllumination: e.target.checked,
             },
         });
     };
@@ -242,7 +300,90 @@ const ScanTaylor = (props) => {
                             />
                         </Col>
                     </Form.Group>
+                    {/* orientation default is portrait <left|right|upsidedown|none> */}
+                    <Form.Group as={Row} className="mb-4">
+                        <Col>
+                            <Form.Label>Schimbă orientarea:</Form.Label>
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Păstează orientarea originală"
+                                name="orientation"
+                                type="radio"
+                                id="none"
+                                value="none"
+                                checked={orientation === "none"}
+                                onChange={handleOrientationChange}
+                            />
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Spre stânga"
+                                name="orientation"
+                                type="radio"
+                                id="left"
+                                value="left"
+                                checked={orientation === "left"}
+                                onChange={handleOrientationChange}
+                            />
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Spre dreapta"
+                                name="orientation"
+                                type="radio"
+                                id="right"
+                                value="right"
+                                checked={orientation === "right"}
+                                onChange={handleOrientationChange}
+                            />
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Inversat (upside down)"
+                                name="orientation"
+                                type="radio"
+                                id="upsidedown"
+                                value="upsidedown"
+                                checked={orientation === "upsidedown"}
+                                onChange={handleOrientationChange}
+                            />
+                        </Col>
+                    </Form.Group>
 
+                    {/* contentDetection default is normal <cautious|normal|aggressive> */}
+                    <Form.Group as={Row} className="mb-4">
+                        <Col>
+                            <Form.Label>Selectează modul de detectare a continutului din imagine: </Form.Label>
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Precaut (mai puțin de 3%)"
+                                name="contentDetection"
+                                type="radio"
+                                id="cautious"
+                                value="cautious"
+                                checked={selectedContentDetectionMode === "cautious"}
+                                onChange={handleContentDetectionModeChange}
+                            />
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Normal (recomandat)"
+                                name="contentDetection"
+                                type="radio"
+                                id="normal"
+                                value="normal"
+                                checked={selectedContentDetectionMode === "normal"}
+                                onChange={handleContentDetectionModeChange}
+                            />
+                            <Form.Check
+                                // className="form-check-inline"
+                                label="Agresiv"
+                                name="contentDetection"
+                                type="radio"
+                                id="aggressive"
+                                value="aggressive"
+                                checked={selectedContentDetectionMode === "aggressive"}
+                                onChange={handleContentDetectionModeChange}
+                            />
+                        </Col>
+                    </Form.Group>
+                    {/* whiteMargins default is false */}
                     <Form.Group as={Row} className="mb-3">
                         <Col>
                             <Form.Check
@@ -255,6 +396,40 @@ const ScanTaylor = (props) => {
                             />
                         </Col>
                     </Form.Group>
+                    {/* normalizeIllumination default: false */}
+                    <Form.Group as={Row} className="mb-3">
+                        <Col>
+                            <Form.Check
+                                label="Corectează iluminarea din imagine"
+                                name="normalizeIllumination"
+                                id="normalize_illumination"
+                                type="checkbox"
+                                checked={normalizeIllumination}
+                                onChange={handleNormalizeIllumination}
+                            />
+                        </Col>
+                    </Form.Group>
+
+                    <Form.Group as={Row} className="mb-4">
+                        <Form.Label className="mb-4">
+                            Schimbă grosimea caracterelor:
+                        </Form.Label>
+                        <Col xs="9">
+                            <RangeSlider
+                                value={threshold}
+                                tooltipLabel={(threshold) => threshold}
+                                onChange={handleThresholdChange}
+                                tooltipPlacement='top'
+                                min={-100}
+                                max={100}
+                                step={1}
+                            />
+                        </Col>
+                        <Col xs="3">
+                            <Form.Control value={threshold} onChange={handleThresholdChange} />
+                        </Col>
+                    </Form.Group>
+
 
                 </Tab>
             </Tabs >
