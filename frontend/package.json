@@ -105,6 +105,7 @@
     "simple-keyboard": "^3.4.46",
     "simple-keyboard-autocorrect": "^2.2.350",
     "simple-keyboard-layouts": "^3.1.46",
-    "tui-image-editor": "^3.15.2"
+    "tui-image-editor": "^3.15.2",
+    "utif": "^3.1.0"
   }
 }

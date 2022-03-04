@@ -2,6 +2,7 @@ import tempfile
 
 import cv2
 from cv2 import threshold
+from cv2 import normalize
 import numpy as np
 from PIL import Image
 import spacy
@@ -54,8 +55,22 @@ def preprocess_scantailor_cli(input_file, options, output):
     dpi = str(options['resolution'])
     threshold = str(options['threshold'])
     color_mode = options['colorMode']
-    command = "scantailor-cli --dpi=" + dpi + " --color-mode=" + color_mode + " --threshold=" + threshold + " " + input_file + " " + output
+    white_margins = str(options['whiteMargins']).lower()
+    despeckle = options['despeckle']
+    orientation = " --orientation=" + options['orientation']
+    if options['orientation'] == 'none':
+        orientation = ''
+    content_detection = options['contentDetection']
+    normalize_illumination = str(options['normalizeIllumination']).lower()
+
+    command = "scantailor-cli --dpi=" + dpi + " --normalize-illumination=" + normalize_illumination + " --content-detection=" + content_detection + orientation + " --despeckle=" + despeckle + " --white-margins=" + white_margins + " --color-mode=" + color_mode + " --threshold=" + threshold + " --output-dpi=" + dpi + " " + input_file + " " + output
     return command
+
+
+def tiff_to_jpg(input_file):
+    read = cv2.imread(input_file)
+    outfile = input_file.split('.')[0] + '.jpg'
+    cv2.imwrite(outfile,read,[int(cv2.IMWRITE_JPEG_QUALITY), 200])
 
 def load_txt(filename):
     # open the file readonly

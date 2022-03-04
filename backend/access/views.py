@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import File
 from django.core.files.storage import FileSystemStorage
-from .utils import process_image_for_ocr, preprocess_scantailor_cli, load_txt, periodOptions, remove_hyphen
+from .utils import process_image_for_ocr, preprocess_scantailor_cli, load_txt, periodOptions, remove_hyphen, tiff_to_jpg
 import os
 from django.conf import settings
 import json
@@ -79,7 +79,8 @@ def preprocess(request):
                     command = preprocess_scantailor_cli(uploaded_file_path, preprocess_scantaylor, output_folder)
                     print(command)
                     os.system(command)
-                    preprocessedFilesURLS.append('pre/ScanTaylor/' + os.path.splitext(file["name"])[0] + '.tiff')
+                    tiff_to_jpg(output_folder + os.path.splitext(file["name"])[0] + '.tif')
+                    preprocessedFilesURLS.append('pre/ScanTaylor/' + os.path.splitext(file["name"])[0] + '.jpg')
                 return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})   
         elif preprocess_with == 'Gimp':
             # TODO : Implement using Gimp
