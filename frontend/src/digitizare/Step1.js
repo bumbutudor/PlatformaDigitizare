@@ -24,14 +24,16 @@ export default class Step1 extends Component {
         <Popover.Header as="h4">{StepsInfo.step1Info.title}</Popover.Header>
         <Popover.Body>
           {StepsInfo.step1Info.body}
-          Pregatirea si incarcarea <strong> documentului scanat </strong> din calculatorul utilizatorului.
-          Se acceptă următoarele formate ale documentelor: png, jpg, tiff și pdf.
-          Pot fi incarcate mai multe documente intr-un singur ciclu de digitizare.
-          Calitatea imaginilor incarcate se pune in proportionalitate directa cu rezultele obtinute.
-          O imagine unde la zoom maxim nu prea se vede bine continutul va genera un rezultat nesatisfacator.
-          Un singur fisier incarcat nu va trece limita de 100MB.
-          Toate fisierele incarcate la un singur ciclu de digitizare nu vor trece limita de 700MB.
-          Este posibilitatea de a sterge unele documente care au fost intamplator selectate in acest pas.
+          Se acceptă următoarele tipuri de fișiere: <b>png, jpg, tiff și pdf</b>.
+          <br /><br />
+          Pot fi încărcate mai multe fișiere într-un singur ciclu de digitizare.
+          <br /><br />
+          Un singur fișier incărcat nu va trece limita de 100MB.
+          Toate fișierele incărcate la un singur ciclu de digitizare nu vor trece limita de 700MB.
+          <br /><br />
+          Atunci când vor fi selectate mai două sau mai multe fișiere, trebuie de luat în considerare că toate aceste fișiere vor fi procesate cu aceleași opțiuni de procesare, respectiv, trebuie să vă asigurați că fișierele încărcate sunt din aceeași perioadă, au unul și același alfabet și necesită aceleași opțiuni de preprocesare a imaginii. Dacă aveți seturi de documente din mai multe perioade, atunci aceste seturi vor fi digitizate în diferite cicluri de digitizare.
+          <br /><br />
+          Este posibilitatea de a șterge unele fișiere care au fost întamplator selectate in acest pas.
         </Popover.Body>
       </Popover>
     );

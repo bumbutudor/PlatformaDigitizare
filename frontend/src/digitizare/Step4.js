@@ -32,10 +32,10 @@ class Step4 extends Component {
     /* this.state = {editorState: EditorState.createEmpty()};
     this.onChange = editorState => this.setState({editorState}); */
 
-    this.onChange = editorState => this.setState({editorState});
+    this.onChange = editorState => this.setState({ editorState });
   }
 
-  componentDidMount() {}
+  componentDidMount() { }
 
   onChange(e) {
     let newState = {};
@@ -91,8 +91,7 @@ class Step4 extends Component {
             <div className="form-group">
               <label className="control-label col-md-12 ">
                 <h1>
-                  Pasul 4: Verifică și editează rezultatul obținut după procesul
-                  OCR
+                  Pasul 4: Verifică și editează textul recunoscut
                 </h1>
               </label>
             </div>
@@ -146,8 +145,8 @@ class Step4 extends Component {
                             data-src={
                               this.state.preprocessedFiles[index] != undefined
                                 ? handleFilePath(
-                                    this.state.preprocessedFiles[index]
-                                  )
+                                  this.state.preprocessedFiles[index]
+                                )
                                 : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
                             }
                             data-caption={"imagine preprocesată"}
@@ -157,8 +156,8 @@ class Step4 extends Component {
                               src={
                                 this.state.preprocessedFiles[index] != undefined
                                   ? handleFilePath(
-                                      this.state.preprocessedFiles[index]
-                                    )
+                                    this.state.preprocessedFiles[index]
+                                  )
                                   : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
                               }
                             />

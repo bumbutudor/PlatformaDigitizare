@@ -170,7 +170,7 @@ const ScanTailor = (props) => {
                 <Tab eventKey="desktop" title="Desktop">
                     <Form.Group>
                         <Form.Label className="bg-warning p-2">
-                            Preprocesare cu ScanTailor este disponibilă doar în versiunea Desktop a platformei. <br></br>
+                            Modalitatea de preprocesare Desktop cu ScanTailor este disponibilă doar în versiunea desktop a platformei. <br></br>
                             Urmează pașii de mai jos pentru a continua.
                         </Form.Label>
                         <ListGroup as="ol" numbered>
@@ -235,7 +235,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Grayscale"
+                                label="Scara tonurilor de gri (grayscale)"
                                 name="colorMode"
                                 type="radio"
                                 id="color_grayscale"
@@ -245,7 +245,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Mixed"
+                                label="Mixt"
                                 name="colorMode"
                                 type="radio"
                                 id="mixed"
@@ -257,10 +257,10 @@ const ScanTailor = (props) => {
                     </Form.Group>
                     <Form.Group as={Row} className="mb-4">
                         <Col>
-                            <Form.Label>Selectează opțiunea de reducere a zgomotului din imagine:</Form.Label>
+                            <Form.Label>Selectează opțiunea de reducere a zgomotului (despeckle):</Form.Label>
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Off"
+                                label="Fără reducere"
                                 name="despeckle"
                                 type="radio"
                                 id="off"
@@ -270,7 +270,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Cautious"
+                                label="Precaut"
                                 name="despeckle"
                                 type="radio"
                                 id="cautious"
@@ -290,7 +290,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Aggressive"
+                                label="Agresiv"
                                 name="despeckle"
                                 type="radio"
                                 id="aggressive"

@@ -147,7 +147,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "6. Verifică transliterația",
+        name: "6. Verifică Transliterația",
         component: (
           <Step6
             getStore={() => this.getStore()}
@@ -158,7 +158,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "7. Folosește rezultatele",
+        name: "7. Salvează rezultatele",
         component: (
           <Step7
             getStore={() => this.getStore()}

@@ -75,7 +75,7 @@ export default class Step5 extends Component {
           <Form className="form-horizontal">
             <Form.Group>
               <label className="col-md-12 control-label">
-                <h1>Pasul 5: Transliterarea textului obținut după editarea OCR </h1>
+                <h1>Pasul 5: Transliterarea textului recunoscut </h1>
               </label>
             </Form.Group>
 
