@@ -10,40 +10,40 @@ import Col from "react-bootstrap/esm/Col";
 import Row from "react-bootstrap/esm/Row";
 
 
-const ScanTaylor = (props) => {
+const ScanTailor = (props) => {
     const [uploadFolder, setUploadFolder] = React.useState(props.getStore().uploadFolder);
     const [selectedColorMode, setSelectedColorMode] = React.useState(
-        props.getStore().preprocessScanTaylor.colorMode
+        props.getStore().preprocessScanTailor.colorMode
     );
 
     const [selectedDespeckleOption, setSelectedDespeckleOption] = React.useState(
-        props.getStore().preprocessScanTaylor.despeckle
+        props.getStore().preprocessScanTailor.despeckle
     );
 
     const [orientation, setOrientation] = React.useState(
-        props.getStore().preprocessScanTaylor.orientation
+        props.getStore().preprocessScanTailor.orientation
     );
 
     const [selectedContentDetectionMode, setSelectedContentDetectionMode] = React.useState(
-        props.getStore().preprocessScanTaylor.contentDetection
+        props.getStore().preprocessScanTailor.contentDetection
     );
 
     const [tab, setTab] = React.useState(props.getStore().preprocessMode);
 
     const [resolution, setResolution] = React.useState(
-        props.getStore().preprocessScanTaylor.resolution
+        props.getStore().preprocessScanTailor.resolution
     );
 
     const [threshold, setThreshold] = React.useState(
-        props.getStore().preprocessScanTaylor.threshold
+        props.getStore().preprocessScanTailor.threshold
     );
 
     const [whiteMargins, setWhiteMargins] = React.useState(
-        props.getStore().preprocessScanTaylor.whiteMargins
+        props.getStore().preprocessScanTailor.whiteMargins
     );
 
     const [normalizeIllumination, setNormalizeIllumination] = React.useState(
-        props.getStore().preprocessScanTaylor.normalizeIllumination
+        props.getStore().preprocessScanTailor.normalizeIllumination
     );
 
     const handleTabChange = (event) => {
@@ -54,8 +54,8 @@ const ScanTaylor = (props) => {
     const handleColorModeChange = (e) => {
         setSelectedColorMode(e.target.value);
         props.updateStore({
-            preprocessScanTaylor: {
-                ...props.getStore().preprocessScanTaylor,
+            preprocessScanTailor: {
+                ...props.getStore().preprocessScanTailor,
                 colorMode: e.target.value
             }
         });
@@ -65,8 +65,8 @@ const ScanTaylor = (props) => {
     const handleContentDetectionModeChange = (e) => {
         setSelectedContentDetectionMode(e.target.value);
         props.updateStore({
-            preprocessScanTaylor: {
-                ...props.getStore().preprocessScanTaylor,
+            preprocessScanTailor: {
+                ...props.getStore().preprocessScanTailor,
                 contentDetection: e.target.value
             }
         });
@@ -75,8 +75,8 @@ const ScanTaylor = (props) => {
     const handleDespeckleOptionChange = (e) => {
         setSelectedDespeckleOption(e.target.value);
         props.updateStore({
-            preprocessScanTaylor: {
-                ...props.getStore().preprocessScanTaylor,
+            preprocessScanTailor: {
+                ...props.getStore().preprocessScanTailor,
                 despeckle: e.target.value
             }
         });
@@ -85,8 +85,8 @@ const ScanTaylor = (props) => {
     const handleOrientationChange = (e) => {
         setOrientation(e.target.value);
         props.updateStore({
-            preprocessScanTaylor: {
-                ...props.getStore().preprocessScanTaylor,
+            preprocessScanTailor: {
+                ...props.getStore().preprocessScanTailor,
                 orientation: e.target.value
             }
         });
@@ -95,8 +95,8 @@ const ScanTaylor = (props) => {
     const handleResolutionChange = (e) => {
         setResolution(e.target.value);
         props.updateStore({
-            preprocessScanTaylor: {
-                ...props.getStore().preprocessScanTaylor,
+            preprocessScanTailor: {
+                ...props.getStore().preprocessScanTailor,
                 resolution: e.target.value,
             },
         });
@@ -105,8 +105,8 @@ const ScanTaylor = (props) => {
     const handleThresholdChange = (e) => {
         setThreshold(e.target.value);
         props.updateStore({
-            preprocessScanTaylor: {
-                ...props.getStore().preprocessScanTaylor,
+            preprocessScanTailor: {
+                ...props.getStore().preprocessScanTailor,
                 threshold: e.target.value,
             },
         });
@@ -115,8 +115,8 @@ const ScanTaylor = (props) => {
     const handleWhiteMargins = (e) => {
         setWhiteMargins(e.target.checked);
         props.updateStore({
-            preprocessScanTaylor: {
-                ...props.getStore().preprocessScanTaylor,
+            preprocessScanTailor: {
+                ...props.getStore().preprocessScanTailor,
                 whiteMargins: e.target.checked,
             },
         });
@@ -126,14 +126,14 @@ const ScanTaylor = (props) => {
     const handleNormalizeIllumination = (e) => {
         setNormalizeIllumination(e.target.checked);
         props.updateStore({
-            preprocessScanTaylor: {
-                ...props.getStore().preprocessScanTaylor,
+            preprocessScanTailor: {
+                ...props.getStore().preprocessScanTailor,
                 normalizeIllumination: e.target.checked,
             },
         });
     };
 
-    const handleOpenScanTaylorRequest = async () => {
+    const handleOpenScanTailorRequest = async () => {
 
         const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
         const requestOptions = {
@@ -158,7 +158,7 @@ const ScanTaylor = (props) => {
         <>
             <Form.Group>
                 <Form.Label>
-                    2.2 Opțiuni de preprocesare cu ScanTaylor recomandate:
+                    2.2 Opțiuni de preprocesare cu ScanTailor recomandate:
                 </Form.Label>
             </Form.Group>
             <Tabs
@@ -170,14 +170,14 @@ const ScanTaylor = (props) => {
                 <Tab eventKey="desktop" title="Desktop">
                     <Form.Group>
                         <Form.Label className="bg-warning p-2">
-                            Preprocesare cu ScanTaylor este disponibilă doar în versiunea Desktop a platformei. <br></br>
+                            Preprocesare cu ScanTailor este disponibilă doar în versiunea Desktop a platformei. <br></br>
                             Urmează pașii de mai jos pentru a continua.
                         </Form.Label>
                         <ListGroup as="ol" numbered>
-                            <ListGroup.Item as="li">Click pe butonul Deschide ScanTaylor de mai jos.
+                            <ListGroup.Item as="li">Click pe butonul Deschide ScanTailor de mai jos.
                                 <em className="text-secondary mx-2">Înainte de a deschide aplicația citește toți pașii!</em>
                             </ListGroup.Item>
-                            <ListGroup.Item as="li">Din fereastra ScanTaylor, alege <code>New Project...</code> </ListGroup.Item>
+                            <ListGroup.Item as="li">Din fereastra ScanTailor, alege <code>New Project...</code> </ListGroup.Item>
                             <ListGroup.Item as="li">Copie și lipește <samp className="bg-warning">{props.getStore().uploadFolder}</samp> în <code>Input Directory</code> </ListGroup.Item>
                             <ListGroup.Item as="li">Apasă pe <code>Select All</code> &nbsp;&nbsp;&nbsp; din
                                 <code>Files Not In Project</code>&nbsp;&nbsp;&nbsp;&nbsp; click pe <code>&#62;&#62;</code>&nbsp;&nbsp;&nbsp;&nbsp; și butonul <code>OK</code>
@@ -192,8 +192,8 @@ const ScanTaylor = (props) => {
                     </Form.Group>
                     <Button
                         className="btn btn-secondary mx-2"
-                        onClick={handleOpenScanTaylorRequest}>
-                        Deschide ScanTaylor
+                        onClick={handleOpenScanTailorRequest}>
+                        Deschide ScanTailor
                     </Button>
                 </Tab>
 
@@ -437,4 +437,4 @@ const ScanTaylor = (props) => {
     );
 }
 
-export default ScanTaylor;
+export default ScanTailor;

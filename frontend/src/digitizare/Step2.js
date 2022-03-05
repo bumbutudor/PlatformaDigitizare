@@ -17,7 +17,7 @@ import { Fancybox } from "@fancyapps/ui/src/Fancybox/Fancybox.js";
 import "@fancyapps/ui/dist/fancybox.css";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
-import ScanTaylor from "../components/ScanTaylor";
+import ScanTailor from "../components/ScanTailor";
 
 // Preprocess the images
 const Step2 = (props) => {
@@ -29,7 +29,7 @@ const Step2 = (props) => {
         <Popover.Body>
           La acest pas, utilizatorul poate sa aleaga motorul de preprocesare dorit in functie de ce
           ajustari necesita documentul sau. Motoarele de preprocesare a imaginii sunt:
-          Modulul de preprocesare a imaginii din FineReader 15, Procesorul de imagini OpenCV, GIMP sau ScanTaylor.
+          Modulul de preprocesare a imaginii din FineReader 15, Procesorul de imagini OpenCV, GIMP sau ScanTailor.
           Poate sa aleaga douar unul din aceste 4 motoare de preprocesare a imaginii la un singur ciclu de digitizare.
           Fiecare din aceste moatoare de preprocesare sunt configurate cu setările recomandate cu posibilitatea
           de a modifica la necesitate. Motorul FineReader are urmatoarele optiuni de preprocesare:
@@ -153,12 +153,12 @@ const Step2 = (props) => {
               <Form.Label>2.1 Selectează motorul de preprocesare:</Form.Label>
               <Form.Check
                 // disabled
-                label="ScanTaylor"
+                label="ScanTailor"
                 name="group1"
                 type="radio"
                 id="radio3"
-                value="ScanTaylor"
-                checked={selectedOption === "ScanTaylor"}
+                value="ScanTailor"
+                checked={selectedOption === "ScanTailor"}
                 onChange={handleOptionChange}
               />
               <Form.Check
@@ -297,10 +297,10 @@ const Step2 = (props) => {
                 </>
               )}
 
-              {/* Preprocesare cu ScanTaylor */}
-              {selectedOption === "ScanTaylor" && (
+              {/* Preprocesare cu ScanTailor */}
+              {selectedOption === "ScanTailor" && (
                 <>
-                  <ScanTaylor getStore={() => props.getStore()}
+                  <ScanTailor getStore={() => props.getStore()}
                     updateStore={(u) => {
                       props.updateStore(u);
                     }} />

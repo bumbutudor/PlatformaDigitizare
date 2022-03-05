@@ -43,7 +43,7 @@ export default class DigitizationSteps extends Component {
         resolution: 300,
         removeNoise: true,
       },
-      preprocessScanTaylor: {
+      preprocessScanTailor: {
         resolution: 600, //default is 600 --dpi=<number>  -- sets x and y dpi. default: 600 --dpi-x=<number> --dpi-y=<number> --output-dpi=<number>  -- sets x and y output dpi. default: 600 --output-dpi-x=<number> --output-dpi-y=<number>
         colorMode: "black_and_white", //default is black_and_white <black_and_white|color_grayscale|mixed>
         whiteMargins: false, //default is false

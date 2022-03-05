@@ -64,23 +64,23 @@ def preprocess(request):
                     preprocessedFilesURLS.append(pre_file_path)
                 return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})
             pass
-        elif preprocess_with == 'ScanTaylor':
+        elif preprocess_with == 'ScanTailor':
             if data["preprocessMode"] == 'desktop':
                 command = "scantailor.exe"
                 a = os.system(command)
                 print(a)
                 return JsonResponse({"code":200,"msg":"success", "uploadFolder":settings.MEDIA_ROOT})
             elif data["preprocessMode"] == 'web':
-                pre_path = '/pre/ScanTaylor/'
-                preprocess_scantaylor = data['preprocessScanTaylor']
+                pre_path = '/pre/ScanTailor/'
+                preprocess_scantailor = data['preprocessScanTailor']
                 for file in files:
                     uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
                     output_folder =  settings.MEDIA_ROOT + pre_path
-                    command = preprocess_scantailor_cli(uploaded_file_path, preprocess_scantaylor, output_folder)
+                    command = preprocess_scantailor_cli(uploaded_file_path, preprocess_scantailor, output_folder)
                     print(command)
                     os.system(command)
                     tiff_to_jpg(output_folder + os.path.splitext(file["name"])[0] + '.tif')
-                    preprocessedFilesURLS.append('pre/ScanTaylor/' + os.path.splitext(file["name"])[0] + '.jpg')
+                    preprocessedFilesURLS.append('pre/ScanTailor/' + os.path.splitext(file["name"])[0] + '.jpg')
                 return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})   
         elif preprocess_with == 'Gimp':
             # TODO : Implement using Gimp
