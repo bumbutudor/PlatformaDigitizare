@@ -43,6 +43,14 @@ shilocation
 # BACKEND
 # environment
 backend/venv
-backend/media
-# END OF BACKEND
+backend/media/pre/FR
+backend/media/pre/OpenCV
+backend/media/pre/ScanTaylor
+backend/media/ocr/secolulXVII
+backend/media/ocr/secolulXVIII
+backend/media/ocr/secolulXIX
+backend/media/ocr/secolulXX
 backend/db.sqlite3
+
+# END OF BACKEND
+
