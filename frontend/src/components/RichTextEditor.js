@@ -10,6 +10,11 @@ import {
 import "./RichText.css";
 import "../../node_modules/draft-js/dist/Draft.css";
 
+import PropTypes from "prop-types";
+import Keyboard from "react-simple-keyboard";
+import "react-simple-keyboard/build/css/index.css";
+import layouts from "../components/KeyboardLayouts";
+
 class RichTextEditor extends React.Component {
   constructor(props) {
     super(props);
@@ -18,6 +23,8 @@ class RichTextEditor extends React.Component {
       editorState: EditorState.createWithContent(
         ContentState.createFromBlockArray(convertFromHTML(props.editorState))
       ),
+      showk: false,
+      layoutName: "default",
     };
 
     this.focus = () => this.refs.editor.focus();
@@ -27,6 +34,26 @@ class RichTextEditor extends React.Component {
     this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this);
     this.toggleBlockType = this._toggleBlockType.bind(this);
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
+    this.cyrillicRomanianLayout = layouts[props.getStore().alphabet];
+    console.log(this.state.showk);
+  }
+
+  onChangeKeyboardInput(input, a) {
+    console.log(input, a);
+    const inputID = this.state.inputID;
+    const ocrResults = this.state.ocrResults;
+    ocrResults[inputID] = input;
+    this.setState({ ocrResults: [...ocrResults] });
+  }
+
+  onKeyPress(button) {
+    if (button === "{shift}" || button === "{lock}") this.handleShift();
+  }
+
+  onChange(e) {
+    let newState = {};
+    newState[e.target.name] = e.target.value;
+    this.setState(newState);
   }
 
   _handleKeyCommand(command, editorState) {
@@ -70,7 +97,6 @@ class RichTextEditor extends React.Component {
         className += " RichEditor-hidePlaceholder";
       }
     }
-    console.log(contentState);
     return (
       <div className="RichEditor-root">
         <BlockStyleControls
@@ -78,6 +104,7 @@ class RichTextEditor extends React.Component {
           onToggle={this.toggleBlockType}
         />
         <InlineStyleControls
+          state={this.state}
           editorState={editorState}
           onToggle={this.toggleInlineStyle}
         />
@@ -95,6 +122,20 @@ class RichTextEditor extends React.Component {
             value="123"
           />
         </div>
+        {this.state.showk && (
+          <Keyboard
+            keyboardRef={(r) => (this.keyboard = r)}
+            layoutName={this.state.layoutName}
+            onChange={(inputs) =>
+              this.onChangeKeyboardInput(
+                inputs,
+                this.state.ocrResults[this.state.inputID]
+              ).bind(this)
+            }
+            onKeyPress={this.onKeyPress.bind(this)}
+            layout={this.cyrillicRomanianLayout.layout}
+          />
+        )}
       </div>
     );
   }
@@ -188,7 +229,7 @@ var INLINE_STYLES = [
 
 const InlineStyleControls = (props) => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
-
+  /* console.log(this.setState()); */
   return (
     <div className="RichEditor-controls">
       {INLINE_STYLES.map((type) => (
@@ -204,10 +245,9 @@ const InlineStyleControls = (props) => {
         className="btn-rch RichEditor-styleButton"
         type="button"
         title="Tatstatura Virtuală"
-        onClick={() =>
-            this.setState({ showk: !this.state.showk })
-          }
-      >keyboard
+        onClick={() => (props.state.showk = !props.state.showk)}
+      >
+        keyboard
         {/* <svg className="svg_keyboard" viewBox="0 0 24 24">
           <path
             fill="currentColor"

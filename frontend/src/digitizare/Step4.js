@@ -6,7 +6,8 @@ import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
 import layouts from "../components/KeyboardLayouts";
 import RichTextEditor from "../components/RichTextEditor";
-import { EditorState, ContentState, convertFromHTML } from 'draft-js'
+import { EditorState, ContentState, convertFromHTML } from "draft-js";
+import Accordion from "react-bootstrap/Accordion";
 
 class Step4 extends Component {
   constructor(props) {
@@ -32,7 +33,8 @@ class Step4 extends Component {
     /* this.state = {editorState: EditorState.createEmpty()};
     this.onChange = editorState => this.setState({editorState}); */
 
-    this.onChange = editorState => this.setState({ editorState });
+    /* console.log(this.setState()); */
+    this.onChange = (editorState) => this.setState({ editorState });
   }
 
   componentDidMount() { }
@@ -56,7 +58,7 @@ class Step4 extends Component {
 
   setActiveInput(event) {
     this.setState({ inputID: event.target.id });
-    console.log(event.target.id);
+    /* console.log(event.target.id); */
   }
 
   onChangeInput(event) {
@@ -97,75 +99,54 @@ class Step4 extends Component {
             </div>
             <div className="row mt-3">
               <div className="form-group col-md-12 content form-block-holder">
-                <label className="control-label col-12">
-                  {this.state.ocrResults &&
-                    this.state.ocrResults.map((item, index) => {
-                      return (
-                        <div key={index}>
-                          <div className="row mb-3">
-                            <span className="ocrResultTitle text-info col-12">
-                              {`Rezultatul OCR pentru imaginea ${index + 1}:`}
-                              <button type="button" className="d-none"></button>
-                              {/* <button
-                                className="btn btn-keyboard col-1"
-                                type="button"
-                                title="Tatstatura Virtuală"
-                                onClick={() =>
-                                  this.setState({ showk: !this.state.showk })
+                {/* <label className="control-label col-12"> */}
+                {this.state.ocrResults &&
+                  this.state.ocrResults.map((item, index) => {
+                    return (
+                      <Accordion defaultActiveKey={["0"]} alwaysOpen>
+                        <Accordion.Item eventKey={index}>
+                          <Accordion.Header>
+                            {`Rezultatul OCR pentru imaginea ${index + 1}:`}
+                          </Accordion.Header>
+                          <Accordion.Body>
+                            <div>
+                              <RichTextEditor
+                                editorState={item}
+                                getStore={this.props.getStore}
+                                /* onChange={this.onChange}*/
+                              />
+                              <a
+                                className="image_ocr_a"
+                                data-fancybox="gallery_2"
+                                data-src={
+                                  this.state.preprocessedFiles[index] !=
+                                  undefined
+                                    ? handleFilePath(
+                                        this.state.preprocessedFiles[index]
+                                      )
+                                    : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
                                 }
+                                data-caption={"imagine preprocesată"}
                               >
-                                <svg
-                                  className="svg_keyboard"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    fill="currentColor"
-                                    d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
-                                  />
-                                </svg>
-                              </button> */}
-                            </span>
-                          </div>
-                          <RichTextEditor
-                            editorState={item}
-                            onChange={this.onChange}
-                          />
-                          {/* <textarea
-                            key={index}
-                            id={index}
-                            onFocus={this.setActiveInput.bind(this)}
-                            value={item}
-                            onChange={this.onChangeInput.bind(this)}
-                            className="form-control mb-4"
-                            rows="10"
-                          ></textarea> */}
-                          <a
-                            className="image_ocr_a"
-                            data-fancybox="gallery_2"
-                            data-src={
-                              this.state.preprocessedFiles[index] != undefined
-                                ? handleFilePath(
-                                  this.state.preprocessedFiles[index]
-                                )
-                                : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
-                            }
-                            data-caption={"imagine preprocesată"}
-                          >
-                            <img
-                              className="image_ocr"
-                              src={
-                                this.state.preprocessedFiles[index] != undefined
-                                  ? handleFilePath(
-                                    this.state.preprocessedFiles[index]
-                                  )
-                                  : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
-                              }
-                            />
-                          </a>
-                        </div>
-                      );
-                    })}
-                </label>
+                                <img
+                                  className="image_ocr"
+                                  src={
+                                    this.state.preprocessedFiles[index] !=
+                                    undefined
+                                      ? handleFilePath(
+                                          this.state.preprocessedFiles[index]
+                                        )
+                                      : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
+                                  }
+                                />
+                              </a>
+                            </div>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      </Accordion>
+                    );
+                  })}
+                {/* </label> */}
 
                 {this.state.showk && (
                   <Keyboard

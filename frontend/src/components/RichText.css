@@ -101,3 +101,9 @@
     border: unset;
     background: transparent;
 }
+
+.accordion-flush .accordion-item {
+    border-right: unset !important;
+    border-left: unset !important;
+    border-radius: unset !important;
+}
