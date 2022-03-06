@@ -32,6 +32,7 @@ export default class DigitizationSteps extends Component {
       ocrResults: [],
       transResults: [],
       preprocessFR: {
+        divideIntoPages: false,
         correctResolution: true,
         convertToBlackAndWhite: true,
         straightenTextLines: true,

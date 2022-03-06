@@ -18,6 +18,7 @@ import "@fancyapps/ui/dist/fancybox.css";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import ScanTailor from "../components/ScanTailor";
+import FineReaderPre from "../components/FineReaderPre";
 
 // Preprocess the images
 const Step2 = (props) => {
@@ -52,9 +53,7 @@ const Step2 = (props) => {
   const [preprocessedFiles, setpreprocessedFiles] = React.useState(
     props.getStore().preprocessedFiles
   );
-  const [preprocessFR, setPreprocessFR] = React.useState(
-    props.getStore().preprocessFR
-  );
+
   const [preprocessOpenCV, setPreprocessOpenCV] = React.useState(
     props.getStore().preprocessOpenCV
   );
@@ -75,13 +74,6 @@ const Step2 = (props) => {
     setShow(true);
   };
 
-  // Preprocesare cu FineReader
-  const handlePreprocessFRChange = (e) => {
-    setPreprocessFR({ ...preprocessFR, [e.target.name]: e.target.checked });
-    props.updateStore({
-      preprocessFR: { ...preprocessFR, [e.target.name]: e.target.checked },
-    });
-  };
 
   // Preprocesare cu OpenCV
   const handlePreprocessOpenCVChange = (e) => {
@@ -193,53 +185,10 @@ const Step2 = (props) => {
             <div className="col-sm mb-3">
               {selectedOption === "FR" && (
                 <>
-                  <Form.Group>
-                    <Form.Label>
-                      2.2 Opțiuni de preprocesare cu FineReader recomandate:
-                    </Form.Label>
-                  </Form.Group>
-                  <Form.Group>
-                    <Form.Check
-                      label="Corectează rezoluția imaginii"
-                      name="correctResolution"
-                      id="checkboxFR1"
-                      type="checkbox"
-                      checked={preprocessFR.correctResolution}
-                      onChange={handlePreprocessFRChange}
-                    />
-                    <Form.Check
-                      label="Îndreaptă orientarea paginii"
-                      name="correctPageOrientation"
-                      id="checkboxFR2"
-                      type="checkbox"
-                      checked={preprocessFR.correctPageOrientation}
-                      onChange={handlePreprocessFRChange}
-                    />
-                    <Form.Check
-                      label="Convertește imaginea în alb-negru"
-                      name="convertToBlackAndWhite"
-                      id="checkboxF3"
-                      type="checkbox"
-                      checked={preprocessFR.convertToBlackAndWhite}
-                      onChange={handlePreprocessFRChange}
-                    />
-                    <Form.Check
-                      label="Reduce zgomotul ISO din text"
-                      name="reduceNoise"
-                      id="checkboxFR4"
-                      type="checkbox"
-                      checked={preprocessFR.reduceNoise}
-                      onChange={handlePreprocessFRChange}
-                    />
-                    <Form.Check
-                      label="Îndreaptă rândurile de text"
-                      name="straightenTextLines"
-                      id="checkboxFR5"
-                      type="checkbox"
-                      checked={preprocessFR.straightenTextLines}
-                      onChange={handlePreprocessFRChange}
-                    />
-                  </Form.Group>
+                  <FineReaderPre getStore={() => props.getStore()}
+                    updateStore={(u) => {
+                      props.updateStore(u);
+                    }} />
                 </>
               )}
 

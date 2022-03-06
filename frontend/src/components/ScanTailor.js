@@ -257,10 +257,10 @@ const ScanTailor = (props) => {
                     </Form.Group>
                     <Form.Group as={Row} className="mb-4">
                         <Col>
-                            <Form.Label>Selectează opțiunea de reducere a zgomotului (despeckle):</Form.Label>
+                            <Form.Label>Selectează opțiunea de curățare a petelor din imagine (despeckle):</Form.Label>
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Fără reducere"
+                                label="Fără curățare"
                                 name="despeckle"
                                 type="radio"
                                 id="off"
@@ -270,7 +270,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Precaut"
+                                label="Curățare precaută"
                                 name="despeckle"
                                 type="radio"
                                 id="cautious"
@@ -280,7 +280,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Normal"
+                                label="Curățare normală"
                                 name="despeckle"
                                 type="radio"
                                 id="normal"
@@ -290,7 +290,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Agresiv"
+                                label="Curățare agresivă"
                                 name="despeckle"
                                 type="radio"
                                 id="aggressive"
@@ -303,10 +303,10 @@ const ScanTailor = (props) => {
                     {/* orientation default is portrait <left|right|upsidedown|none> */}
                     <Form.Group as={Row} className="mb-4">
                         <Col>
-                            <Form.Label>Schimbă orientarea:</Form.Label>
+                            <Form.Label>Corectează orientarea imaginii:</Form.Label>
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Păstează orientarea originală"
+                                label="Păstrează orientarea originală"
                                 name="orientation"
                                 type="radio"
                                 id="none"
@@ -316,7 +316,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Spre stânga"
+                                label="Întoarce spre stânga"
                                 name="orientation"
                                 type="radio"
                                 id="left"
@@ -326,7 +326,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Spre dreapta"
+                                label="Întoarce spre dreapta"
                                 name="orientation"
                                 type="radio"
                                 id="right"
@@ -336,7 +336,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Inversat (upside down)"
+                                label="Întoarce cu susul în jos (upside down)"
                                 name="orientation"
                                 type="radio"
                                 id="upsidedown"
@@ -350,10 +350,10 @@ const ScanTailor = (props) => {
                     {/* contentDetection default is normal <cautious|normal|aggressive> */}
                     <Form.Group as={Row} className="mb-4">
                         <Col>
-                            <Form.Label>Selectează modul de detectare a continutului din imagine: </Form.Label>
+                            <Form.Label>Selectează modul de detectare a conținutului din imagine: </Form.Label>
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Precaut (mai puțin de 3%)"
+                                label="Detectare precatută"
                                 name="contentDetection"
                                 type="radio"
                                 id="cautious"
@@ -363,7 +363,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Normal (recomandat)"
+                                label="Detectare normală"
                                 name="contentDetection"
                                 type="radio"
                                 id="normal"
@@ -373,7 +373,7 @@ const ScanTailor = (props) => {
                             />
                             <Form.Check
                                 // className="form-check-inline"
-                                label="Agresiv"
+                                label="Detectare agresivă"
                                 name="contentDetection"
                                 type="radio"
                                 id="aggressive"

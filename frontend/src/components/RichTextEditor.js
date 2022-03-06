@@ -222,7 +222,7 @@ const BlockStyleControls = (props) => {
 var INLINE_STYLES = [
   { label: "Bold", style: "BOLD" },
   { label: "Italic", style: "ITALIC" },
-  { label: "Underline", style: "UNDERLINE" },
+  // { label: "Underline", style: "UNDERLINE" },
   /* { label: "Monospace", style: "CODE" }, */
   /* { label: "Keyboard", style: "CODE" }, */
 ];
@@ -244,10 +244,10 @@ const InlineStyleControls = (props) => {
       <button
         className="btn-rch RichEditor-styleButton"
         type="button"
-        title="Tatstatura Virtuală"
+        title="Tastatură Virtuală"
         onClick={() => (props.state.showk = !props.state.showk)}
       >
-        keyboard
+        Tastatură Virtuală
         {/* <svg className="svg_keyboard" viewBox="0 0 24 24">
           <path
             fill="currentColor"

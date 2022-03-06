@@ -4,6 +4,9 @@ import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
+import StepsInfo from '../components/StepsInfo';
+import Popover from "react-bootstrap/Popover";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 
 // OCR
 export default class Step3 extends Component {
@@ -19,6 +22,25 @@ export default class Step3 extends Component {
       ocrResults: props.getStore().ocrResults,
       show: true,
     };
+
+    this.step3Info = (
+      <Popover id="popover-basic">
+        <Popover.Header as="h4">{StepsInfo.step3Info.title}</Popover.Header>
+        <Popover.Body>
+          {StepsInfo.step3Info.body}
+          Se acceptă următoarele tipuri de fișiere: <b>png, jpg, tiff și pdf</b>.
+          <br /><br />
+          Pot fi încărcate mai multe fișiere într-un singur ciclu de digitizare.
+          <br /><br />
+          Un singur fișier incărcat nu va trece limita de 100MB.
+          Toate fișierele incărcate la un singur ciclu de digitizare nu vor trece limita de 700MB.
+          <br /><br />
+          Atunci când vor fi selectate mai două sau mai multe fișiere, trebuie de luat în considerare că toate aceste fișiere vor fi procesate cu aceleași opțiuni de procesare, respectiv, trebuie să vă asigurați că fișierele încărcate sunt din aceeași perioadă, au unul și același alfabet și necesită aceleași opțiuni de preprocesare a imaginii. Dacă aveți seturi de documente din mai multe perioade, atunci aceste seturi vor fi digitizate în diferite cicluri de digitizare.
+          <br /><br />
+          Este posibilitatea de a șterge unele fișiere care au fost întamplator selectate in acest pas.
+        </Popover.Body>
+      </Popover>
+    );
 
 
     // this._validateOnDemand = true; // this flag enables onBlur validation as user fills forms
@@ -134,9 +156,12 @@ export default class Step3 extends Component {
         <div className="row">
           <Form className="form-horizontal">
             <Form.Group>
-              <label className="col-md-12 control-label">
+              <Form.Label className="col-md-12 control-label d-flex">
                 <h1>Pasul 3: Recunoașterea optică a caracterelor - OCR </h1>
-              </label>
+                <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.step3Info}>
+                  <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
+                </OverlayTrigger>
+              </Form.Label>
             </Form.Group>
 
             <div className="row content">
