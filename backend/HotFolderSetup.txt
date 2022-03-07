@@ -1,0 +1,5 @@
+Setare Hot Folder
+
+1. Adauga path folder
+2. Adauga modelul de recunoastere si seteaza user patterns!!!
+3. Salveaza ca txt sau docx
