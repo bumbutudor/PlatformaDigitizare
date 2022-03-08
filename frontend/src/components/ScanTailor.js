@@ -174,9 +174,10 @@ const ScanTailor = (props) => {
                             Urmează pașii de mai jos pentru a continua.
                         </Form.Label>
                         <ListGroup as="ol" numbered>
-                            <ListGroup.Item as="li">Click pe butonul Deschide ScanTailor de mai jos.
-                                <em className="text-secondary mx-2">Înainte de a deschide aplicația citește toți pașii!</em>
+                            <ListGroup.Item as="li">Apasă butonul <code>Start preprocesare</code>&nbsp;&nbsp;&nbsp;&nbsp; de mai jos.
+                                <em className="text-secondary mx-2">Înainte de a apăsa butonul care deschide aplicația ScanTailor citește toți pașii!</em>
                             </ListGroup.Item>
+                            <ListGroup.Item as="li">Verifică dacă s-a deschis aplicația ScanTailor din calculator. </ListGroup.Item>
                             <ListGroup.Item as="li">Din fereastra ScanTailor, alege <code>New Project...</code> </ListGroup.Item>
                             <ListGroup.Item as="li">Copie și lipește <samp className="bg-warning">{props.getStore().uploadFolder}</samp> în <code>Input Directory</code> </ListGroup.Item>
                             <ListGroup.Item as="li">Apasă pe <code>Select All</code> &nbsp;&nbsp;&nbsp; din
@@ -186,15 +187,21 @@ const ScanTailor = (props) => {
                                 după care setează valorile <code>DPI (se recomandă 600*600 dpi)</code>
                             </ListGroup.Item>
                             <ListGroup.Item as="li">Este recomandat să treci prin următorii pași de preprocesare:
-                                Fix Orientation, Deskew, Select Conntent pană a ajunge la pasul Output
+                                Fix Orientation, Deskew, Select Conntent pană a ajunge la pasul Output. În dreptul fiecărui pas, apasă pe butonul "play".
+                            </ListGroup.Item>
+                            <ListGroup.Item as="li">În fereastra Output, apasă butonul "play" pentru a primi imaginea preprocesată.
+                            </ListGroup.Item>
+                            <ListGroup.Item as="li">După ce ai terminat, închide aplicația ScanTailor, fără a salva proiectul (alege "Discard").
+                            </ListGroup.Item>
+                            <ListGroup.Item as="li">Revino înapoi la fereastra platformei pentru a continua cu următorul pas.
                             </ListGroup.Item>
                         </ListGroup>
                     </Form.Group>
-                    <Button
+                    {/* <Button
                         className="btn btn-secondary mx-2"
                         onClick={handleOpenScanTailorRequest}>
                         Deschide ScanTailor
-                    </Button>
+                    </Button> */}
                 </Tab>
 
                 {/* web functionalities */}
