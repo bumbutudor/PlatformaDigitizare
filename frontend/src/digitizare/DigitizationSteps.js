@@ -21,6 +21,7 @@ export default class DigitizationSteps extends Component {
       // email: "",
       // gender: "",
       period: "secolulXX", //default is 20th century
+      ocrModel: "",
       typography: "",
       alphabet: "cyrillic", //default is cyrillic
       savedToCloud: false,
@@ -28,7 +29,7 @@ export default class DigitizationSteps extends Component {
       sourceFiles: [],
       preprocessedFiles: [],
       preprocessWith: "",
-      preprocessMode: "web",
+      preprocessMode: "desktop",
       ocrResults: [],
       transResults: [],
       preprocessFR: {
