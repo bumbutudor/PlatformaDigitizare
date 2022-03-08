@@ -19,6 +19,7 @@ export default class Step3 extends Component {
       preprocessedFiles: props.getStore().preprocessedFiles,
       alphabet: props.getStore().alphabet,
       sourceFiles: props.getStore().sourceFiles,
+      ocrModel: props.getStore().ocrModel,
       ocrResults: props.getStore().ocrResults,
       show: true,
     };
@@ -192,7 +193,7 @@ export default class Step3 extends Component {
                   id="radio3"
                   value="secolulXVIII"
                   checked={this.state.period === "secolulXVIII"}
-                  onChange={() => { this.setState({ period: "secolulXVIII" }); this.props.updateStore({ period: "secolulXVIII" }); }}
+                  onChange={() => { this.setState({ period: "secolulXVIII", alphabet: "cyrillicRomanian" }); this.props.updateStore({ period: "secolulXVIII", alphabet: "cyrillicRomanian" }); }}
 
                 />
                 <Form.Check
@@ -208,34 +209,134 @@ export default class Step3 extends Component {
               <div className="col-sm mb-3">
                 {this.state.period === "secolulXX" && <>
                   <Form.Group className="mb-3">
-                    <Form.Label>3.2 Selectează alfabetul documentului:</Form.Label>
+                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check
-                      label="Alfabetul chirilic sovietic"
-                      name="group6"
-                      type="checkbox"
+                      label="Model bazat pe alfabetul chirilic sovietic"
+                      name="secolulXX"
+                      // type="checkbox"
+                      type='radio'
                       id="radio11"
                       value="cyrillic"
-                      checked={this.state.alphabet === "cyrillic"}
-                      onChange={() => { this.setState({ alphabet: "cyrillic" }); this.props.updateStore({ alphabet: "cyrillic" }); }}
+                      checked={this.state.ocrModel === "cyrillic"}
+                      onChange={() => { this.setState({ ocrModel: "cyrillic", alphabet: "cyrillic" }); this.props.updateStore({ ocrModel: "cyrillic", alphabet: "cyrillic" }); }}
                     />
 
                     <Form.Check
-                      label="Alfabetul românesc (latin)"
-                      name="group6"
-                      type="checkbox"
+                      label="Model bazat pe alfabetul românesc (latin)"
+                      name="secolulXX"
+                      type="radio"
                       id="radio12"
                       value="latin"
-                      checked={this.state.alphabet === "latin"}
-                      onChange={() => { this.setState({ alphabet: "latin" }); this.props.updateStore({ alphabet: "latin" }); }}
+                      checked={this.state.ocrModel === "latin"}
+                      onChange={() => { this.setState({ ocrModel: "latin", alphabet: "latin" }); this.props.updateStore({ ocrModel: "latin", alphabet: "latin" }); }}
                     />
                   </Form.Group>
 
                 </>}
-                {this.state.period === "secolulXIX" && <>TODO</>}
-                {this.state.period === "secolulXVIII" && <>TODO</>}
+                {this.state.period === "secolulXIX" && <>
+                  <Form.Group className="mb-3 col-sm">
+                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
+                    <Form.Check
+                      label="Model bazat alfabetul chirilic românesc (Legiuire de G. Caragea, anul 1818)"
+                      name="secolulXIX"
+                      type="radio"
+                      id="radio21"
+                      value="secolulXIX_1"
+                      checked={this.state.ocrModel === "secolulXIX_1"}
+                      onChange={() => { this.setState({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian" }); this.props.updateStore({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian" }); }}
+                    />
+                    <Form.Check
+                      label="Model bazat pe alfabetul de tranziție (Epistolariul românesc, anul 1841)"
+                      name="secolulXIX"
+                      type="radio"
+                      id="radio22"
+                      value="secolulXIX_2"
+                      checked={this.state.ocrModel === "secolulXIX_2"}
+                      onChange={() => { this.setState({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional" }); this.props.updateStore({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional" }); }}
+                    />
+                    <Form.Check
+                      label="Model bazat pe alfabetul de tranziție (Elemente de aritmetică de G. Asachi, anul 1836)"
+                      name="secolulXIX"
+                      type="radio"
+                      id="radio23"
+                      value="secolulXIX_3"
+                      checked={this.state.ocrModel === "secolulXIX_3"}
+                      onChange={() => { this.setState({ ocrModel: "secolulXIX_3", alphabet: "cyrillicTransitional" }); this.props.updateStore({ ocrModel: "secolulXIX_3", alphabet: "cyrillicTransitional" }); }}
+
+                    />
+                  </Form.Group>
+
+                </>}
+                {this.state.period === "secolulXVIII" && <>
+                  <Form.Group className="mb-3 col-sm">
+                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
+                    <Form.Check
+                      label="Model bazat pe alfabetul chirilic românesc&nbsp;&nbsp;&nbsp; (De Obște Geografie, anul 1795)"
+                      name="secolulXVIII"
+                      type="radio"
+                      id="radio31"
+                      value="secolulXVIII_1"
+                      checked={this.state.ocrModel === "secolulXVIII_1"}
+                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_1" }); this.props.updateStore({ ocrModel: "secolulXVIII_1" }); }}
+                    />
+                    <Form.Check
+                      label="Model bazat pe alfabetul chirilic românesc (Fiziognomie de M. Strilbițchi, anul 1785)"
+                      name="secolulXVIII"
+                      type="radio"
+                      id="radio32"
+                      value="secolulXVIII_2"
+                      checked={this.state.ocrModel === "secolulXVIII_2"}
+                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_2" }); this.props.updateStore({ ocrModel: "secolulXVIII_2" }); }}
+                    />
+                    <Form.Check
+                      label="Model bazat pe alfabetul chirilic românesc (Așezământ, anul 1786)"
+                      name="secolulXVIII"
+                      type="radio"
+                      id="radio33"
+                      value="secolulXVIII_3"
+                      checked={this.state.ocrModel === "secolulXVIII_3"}
+                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_3" }); this.props.updateStore({ ocrModel: "secolulXVIII_3" }); }}
+
+                    />
+                  </Form.Group>
+
+                </>}
                 {this.state.period === "secolulXVII" && <>
-                  <Form.Group className="">
-                    <Form.Label>3.2 Selectează tipografia din Secolul XVII</Form.Label>
+                  <Form.Group className="mb-4">
+                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
+                    <Form.Check
+                      {...(this.state.typography === "typographyAuto" ? { disabled: true } : {})}
+                      label="Model bazat pe alfabetul chirilic românesc (Noul Testament, 1646, clasa A de fonturi)"
+                      name="secolulXVII"
+                      type="radio"
+                      id="radio41"
+                      value="secolulXVII_1"
+                      checked={this.state.ocrModel === "secolulXVII_1"}
+                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_1" }); this.props.updateStore({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_1" }); }}
+                    />
+                    <Form.Check
+                      {...(this.state.typography === "typographyAuto" ? { disabled: true } : {})}
+                      label="Model OCR bazat pe alfabetul chirilic românesc (model antrenat cu documente din clasa B de fonturi)"
+                      name="secolulXVII"
+                      type="radio"
+                      id="radio42"
+                      value="secolulXVII_2"
+                      checked={this.state.ocrModel === "secolulXVII_2"}
+                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_2" }); this.props.updateStore({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_2" }); }}
+                    />
+                    <Form.Check
+                      label="Identifică automat modelul necesar pentru documentul tău"
+                      name="typographyAuto"
+                      type="checkbox"
+                      id="radio1"
+                      value="typographyAuto"
+                      checked={this.state.typography === "typographyAuto"}
+                      onChange={() => { this.setState({ typography: "typographyAuto" }); this.props.updateStore({ typography: "typographyAuto" }); }}
+
+                    />
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>Dacă cunoști la ce tipografie a fost tipărit documentul, selectează din lista de mai jos </Form.Label>
                     <Form.Select value={this.state.typography} onChange={(e) => { this.setState({ typography: e.target.value }); this.props.updateStore({ typography: e.target.value }); }}>
 
                       <option value="">Lista tipografiilor:</option>
@@ -253,26 +354,6 @@ export default class Step3 extends Component {
 
                     </Form.Select>
                     <span className='m-2' />
-                    <Form.Check
-                      label="Identifică automat fontul documentului"
-                      name="group7"
-                      type="checkbox"
-                      id="radio5"
-                      value="typographyAuto"
-                      checked={this.state.typography === "typographyAuto"}
-                      onChange={() => { this.setState({ typography: "typographyAuto" }); this.props.updateStore({ typography: "typographyAuto" }); }}
-
-                    />
-                    <Form.Check
-                      disabled
-                      label="Alfabetul chirilic românesc"
-                      name="group6"
-                      type="checkbox"
-                      id="radio13"
-                      value="cyrillicRomanian"
-                      checked={this.state.alphabet === "cyrillicRomanian"}
-                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian" }); this.props.updateStore({ alphabet: "cyrillicRomanian" }); }}
-                    />
                   </Form.Group>
                 </>}
               </div>
