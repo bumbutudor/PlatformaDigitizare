@@ -46,11 +46,20 @@ backend/venv
 backend/media/pre/FR
 backend/media/pre/OpenCV
 backend/media/pre/ScanTailor
+backend/media/out
 backend/media/ocr/secolulXVII
 backend/media/ocr/secolulXVIII
 backend/media/ocr/secolulXIX
 backend/media/ocr/secolulXX
 backend/db.sqlite3
+backend/ocr_models
+backend/media/*.pdf
+backend/media/*.jpg
+backend/media/*.png
+backend/media/*.jpeg
+backend/media/*.tiff
+backend/media/*.tif
+
 
 # END OF BACKEND
 
