@@ -19,6 +19,7 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import ScanTailor from "../components/ScanTailor";
 import FineReaderPre from "../components/FineReaderPre";
+import OpenCV from "../components/OpenCV";
 
 // Preprocess the images
 const Step2 = (props) => {
@@ -54,12 +55,6 @@ const Step2 = (props) => {
     props.getStore().preprocessedFiles
   );
 
-  const [preprocessOpenCV, setPreprocessOpenCV] = React.useState(
-    props.getStore().preprocessOpenCV
-  );
-  const [resolutionOpenCV, setResolutionOpenCV] = React.useState(
-    props.getStore().preprocessOpenCV.resolution
-  );
   const [selectedOption, setSelectedOption] = React.useState(
     props.getStore().preprocessWith
   );
@@ -72,31 +67,6 @@ const Step2 = (props) => {
     setSelectedOption(e.target.value);
     props.updateStore({ preprocessWith: e.target.value });
     setShow(true);
-  };
-
-
-  // Preprocesare cu OpenCV
-  const handlePreprocessOpenCVChange = (e) => {
-    setPreprocessOpenCV({
-      ...preprocessOpenCV,
-      [e.target.name]: e.target.checked,
-    });
-    props.updateStore({
-      preprocessOpenCV: {
-        ...preprocessOpenCV,
-        [e.target.name]: e.target.checked,
-      },
-    });
-  };
-
-  const handleResolutionChange = (e) => {
-    setResolutionOpenCV(e.target.value);
-    props.updateStore({
-      preprocessOpenCV: {
-        ...props.getStore().preprocessOpenCV,
-        resolution: e.target.value,
-      },
-    });
   };
 
   // Fisierele sursa
@@ -195,54 +165,10 @@ const Step2 = (props) => {
               {/* Preprocesare cu OpenCV */}
               {selectedOption === "OpenCV" && (
                 <>
-                  <Form.Group>
-                    <Form.Label>
-                      2.2 Opțiuni de preprocesare cu OpenCV
-                    </Form.Label>
-                  </Form.Group>
-                  <Form.Group
-                    className="mb-5 display-flex"
-                    id="openCVResolution"
-                  >
-                    <Form.Check
-                      label="Setează rezoluția imaginii"
-                      name="setResolution"
-                      id="checkboxCV1"
-                      type="checkbox"
-                      checked={preprocessOpenCV.setResolution}
-                      onChange={handlePreprocessOpenCVChange}
-                    />
-                    {props.getStore().preprocessOpenCV.setResolution && (
-                      <div className="row mt-2">
-                        <div className="col-9">
-                          <RangeSlider
-                            value={resolutionOpenCV}
-                            tooltipLabel={(resolutionOpenCV) =>
-                              `${resolutionOpenCV} dpi`
-                            }
-                            onChange={handleResolutionChange}
-                            // tooltip="on"
-                            min={75}
-                            max={1200}
-                            step={25}
-                          />
-                        </div>
-                        <div className="col-3 text-warning">
-                          <Form.Control value={resolutionOpenCV} onChange={handleResolutionChange} />
-                        </div>
-                      </div>
-                    )}
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Check
-                      label="Șterge zgomotul și neclaritatea din imagine"
-                      name="removeNoise"
-                      id="checkboxCV2"
-                      type="checkbox"
-                      checked={preprocessOpenCV.removeNoise}
-                      onChange={handlePreprocessOpenCVChange}
-                    />
-                  </Form.Group>
+                  <OpenCV getStore={() => props.getStore()}
+                    updateStore={(u) => {
+                      props.updateStore(u);
+                    }} />
                 </>
               )}
 
