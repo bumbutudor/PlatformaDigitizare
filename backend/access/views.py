@@ -1,3 +1,4 @@
+from multiprocessing.connection import wait
 from click import command
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -67,9 +68,21 @@ def preprocess(request):
         elif preprocess_with == 'ScanTailor':
             if data["preprocessMode"] == 'desktop':
                 command = "scantailor.exe"
-                a = os.system(command)
-                print(a)
-                return JsonResponse({"code":200,"msg":"success", "uploadFolder":settings.MEDIA_ROOT})
+                os.system(command)
+                pre_path = settings.MEDIA_ROOT + "/out/"
+                first_file_path = pre_path + os.path.splitext(files[0]["name"])[0] + '.tif'
+                
+                while not os.path.exists(first_file_path):
+                    print("waiting for file", first_file_path)
+                    time.sleep(1)
+                
+                if os.path.isfile(first_file_path):
+                    for file in files:
+                        # uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
+                        # output_folder =  settings.MEDIA_ROOT + pre_path
+                        tiff_to_jpg(pre_path + os.path.splitext(file["name"])[0] + '.tif')
+                        preprocessedFilesURLS.append('out/' + os.path.splitext(file["name"])[0] + '.jpg')
+                    return JsonResponse({"code":200,"msg":"success", "preprocessedFiles":preprocessedFilesURLS})
             elif data["preprocessMode"] == 'web':
                 pre_path = '/pre/ScanTailor/'
                 preprocess_scantailor = data['preprocessScanTailor']
