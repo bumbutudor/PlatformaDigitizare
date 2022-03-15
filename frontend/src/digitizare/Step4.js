@@ -45,22 +45,35 @@ class Step4 extends Component {
         <Popover.Header as="h4">{StepsInfo.step4Info.title}</Popover.Header>
         <Popover.Body>
           {StepsInfo.step3Info.body}
-          Se acceptă următoarele tipuri de fișiere: <b>png, jpg, tiff și pdf</b>.
-          <br /><br />
+          Se acceptă următoarele tipuri de fișiere: <b>png, jpg, tiff și pdf</b>
+          .
+          <br />
+          <br />
           Pot fi încărcate mai multe fișiere într-un singur ciclu de digitizare.
-          <br /><br />
-          Un singur fișier incărcat nu va trece limita de 100MB.
-          Toate fișierele incărcate la un singur ciclu de digitizare nu vor trece limita de 700MB.
-          <br /><br />
-          Atunci când vor fi selectate mai două sau mai multe fișiere, trebuie de luat în considerare că toate aceste fișiere vor fi procesate cu aceleași opțiuni de procesare, respectiv, trebuie să vă asigurați că fișierele încărcate sunt din aceeași perioadă, au unul și același alfabet și necesită aceleași opțiuni de preprocesare a imaginii. Dacă aveți seturi de documente din mai multe perioade, atunci aceste seturi vor fi digitizate în diferite cicluri de digitizare.
-          <br /><br />
-          Este posibilitatea de a șterge unele fișiere care au fost întamplator selectate in acest pas.
+          <br />
+          <br />
+          Un singur fișier incărcat nu va trece limita de 100MB. Toate fișierele
+          incărcate la un singur ciclu de digitizare nu vor trece limita de
+          700MB.
+          <br />
+          <br />
+          Atunci când vor fi selectate mai două sau mai multe fișiere, trebuie
+          de luat în considerare că toate aceste fișiere vor fi procesate cu
+          aceleași opțiuni de procesare, respectiv, trebuie să vă asigurați că
+          fișierele încărcate sunt din aceeași perioadă, au unul și același
+          alfabet și necesită aceleași opțiuni de preprocesare a imaginii. Dacă
+          aveți seturi de documente din mai multe perioade, atunci aceste seturi
+          vor fi digitizate în diferite cicluri de digitizare.
+          <br />
+          <br />
+          Este posibilitatea de a șterge unele fișiere care au fost întamplator
+          selectate in acest pas.
         </Popover.Body>
       </Popover>
     );
   }
 
-  componentDidMount() { }
+  componentDidMount() {}
 
   onChange(e) {
     let newState = {};
@@ -115,11 +128,19 @@ class Step4 extends Component {
           <form id="Form" className="form-horizontal">
             <div className="form-group">
               <label className="control-label col-md-12 d-flex">
-                <h1>
-                  Pasul 4: Verifică și editează textul recunoscut
-                </h1>
-                <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.step4Info}>
-                  <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
+                <h1>Pasul 4: Verifică și editează textul recunoscut</h1>
+                <OverlayTrigger
+                  trigger="click"
+                  rootClose
+                  placement="right"
+                  overlay={this.step4Info}
+                >
+                  <Button
+                    type="button"
+                    className="btn btn-info text-white mx-4"
+                  >
+                    Info
+                  </Button>
                 </OverlayTrigger>
               </label>
             </div>
@@ -136,20 +157,47 @@ class Step4 extends Component {
                           </Accordion.Header>
                           <Accordion.Body>
                             <div>
-                              <RichTextEditor
+                              {/* <RichTextEditor
                                 editorState={item}
                                 getStore={this.props.getStore}
-                              /* onChange={this.onChange}*/
-                              />
+                              /* onChange={this.onChange}
+                              /> */}
+                              <textarea
+                                key={index}
+                                id={index}
+                                onFocus={this.setActiveInput.bind(this)}
+                                value={item}
+                                onChange={this.onChangeInput.bind(this)}
+                                className="form-control mb-4"
+                                rows="10"
+                              ></textarea>
+                              <button
+                                className="btn btn-keyboard"
+                                type="button"
+                                title="Tatstatura Virtuală"
+                                onClick={() =>
+                                  this.setState({ showk: !this.state.showk })
+                                }
+                              >
+                                <svg
+                                  className="svg_keyboard"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fill="currentColor"
+                                    d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
+                                  />
+                                </svg>
+                              </button>
                               <a
                                 className="image_ocr_a"
                                 data-fancybox="gallery_2"
                                 data-src={
                                   this.state.preprocessedFiles[index] !=
-                                    undefined
+                                  undefined
                                     ? handleFilePath(
-                                      this.state.preprocessedFiles[index]
-                                    )
+                                        this.state.preprocessedFiles[index]
+                                      )
                                     : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
                                 }
                                 data-caption={"imagine preprocesată"}
@@ -158,10 +206,10 @@ class Step4 extends Component {
                                   className="image_ocr"
                                   src={
                                     this.state.preprocessedFiles[index] !=
-                                      undefined
+                                    undefined
                                       ? handleFilePath(
-                                        this.state.preprocessedFiles[index]
-                                      )
+                                          this.state.preprocessedFiles[index]
+                                        )
                                       : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
                                   }
                                 />
@@ -174,7 +222,7 @@ class Step4 extends Component {
                   })}
                 {/* </label> */}
 
-                {/* {this.state.showk && ( */}
+                {this.state.showk && (
                 <Keyboard
                   keyboardRef={(r) => (this.keyboard = r)}
                   layoutName={this.state.layoutName}
@@ -182,12 +230,13 @@ class Step4 extends Component {
                     this.onChangeKeyboardInput(
                       inputs,
                       this.state.ocrResults[this.state.inputID]
-                    ).bind(this)
+                    )
+                    //.bind(this)
                   }
                   onKeyPress={this.onKeyPress.bind(this)}
                   layout={this.cyrillicRomanianLayout.layout}
                 />
-                {/* )} */}
+                )}
               </div>
               {/* <div className="form-group col-md-3 content form-block-image">
                 
