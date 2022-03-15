@@ -111,7 +111,7 @@ const Step2 = (props) => {
           </Form.Group>
 
           <div className="row content">
-            <Form.Group className="mb-3 col-sm">
+            <Form.Group className="mb-3 col-sm-3 border">
               <Form.Label>2.1 Selectează motorul de preprocesare:</Form.Label>
               <Form.Check
                 // disabled
@@ -183,7 +183,7 @@ const Step2 = (props) => {
               )}
             </div>
 
-            <div className="mt-5 mb-3 col-md-12 d-flex justify-content-center">
+            <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
 
               {selectedOption && show ? (<>
                 <Button variant="primary" onClick={handlePreprocessRequest}>

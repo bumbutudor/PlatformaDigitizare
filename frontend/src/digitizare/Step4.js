@@ -129,8 +129,8 @@ class Step4 extends Component {
                 {this.state.ocrResults &&
                   this.state.ocrResults.map((item, index) => {
                     return (
-                      <Accordion defaultActiveKey={["0"]} alwaysOpen>
-                        <Accordion.Item eventKey={index}>
+                      <Accordion key={index} defaultActiveKey={["0"]} alwaysOpen>
+                        <Accordion.Item eventKey="0">
                           <Accordion.Header>
                             {`Rezultatul OCR pentru imaginea ${index + 1}:`}
                           </Accordion.Header>
@@ -175,7 +175,7 @@ class Step4 extends Component {
                 {/* </label> */}
 
                 {/* {this.state.showk && ( */}
-                <Keyboard
+                {/* <Keyboard
                   keyboardRef={(r) => (this.keyboard = r)}
                   layoutName={this.state.layoutName}
                   onChange={(inputs) =>
@@ -186,7 +186,7 @@ class Step4 extends Component {
                   }
                   onKeyPress={this.onKeyPress.bind(this)}
                   layout={this.cyrillicRomanianLayout.layout}
-                />
+                /> */}
                 {/* )} */}
               </div>
               {/* <div className="form-group col-md-3 content form-block-image">

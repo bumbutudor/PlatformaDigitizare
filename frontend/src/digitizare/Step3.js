@@ -166,7 +166,7 @@ export default class Step3 extends Component {
             </Form.Group>
 
             <div className="row content">
-              <Form.Group className="mb-3 col-sm">
+              <Form.Group className="mb-3 col-sm-3 border">
                 <Form.Label>3.1 Selectează perioada documentului:</Form.Label>
                 <Form.Check
                   label="Secolul XX"
@@ -359,7 +359,7 @@ export default class Step3 extends Component {
               </div>
 
 
-              <div className="mt-5 mb-3 col-md-12 d-flex justify-content-center">
+              <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
                 {this.state.period && this.state.show ? <Button variant="primary" onClick={handleOCRRequest}>Start OCR</Button> : <Button variant="primary" disabled>Start OCR</Button>}
                 {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(3)}>Verifică și editează rezultatul</Button> </>}
               </div>

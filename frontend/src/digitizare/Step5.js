@@ -80,7 +80,7 @@ export default class Step5 extends Component {
             </Form.Group>
 
             <div className="row content">
-              <div className="mb-3 col-md-12">
+              <div className="mb-3 col-sm-3 border">
                 <Form.Group >
                   <Form.Label>5.1 Perioada documentului este:
                     <span className='text-primary mx-2'>{this.periodOptions[this.state.period]}</span>
@@ -151,37 +151,38 @@ export default class Step5 extends Component {
                     onChange={() => { this.setState({ alphabet: "latin" }); this.props.updateStore({ alphabet: "latin" }); }}
                   /> */}
                 </Form.Group>
-                <Form.Group>
-                  <Form.Label>5.3 Setări de transliterare:</Form.Label>
-                  <Form.Check
-                    label="Actualizează ortografia (gînd => gând)"
-                    name="actualizeWordForm"
-                    id="checkboxTrans1"
-                    type="checkbox"
-                    checked={this.state.transOptions.actualizeWordForm}
-                    onChange={this.handleTransOptionsChange.bind(this)}
-                  />
-                  <Form.Check
-                    label="Înlocuiește apostroful cu cratima (n’ar => n-ar)"
-                    name="replaceApostrophe"
-                    id="checkboxTrans2"
-                    type="checkbox"
-                    checked={this.state.transOptions.replaceApostrophe}
-                    onChange={this.handleTransOptionsChange.bind(this)}
-                  />
-                  <Form.Check
-                    label="Șterge cratima care desparte cuvântul de la sfârșit de rând"
-                    name="removeHyphen"
-                    id="checkboxTrans3"
-                    type="checkbox"
-                    checked={this.state.transOptions.removeHyphen}
-                    onChange={this.handleTransOptionsChange.bind(this)}
-                  />
-                </Form.Group>
               </div>
+              <Form.Group className="col-sm">
+                <Form.Label>5.3 Setări de transliterare:</Form.Label>
+                <Form.Check
+                  label="Actualizează ortografia (gînd => gând)"
+                  name="actualizeWordForm"
+                  id="checkboxTrans1"
+                  type="checkbox"
+                  checked={this.state.transOptions.actualizeWordForm}
+                  onChange={this.handleTransOptionsChange.bind(this)}
+                />
+                <Form.Check
+                  label="Înlocuiește apostroful cu cratima (n’ar => n-ar)"
+                  name="replaceApostrophe"
+                  id="checkboxTrans2"
+                  type="checkbox"
+                  checked={this.state.transOptions.replaceApostrophe}
+                  onChange={this.handleTransOptionsChange.bind(this)}
+                />
+                <Form.Check
+                  label="Șterge cratima care desparte cuvântul de la sfârșit de rând"
+                  name="removeHyphen"
+                  id="checkboxTrans3"
+                  type="checkbox"
+                  checked={this.state.transOptions.removeHyphen}
+                  onChange={this.handleTransOptionsChange.bind(this)}
+                />
+              </Form.Group>
 
 
-              <div className="mt-5 mb-3 col-md-12 d-flex justify-content-center">
+
+              <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
                 {this.state.period && this.state.show ? <Button variant="primary" onClick={handleTransRequest}>Start Transliterare</Button> : <Button variant="primary" disabled>Start Transliterare</Button>}
                 {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(5)}>Verifică și editează rezultatul</Button> </>}
               </div>
