@@ -8,7 +8,7 @@ const FileUpload = (props) => {
     const fileParams = ({ file, meta }) => {
         const body = new FormData();
         body.append("uploadedFiles", file);
-        console.log(file);
+        // console.log(file);
         return { url: "http://127.0.0.1:8000/get_file/", body }; // localhost http://127.0.0.1:8000/get_file/
     };
 
@@ -17,7 +17,7 @@ const FileUpload = (props) => {
     };
 
     const handleSubmit = (files, allFiles) => {
-        console.log(props.get)
+        // console.log(props.get)
         props.updateStore({ sourceFiles: files.map(f => f.meta) });
         // console.log(props)
         allFiles.forEach(f => f.remove())
