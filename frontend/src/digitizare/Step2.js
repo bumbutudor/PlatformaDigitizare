@@ -20,7 +20,7 @@ import Popover from "react-bootstrap/Popover";
 import ScanTailor from "../components/ScanTailor";
 import FineReaderPre from "../components/FineReaderPre";
 import OpenCV from "../components/OpenCV";
-
+import Spinner from "react-bootstrap/Spinner";
 // Preprocess the images
 const Step2 = (props) => {
 
@@ -59,6 +59,8 @@ const Step2 = (props) => {
     props.getStore().preprocessWith
   );
   const [show, setShow] = React.useState(true);
+  const [showLoader, setShowLoader] = React.useState(false);
+  const [showNextStep, setShowNextStep] = React.useState(false);
 
   const handleOptionChange = (e) => {
     // this.setState({
@@ -80,6 +82,7 @@ const Step2 = (props) => {
   // Post request
   const handlePreprocessRequest = async () => {
     setShow(false);
+    setShowLoader(true);
 
     const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
     const requestOptions = {
@@ -87,13 +90,26 @@ const Step2 = (props) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(props.getStore()),
     };
-    const response = await fetch(preprocessAPI, requestOptions);
-    const data = await response.json();
-    console.log(data);
-    if (data.preprocessedFiles) {
-      setpreprocessedFiles(data.preprocessedFiles);
-      props.updateStore({ preprocessedFiles: data.preprocessedFiles });
-    }
+
+    fetch(preprocessAPI, requestOptions)
+      .then(response => {
+        const data = response.json();
+        return data;
+      })
+      .then(data => {
+        console.log(data);
+        if (data.preprocessedFiles) {
+          setpreprocessedFiles(data.preprocessedFiles);
+          props.updateStore({ preprocessedFiles: data.preprocessedFiles });
+        }
+
+      })
+      .catch(err => console.error(err))
+      .finally(() => {
+        setShow(true);
+        setShowLoader(false);
+        setShowNextStep(true);
+      });
 
   };
 
@@ -191,10 +207,10 @@ const Step2 = (props) => {
                 </Button> </>
               ) : (
                 <Button disabled variant="primary">
-                  Start preprocesare
+                  {showLoader ? (<><Spinner animation="border" /> Se preprocesează...</>) : (<>Start preprocesare</>)}
                 </Button>
               )}
-              {!show && (
+              {showNextStep && (
                 <>
                   {" "}
                   <Button
