@@ -151,7 +151,7 @@ def transliterate(request):
         trans_results = []
         for ocr_result in ocr_results:
             data = {'cyrillicText': ocr_result, 'period': periodOptions[period], 'actualize':trans_options['actualizeWordForm']}
-            response = requests.post("http://translitera.cc/ProcessServlet", data=data)
+            response = requests.post("https://translitera.cc/ProcessServlet", data=data)
             trans_result = response.text
             if trans_options['replaceApostrophe'] and trans_options["removeHyphen"]:
                 text_no_apostrophe = trans_result.replace("’", "-").replace('\'', "-")
