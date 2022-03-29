@@ -21,6 +21,7 @@ import ScanTailor from "../components/ScanTailor";
 import FineReaderPre from "../components/FineReaderPre";
 import OpenCV from "../components/OpenCV";
 import Spinner from "react-bootstrap/Spinner";
+import Alert from 'react-bootstrap/Alert'
 // Preprocess the images
 const Step2 = (props) => {
 
@@ -61,6 +62,7 @@ const Step2 = (props) => {
   const [show, setShow] = React.useState(true);
   const [showLoader, setShowLoader] = React.useState(false);
   const [showNextStep, setShowNextStep] = React.useState(false);
+  const [showError, setShowError] = React.useState(false);
 
   const handleOptionChange = (e) => {
     // this.setState({
@@ -82,6 +84,8 @@ const Step2 = (props) => {
   // Post request
   const handlePreprocessRequest = async () => {
     setShow(false);
+    setShowError(false);
+    setShowNextStep(false);
     setShowLoader(true);
 
     const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
@@ -98,17 +102,22 @@ const Step2 = (props) => {
       })
       .then(data => {
         console.log(data);
-        if (data.preprocessedFiles) {
+        if (data.preprocessedFiles.length > 0) {
+          setShowNextStep(true);
           setpreprocessedFiles(data.preprocessedFiles);
           props.updateStore({ preprocessedFiles: data.preprocessedFiles });
+        } else {
+          setShowError(true);
         }
 
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err)
+        setShowError(true);
+      })
       .finally(() => {
         setShow(true);
         setShowLoader(false);
-        setShowNextStep(true);
       });
 
   };
@@ -222,6 +231,11 @@ const Step2 = (props) => {
                 </>
               )}
             </div>
+            {showError && (
+              <Alert variant="danger">
+                <Alert.Heading>Eroare la preprocesare! Incearcă din nou...</Alert.Heading>
+              </Alert>
+            )}
           </div>
         </Form>
       </div >
