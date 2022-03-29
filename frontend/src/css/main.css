@@ -200,23 +200,23 @@ ol.progtrckr li.progtrckr-done:hover:before {
 }
 
 .btn-keyboard {
-  position: absolute;
+  /* position: absolute; */
   color: #666 !important;
 }
 
 .form-control {
   /* width: 70% !important;
   display: inline !important; */
-    font-size: 14px;
-    margin-right: 2%;
-    width: 75% !important;
-    display: inline-block !important;
-    border-radius: 6px;
-    cursor: text;
-    font-size: 16px;
-    border-radius: 10px;
-    border: 1px solid #d8d8d8;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  margin-right: 2%;
+  width: 75% !important;
+  display: inline-block !important;
+  border-radius: 6px;
+  cursor: text;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid #d8d8d8;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .image_ocr_a {
@@ -225,7 +225,7 @@ ol.progtrckr li.progtrckr-done:hover:before {
 
 .image_ocr {
   /* margin-left: 4%; */
-  margin-top: 4rem;
+  /* margin-top: 4rem; */
   width: 23%;
   margin-bottom: 20px;
   border-radius: 4px;
