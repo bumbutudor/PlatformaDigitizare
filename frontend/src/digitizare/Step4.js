@@ -114,6 +114,20 @@ class Step4 extends Component {
     this.setState({ ocrResults: [...ocrResults] });
   }
 
+  handleKeyboardButton(showk) {
+    const keyboardButton = document.querySelector("button#keyboard-button");
+    if (keyboardButton) {
+      if (showk) {
+        keyboardButton.classList.remove("btn-primary");
+        keyboardButton.classList.add("btn-keyboard");
+        return "Închide tastatura virtuală";
+      }
+      keyboardButton.classList.remove("btn-keyboard");
+      keyboardButton.classList.add("btn-primary");
+    }
+    return "Deschide tastatura virtuală";
+  }
+
   render() {
     // Fisierele sursa
     const handleFilePath = (filePath) => {
@@ -156,6 +170,26 @@ class Step4 extends Component {
                             {`Rezultatul OCR pentru imaginea ${index + 1}:`}
                           </Accordion.Header>
                           <Accordion.Body>
+                            <button
+                              id="keyboard-button"
+                              className="btn btn-primary"
+                              type="button"
+                              title="Tastatura Virtuală"
+                              onClick={() =>
+                                this.setState({ showk: !this.state.showk })
+                              }
+                            >
+                              <svg
+                                className="svg_keyboard"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="currentColor"
+                                  d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
+                                />
+                              </svg>
+                              {this.handleKeyboardButton(this.state.showk)}
+                            </button>
                             <div>
                               {/* <RichTextEditor
                                 editorState={item}
@@ -171,24 +205,7 @@ class Step4 extends Component {
                                 className="form-control mb-4"
                                 rows="10"
                               ></textarea>
-                              <button
-                                className="btn btn-keyboard"
-                                type="button"
-                                title="Tatstatura Virtuală"
-                                onClick={() =>
-                                  this.setState({ showk: !this.state.showk })
-                                }
-                              >
-                                <svg
-                                  className="svg_keyboard"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    fill="currentColor"
-                                    d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
-                                  />
-                                </svg>
-                              </button>
+
                               <a
                                 className="image_ocr_a"
                                 data-fancybox="gallery_2"
