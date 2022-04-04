@@ -54,6 +54,13 @@ def preprocess(request):
         elif preprocess_with == 'FR':
             preprocess_fr = data['preprocessFR']
             pre_path = '/pre/FR/'
+
+            first_file_path = settings.MEDIA_ROOT + pre_path + os.path.splitext(files[0]["name"])[0] + '.jpg'
+            
+            while not os.path.exists(first_file_path):
+                print("waiting for file", first_file_path)
+                time.sleep(1)
+
             if preprocess_fr['convertToBlackAndWhite']:
                 for file in files:
                     pre_file_path = pre_path + '/' + os.path.splitext(file["name"])[0] + '.jpg'
