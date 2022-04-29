@@ -8,6 +8,8 @@ import RangeSlider from "react-bootstrap-range-slider";
 import Form from "react-bootstrap/Form";
 import Col from "react-bootstrap/esm/Col";
 import Row from "react-bootstrap/esm/Row";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Popover from "react-bootstrap/Popover";
 
 
 const ScanTailor = (props) => {
@@ -133,23 +135,53 @@ const ScanTailor = (props) => {
         });
     };
 
-    const handleOpenScanTailorRequest = async () => {
+    // const handleOpenScanTailorRequest = async () => {
 
-        const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
-        const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(props.getStore()),
-        };
-        const response = await fetch(preprocessAPI, requestOptions);
-        const data = await response.json();
-        console.log(data);
-        if (data.uploadFolder) {
-            setUploadFolder(data.uploadFolder);
-            // props.updateStore({ preprocessedFiles: data.preprocessedFiles });
-        }
+    //     const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
+    //     const requestOptions = {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify(props.getStore()),
+    //     };
+    //     const response = await fetch(preprocessAPI, requestOptions);
+    //     const data = await response.json();
+    //     console.log(data);
+    //     if (data.uploadFolder) {
+    //         setUploadFolder(data.uploadFolder);
+    //         // props.updateStore({ preprocessedFiles: data.preprocessedFiles });
+    //     }
 
-    };
+    // };
+
+    const desktopModeInfo = (
+        <Popover id="popover-basic">
+            <Popover.Body>
+                <ListGroup as="ol" numbered>
+                    <ListGroup.Item as="li">Apasă butonul <code>Start preprocesare</code>&nbsp;&nbsp;&nbsp;&nbsp; de mai jos pentru a deschide aplicația ScanTailor în calculatorul tău.
+                        <em className="text-secondary mx-2">Înainte de a apăsa butonul, citește toți pașii!</em>
+                    </ListGroup.Item>
+                    <ListGroup.Item as="li">Verifică dacă s-a deschis aplicația ScanTailor din calculator. </ListGroup.Item>
+                    <ListGroup.Item as="li">Din fereastra ScanTailor, alege <code>New Project...</code> </ListGroup.Item>
+                    <ListGroup.Item as="li">Copie și lipește <samp className="bg-warning">{props.getStore().uploadFolder}</samp> în <code>Input Directory</code> </ListGroup.Item>
+                    <ListGroup.Item as="li">Apasă pe <code>Select All</code> &nbsp;&nbsp;&nbsp; din
+                        <code>Files Not In Project</code>&nbsp;&nbsp;&nbsp;&nbsp; click pe <code>&#62;&#62;</code>&nbsp;&nbsp;&nbsp;&nbsp; și butonul <code>OK</code>
+                    </ListGroup.Item>
+                    <ListGroup.Item as="li">Din fereastra Fix DPI, selectează <code>All Pages</code>&nbsp;&nbsp;&nbsp;
+                        după care setează valorile <code>DPI (se recomandă 600*600 dpi)</code>
+                    </ListGroup.Item>
+                    <ListGroup.Item as="li">Este recomandat să treci prin următorii pași de preprocesare:
+                        Fix Orientation, Deskew, Select Conntent pană a ajunge la pasul Output. În dreptul fiecărui pas, apasă pe butonul "play".
+                    </ListGroup.Item>
+                    <ListGroup.Item as="li">În fereastra Output, apasă butonul "play" pentru a primi imaginea preprocesată.
+                    </ListGroup.Item>
+                    <ListGroup.Item as="li">După ce ai terminat, închide aplicația ScanTailor, fără a salva proiectul (alege "Discard").
+                    </ListGroup.Item>
+                    <ListGroup.Item as="li">Revino înapoi la fereastra platformei pentru a continua cu următorul pas.
+                    </ListGroup.Item>
+                </ListGroup>
+            </Popover.Body>
+        </Popover>
+    );
 
 
 
@@ -170,32 +202,12 @@ const ScanTailor = (props) => {
                 <Tab eventKey="desktop" title="Desktop">
                     <Form.Group>
                         <Form.Label className="bg-warning p-2">
-                            Modalitatea de preprocesare Desktop cu ScanTailor este disponibilă doar în versiunea desktop a platformei. <br></br>
-                            Urmează pașii de mai jos pentru a continua.
+                            Modalitatea de preprocesare Desktop cu ScanTailor este disponibilă doar în versiunea desktop a platformei.
+                            <OverlayTrigger trigger="click" rootClose placement="right" overlay={desktopModeInfo}>
+                                <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
+                            </OverlayTrigger>
                         </Form.Label>
-                        <ListGroup as="ol" numbered>
-                            <ListGroup.Item as="li">Apasă butonul <code>Start preprocesare</code>&nbsp;&nbsp;&nbsp;&nbsp; de mai jos.
-                                <em className="text-secondary mx-2">Înainte de a apăsa butonul care deschide aplicația ScanTailor citește toți pașii!</em>
-                            </ListGroup.Item>
-                            <ListGroup.Item as="li">Verifică dacă s-a deschis aplicația ScanTailor din calculator. </ListGroup.Item>
-                            <ListGroup.Item as="li">Din fereastra ScanTailor, alege <code>New Project...</code> </ListGroup.Item>
-                            <ListGroup.Item as="li">Copie și lipește <samp className="bg-warning">{props.getStore().uploadFolder}</samp> în <code>Input Directory</code> </ListGroup.Item>
-                            <ListGroup.Item as="li">Apasă pe <code>Select All</code> &nbsp;&nbsp;&nbsp; din
-                                <code>Files Not In Project</code>&nbsp;&nbsp;&nbsp;&nbsp; click pe <code>&#62;&#62;</code>&nbsp;&nbsp;&nbsp;&nbsp; și butonul <code>OK</code>
-                            </ListGroup.Item>
-                            <ListGroup.Item as="li">Din fereastra Fix DPI, selectează <code>All Pages</code>&nbsp;&nbsp;&nbsp;
-                                după care setează valorile <code>DPI (se recomandă 600*600 dpi)</code>
-                            </ListGroup.Item>
-                            <ListGroup.Item as="li">Este recomandat să treci prin următorii pași de preprocesare:
-                                Fix Orientation, Deskew, Select Conntent pană a ajunge la pasul Output. În dreptul fiecărui pas, apasă pe butonul "play".
-                            </ListGroup.Item>
-                            <ListGroup.Item as="li">În fereastra Output, apasă butonul "play" pentru a primi imaginea preprocesată.
-                            </ListGroup.Item>
-                            <ListGroup.Item as="li">După ce ai terminat, închide aplicația ScanTailor, fără a salva proiectul (alege "Discard").
-                            </ListGroup.Item>
-                            <ListGroup.Item as="li">Revino înapoi la fereastra platformei pentru a continua cu următorul pas.
-                            </ListGroup.Item>
-                        </ListGroup>
+
                     </Form.Group>
                     {/* <Button
                         className="btn btn-secondary mx-2"
