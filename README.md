@@ -4,7 +4,7 @@ Platforma pentru preprocesarea, recunoasterea, transliterarea si editarea docume
 
 ## Install
 
-### FrontEnd setup (make sure you have npm installed on your machine)
+### Frontend setup (make sure you have npm installed on your machine)
 
 1. Enter frontend folder
    `cd frontend`
@@ -31,8 +31,6 @@ Platforma pentru preprocesarea, recunoasterea, transliterarea si editarea docume
    `python manage.py runserver`
 
 ## About and Features
-
-Platforma de Digitizare (capitol din teză)
 
 Platforma de digitizare este o aplicație web/desktop scrisă în Python și
 Javascript, care permite încărcarea imaginilor sau documentelor PDF,
