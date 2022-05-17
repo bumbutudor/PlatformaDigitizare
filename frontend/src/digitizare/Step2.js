@@ -22,7 +22,9 @@ import FineReaderPre from "../components/FineReaderPre";
 import OpenCV from "../components/OpenCV";
 import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert'
-// Preprocess the images
+import FetchWrapper from "../components/FetchWrapper";
+
+// Step 2 - preprocess the images
 const Step2 = (props) => {
 
   const step2Info =
@@ -82,26 +84,22 @@ const Step2 = (props) => {
   };
 
   // Post request
+  const API = new FetchWrapper("http://127.0.0.1:8000/");
+
   const handlePreprocessRequest = async () => {
     setShow(false);
     setShowError(false);
     setShowNextStep(false);
     setShowLoader(true);
 
-    const preprocessAPI = "http://127.0.0.1:8000/preprocess/";
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(props.getStore()),
-    };
 
-    fetch(preprocessAPI, requestOptions)
-      .then(response => {
-        const data = response.json();
-        return data;
-      })
+
+    const preprocessEndpoint = "preprocess/";
+    const requestBody = props.getStore();
+
+    API.post(preprocessEndpoint, requestBody)
       .then(data => {
-        console.log(data);
+        // console.log(data);
         if (data.preprocessedFiles.length > 0) {
           setShowNextStep(true);
           setpreprocessedFiles(data.preprocessedFiles);
