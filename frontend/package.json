@@ -97,15 +97,18 @@
     "react-awesome-lightbox": "^1.8.1",
     "react-bootstrap": "^2.1.2",
     "react-bootstrap-range-slider": "^3.0.3",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-dropzone-uploader": "^2.11.0",
     "react-fancybox": "^0.2.5",
     "react-images-viewer": "^1.7.1",
     "react-pdf": "^5.7.0",
     "react-simple-keyboard": "^3.4.56",
+    "react-use-clipboard": "^1.0.8",
     "simple-keyboard": "^3.4.46",
     "simple-keyboard-autocorrect": "^2.2.350",
     "simple-keyboard-layouts": "^3.1.46",
     "tui-image-editor": "^3.15.2",
-    "utif": "^3.1.0"
+    "utif": "^3.1.0",
+    "video-react": "^0.15.0"
   }
 }
