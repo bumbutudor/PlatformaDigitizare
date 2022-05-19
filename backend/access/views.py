@@ -120,6 +120,12 @@ def ocr(request):
 
         if period == 'secolulXX' and alphabet == 'cyrillic':  
             ocr_path = '/ocr/secolulXX/cyrillic/'
+            first_file_path = settings.MEDIA_ROOT + ocr_path + os.path.splitext(files[0]["name"])[0] + '.txt'
+            
+            while not os.path.exists(first_file_path):
+                print("waiting for file", first_file_path)
+                time.sleep(1)
+                
             for file in files:
 
                 ocr_file_path = settings.MEDIA_ROOT + ocr_path + '/' + os.path.splitext(file["name"])[0] + '.txt'                
@@ -129,7 +135,7 @@ def ocr(request):
         elif period == 'secolulXX' and alphabet == 'latin':
             # TODO : Implement using F
             pass
-        elif period == 'secolulXVII':
+        elif period == 'secolulXVII' :
             ocr_path = '/ocr/secolulXVII/'
             # ocr_model_path = '/ocr/secolulXVII/models/FR15_secXVII_NT/batch.options.xml'
             for file in files:
@@ -141,7 +147,7 @@ def ocr(request):
                 ocr_result = load_txt(ocr_file_path)
                 ocr_results.append(ocr_result)
             return JsonResponse({"code":200,"msg":"success", "ocrResults":ocr_results})
-        elif period == 'Gimp':
+        elif period == 'secolulXVII':
             # TODO : Implement using Gimp
             pass
     

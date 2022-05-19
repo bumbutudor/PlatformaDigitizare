@@ -7,6 +7,9 @@ import Button from 'react-bootstrap/Button';
 import StepsInfo from '../components/StepsInfo';
 import Popover from "react-bootstrap/Popover";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import FetchWrapper from '../components/FetchWrapper';
+import Spinner from "react-bootstrap/Spinner";
+import Alert from 'react-bootstrap/Alert'
 
 // OCR
 export default class Step3 extends Component {
@@ -21,28 +24,27 @@ export default class Step3 extends Component {
       sourceFiles: props.getStore().sourceFiles,
       ocrModel: props.getStore().ocrModel,
       ocrResults: props.getStore().ocrResults,
-      show: true,
+      show: false,
+      showLoader: false,
+      showNextStep: false,
+      showErroe: false,
+      // TODO
+      // const [show, setShow] = React.useState(true);
+      // const [showLoader, setShowLoader] = React.useState(false);
+      // const [showNextStep, setShowNextStep] = React.useState(false);
+      // const [showError, setShowError] = React.useState(false);
     };
 
     this.step3Info = (
       <Popover id="popover-basic">
-        <Popover.Header as="h4">{StepsInfo.step3Info.title}</Popover.Header>
+        <Popover.Header as="h4">TODO</Popover.Header>
         <Popover.Body>
-          {StepsInfo.step3Info.body}
-          Se acceptă următoarele tipuri de fișiere: <b>png, jpg, tiff și pdf</b>.
-          <br /><br />
-          Pot fi încărcate mai multe fișiere într-un singur ciclu de digitizare.
-          <br /><br />
-          Un singur fișier incărcat nu va trece limita de 100MB.
-          Toate fișierele incărcate la un singur ciclu de digitizare nu vor trece limita de 700MB.
-          <br /><br />
-          Atunci când vor fi selectate mai două sau mai multe fișiere, trebuie de luat în considerare că toate aceste fișiere vor fi procesate cu aceleași opțiuni de procesare, respectiv, trebuie să vă asigurați că fișierele încărcate sunt din aceeași perioadă, au unul și același alfabet și necesită aceleași opțiuni de preprocesare a imaginii. Dacă aveți seturi de documente din mai multe perioade, atunci aceste seturi vor fi digitizate în diferite cicluri de digitizare.
-          <br /><br />
-          Este posibilitatea de a șterge unele fișiere care au fost întamplator selectate in acest pas.
+          TODO
         </Popover.Body>
       </Popover>
-    );
 
+    );
+    this.API = new FetchWrapper('http://localhost:8000/');
 
     // this._validateOnDemand = true; // this flag enables onBlur validation as user fills forms
 
@@ -115,27 +117,38 @@ export default class Step3 extends Component {
   //   };
   // }
 
+  async handleOCRRequest() {
+    this.setState({ show: false });
+    this.setState({ showError: false });
+    this.setState({ showLoader: true });
+
+    const ocrEndpoint = "ocr/";
+    const postData = this.state;
+
+    this.API.post(ocrEndpoint, postData)
+      .then(data => {
+        console.log(data);
+        if (data.ocrResults.length > 0) {
+          this.setState({ ocrResults: data.ocrResults });
+          this.props.updateStore({ ocrResults: data.ocrResults });
+          this.setState({ showNextStep: true });
+        } else {
+          this.setState({ showError: true });
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        this.setState({ showError: true });
+      })
+      .finally(() => {
+        this.setState({ showLoader: false });
+      });
+  }
+
 
   render() {
     // explicit class assigning based on validation
     // let notValidClasses = {};
-
-    const handleOCRRequest = async () => {
-      const ocrAPI = "http://127.0.0.1:8000/ocr/";
-
-      const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.state)
-      };
-      const response = await fetch(ocrAPI, requestOptions);
-      const data = await response.json();
-
-      this.setState({ ocrResults: data.ocrResults });
-      this.props.updateStore({ ocrResults: data.ocrResults });
-      console.log(data);
-      this.setState({ show: false });
-    }
 
     // if (typeof this.state.periodVal == 'undefined' || this.state.periodVal) {
     //   notValidClasses.periodCls = 'no-error col-md-8';
@@ -152,6 +165,8 @@ export default class Step3 extends Component {
     //   notValidClasses.emailCls = 'has-error col-md-8';
     //   notValidClasses.emailValGrpCls = 'val-err-tooltip';
     // }
+
+
     return (
       <div className="step step3">
         <div className="row">
@@ -218,7 +233,7 @@ export default class Step3 extends Component {
                       id="radio11"
                       value="cyrillic"
                       checked={this.state.ocrModel === "cyrillic"}
-                      onChange={() => { this.setState({ ocrModel: "cyrillic", alphabet: "cyrillic" }); this.props.updateStore({ ocrModel: "cyrillic", alphabet: "cyrillic" }); }}
+                      onChange={() => { this.setState({ ocrModel: "cyrillic", alphabet: "cyrillic", show: true }); this.props.updateStore({ ocrModel: "cyrillic", alphabet: "cyrillic" }); }}
                     />
 
                     <Form.Check
@@ -228,7 +243,7 @@ export default class Step3 extends Component {
                       id="radio12"
                       value="latin"
                       checked={this.state.ocrModel === "latin"}
-                      onChange={() => { this.setState({ ocrModel: "latin", alphabet: "latin" }); this.props.updateStore({ ocrModel: "latin", alphabet: "latin" }); }}
+                      onChange={() => { this.setState({ ocrModel: "latin", alphabet: "latin", show: true }); this.props.updateStore({ ocrModel: "latin", alphabet: "latin" }); }}
                     />
                   </Form.Group>
 
@@ -243,7 +258,7 @@ export default class Step3 extends Component {
                       id="radio21"
                       value="secolulXIX_1"
                       checked={this.state.ocrModel === "secolulXIX_1"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian" }); this.props.updateStore({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian" }); }}
+                      onChange={() => { this.setState({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian" }); }}
                     />
                     <Form.Check
                       label="Model bazat pe alfabetul de tranziție (Epistolariul românesc, anul 1841)"
@@ -252,7 +267,7 @@ export default class Step3 extends Component {
                       id="radio22"
                       value="secolulXIX_2"
                       checked={this.state.ocrModel === "secolulXIX_2"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional" }); this.props.updateStore({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional" }); }}
+                      onChange={() => { this.setState({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional" }); }}
                     />
                     <Form.Check
                       label="Model bazat pe alfabetul de tranziție (Elemente de aritmetică de G. Asachi, anul 1836)"
@@ -261,7 +276,7 @@ export default class Step3 extends Component {
                       id="radio23"
                       value="secolulXIX_3"
                       checked={this.state.ocrModel === "secolulXIX_3"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXIX_3", alphabet: "cyrillicTransitional" }); this.props.updateStore({ ocrModel: "secolulXIX_3", alphabet: "cyrillicTransitional" }); }}
+                      onChange={() => { this.setState({ ocrModel: "secolulXIX_3", alphabet: "cyrillicTransitional", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_3", alphabet: "cyrillicTransitional" }); }}
 
                     />
                   </Form.Group>
@@ -277,7 +292,7 @@ export default class Step3 extends Component {
                       id="radio31"
                       value="secolulXVIII_1"
                       checked={this.state.ocrModel === "secolulXVIII_1"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_1" }); this.props.updateStore({ ocrModel: "secolulXVIII_1" }); }}
+                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_1", show: true }); this.props.updateStore({ ocrModel: "secolulXVIII_1" }); }}
                     />
                     <Form.Check
                       label="Model bazat pe alfabetul chirilic românesc (Fiziognomie de M. Strilbițchi, anul 1785)"
@@ -286,7 +301,7 @@ export default class Step3 extends Component {
                       id="radio32"
                       value="secolulXVIII_2"
                       checked={this.state.ocrModel === "secolulXVIII_2"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_2" }); this.props.updateStore({ ocrModel: "secolulXVIII_2" }); }}
+                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_2", show: true }); this.props.updateStore({ ocrModel: "secolulXVIII_2" }); }}
                     />
                     <Form.Check
                       label="Model bazat pe alfabetul chirilic românesc (Așezământ, anul 1786)"
@@ -295,7 +310,7 @@ export default class Step3 extends Component {
                       id="radio33"
                       value="secolulXVIII_3"
                       checked={this.state.ocrModel === "secolulXVIII_3"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_3" }); this.props.updateStore({ ocrModel: "secolulXVIII_3" }); }}
+                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_3", show: true }); this.props.updateStore({ ocrModel: "secolulXVIII_3" }); }}
 
                     />
                   </Form.Group>
@@ -312,32 +327,35 @@ export default class Step3 extends Component {
                       id="radio41"
                       value="secolulXVII_1"
                       checked={this.state.ocrModel === "secolulXVII_1"}
-                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_1" }); this.props.updateStore({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_1" }); }}
+                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_1", show: true }); this.props.updateStore({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_1" }); }}
                     />
                     <Form.Check
                       {...(this.state.typography === "typographyAuto" ? { disabled: true } : {})}
-                      label="Model OCR bazat pe alfabetul chirilic românesc (model antrenat cu documente din clasa B de fonturi)"
+                      label="Model bazat pe alfabetul chirilic românesc (antrenat cu fonturile de tip B)"
                       name="secolulXVII"
                       type="radio"
                       id="radio42"
                       value="secolulXVII_2"
                       checked={this.state.ocrModel === "secolulXVII_2"}
-                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_2" }); this.props.updateStore({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_2" }); }}
+                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_2", show: true }); this.props.updateStore({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_2" }); }}
                     />
+
+                  </Form.Group>
+                  <Form.Group className="mb-4">
                     <Form.Check
                       label="Identifică automat modelul necesar pentru documentul tău"
                       name="typographyAuto"
                       type="checkbox"
-                      id="radio1"
+                      id="radio43"
                       value="typographyAuto"
                       checked={this.state.typography === "typographyAuto"}
-                      onChange={() => { this.setState({ typography: "typographyAuto" }); this.props.updateStore({ typography: "typographyAuto" }); }}
+                      onChange={() => { this.setState({ typography: "typographyAuto", show: true }); this.props.updateStore({ typography: "typographyAuto" }); }}
 
                     />
                   </Form.Group>
                   <Form.Group>
                     <Form.Label>Dacă cunoști la ce tipografie a fost tipărit documentul, selectează din lista de mai jos </Form.Label>
-                    <Form.Select value={this.state.typography} onChange={(e) => { this.setState({ typography: e.target.value }); this.props.updateStore({ typography: e.target.value }); }}>
+                    <Form.Select value={this.state.typography} onChange={(e) => { this.setState({ typography: e.target.value, show: true }); this.props.updateStore({ typography: e.target.value }); }}>
 
                       <option value="">Lista tipografiilor:</option>
                       <option value="typography1">Tipariul cel Domnesc (Iași)</option>
@@ -360,10 +378,39 @@ export default class Step3 extends Component {
 
 
               <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
-                {this.state.period && this.state.show ? <Button variant="primary" onClick={handleOCRRequest}>Start OCR</Button> : <Button variant="primary" disabled>Start OCR</Button>}
-                {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(3)}>Verifică și editează rezultatul</Button> </>}
-              </div>
+                {this.state.period && this.state.show ?
+                  <Button
+                    variant="primary"
+                    onClick={this.handleOCRRequest.bind(this)}>
+                    Start OCR
+                  </Button> :
+                  <Button
+                    variant="primary"
+                    disabled>
+                    {this.state.showLoader ?
+                      (<>
+                        <Spinner
+                          animation="border" />
+                        Are loc procesul OCR...
+                      </>) :
+                      (<>
+                        Start OCR
+                      </>)}</Button>}
 
+                {this.state.showNextStep && (<>
+                  {" "}
+                  <Button
+                    variant="primary mx-4"
+                    onClick={() => this.props.jumpToStep(3)}>
+                    Mergi la pasul următor
+                  </Button>
+                </>)}
+              </div>
+              {this.state.showError && (
+                <Alert variant="danger">
+                  <Alert.Heading>Eroare la recunoașterea optică! Incearcă alt model OCR...</Alert.Heading>
+                </Alert>
+              )}
             </div>
           </Form>
         </div>

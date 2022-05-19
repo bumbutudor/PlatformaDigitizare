@@ -26,7 +26,7 @@ export default class DigitizationSteps extends Component {
       alphabet: "cyrillic", //default is cyrillic
       savedToCloud: false,
       uploadFolder: "C:\\Users\\bumbu\\OneDrive\\Desktop\\Projects\\PlatformaDigitizare\\backend\\media",
-      sourceFiles: [],
+      sourceFiles: [{ "name": "5.jpg", "size": 1535454, "type": "image/jpeg", "lastModifiedDate": "2021-05-27T15:49:52.594Z", "uploadedDate": "2022-05-17T19:15:44.681Z", "percent": 100, "id": "1652814944681-0", "status": "removed", "previewUrl": "blob:http://localhost:8080/3a701ff3-27a9-47ff-9ca3-fc2ce6554e10", "width": 1305, "height": 1333 }],
       preprocessedFiles: [],
       preprocessWith: "",
       preprocessMode: "desktop",
