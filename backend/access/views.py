@@ -135,7 +135,7 @@ def ocr(request):
         elif period == 'secolulXX' and alphabet == 'latin':
             # TODO : Implement using F
             pass
-        elif period == 'secolulXVII' :
+        elif period == 'secolulXVII':
             ocr_path = '/ocr/secolulXVII/'
             # ocr_model_path = '/ocr/secolulXVII/models/FR15_secXVII_NT/batch.options.xml'
             for file in files:
