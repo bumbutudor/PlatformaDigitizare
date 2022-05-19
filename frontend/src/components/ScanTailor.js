@@ -10,6 +10,10 @@ import Col from "react-bootstrap/esm/Col";
 import Row from "react-bootstrap/esm/Row";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import Tooltip from "react-bootstrap/Tooltip";
+import { Player } from 'video-react';
+// import ScanTailorTutorial from '../assets/ScanTailorTutorial.mp4'
 
 
 const ScanTailor = (props) => {
@@ -52,6 +56,7 @@ const ScanTailor = (props) => {
         setTab(event);
         props.updateStore({ preprocessMode: event });
     }
+
 
     const handleColorModeChange = (e) => {
         setSelectedColorMode(e.target.value);
@@ -157,6 +162,11 @@ const ScanTailor = (props) => {
         <Popover id="popover-basic">
             <Popover.Body>
                 <ListGroup as="ol" numbered>
+                    <ListGroup.Item>
+                        <Player>
+                            <source src="http://127.0.0.1:8000/media/pre/ScanTailor/tutorial.mp4" />
+                        </Player>
+                    </ListGroup.Item>
                     <ListGroup.Item as="li">Apasă butonul <code>Start preprocesare</code>&nbsp;&nbsp;&nbsp;&nbsp; de mai jos pentru a deschide aplicația ScanTailor în calculatorul tău.
                         <em className="text-secondary mx-2">Înainte de a apăsa butonul, citește toți pașii!</em>
                     </ListGroup.Item>
@@ -183,9 +193,16 @@ const ScanTailor = (props) => {
         </Popover>
     );
 
+    const [isCopied, setCopied] = React.useState(false);
 
+    const renderTooltip = (props) => (
+        <Tooltip id="button-tooltip" {...props}>
+            {isCopied ? "Copiat!" : "Apasă pentru a copia"}
+        </Tooltip>
+    );
 
     return (
+
         console.log(props.getStore()),
         <>
             <Form.Group>
@@ -197,18 +214,54 @@ const ScanTailor = (props) => {
                 id="controlled-tab-example"
                 activeKey={tab}
                 onSelect={handleTabChange}
-                className="mb-3"
+            // className="mb-3"
             >
                 <Tab eventKey="desktop" title="Desktop">
                     <Form.Group>
-                        <Form.Label className="bg-warning p-2">
+                        <Form.Label className=" p-2">
                             Modalitatea de preprocesare Desktop cu ScanTailor este disponibilă doar în versiunea desktop a platformei.
                             <OverlayTrigger trigger="click" rootClose placement="right" overlay={desktopModeInfo}>
-                                <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
+                                <Button type="button" className="btn btn-info text-white mx-4">?</Button>
                             </OverlayTrigger>
                         </Form.Label>
 
                     </Form.Group>
+                    <ListGroup as="ol" numbered>
+                        <ListGroup.Item as="li">Apasă butonul <code>Start preprocesare</code>&nbsp;&nbsp;&nbsp;&nbsp; de mai jos pentru a deschide aplicația ScanTailor în calculatorul tău.
+                            <em className="text-secondary mx-2">Înainte de a apăsa butonul, citește toți pașii!</em>
+                        </ListGroup.Item>
+                        <ListGroup.Item as="li">Verifică dacă s-a deschis aplicația ScanTailor din calculator. </ListGroup.Item>
+                        <ListGroup.Item as="li">Din fereastra ScanTailor, alege <code>New Project...</code> </ListGroup.Item>
+                        <ListGroup.Item as="li">Copie și lipește
+                            <OverlayTrigger
+                                placement="left"
+                                delay={{ show: 250, hide: 400 }}
+                                overlay={renderTooltip}
+                            >
+                                <CopyToClipboard
+                                    text={props.getStore().uploadFolder}
+                                    onCopy={() => setCopied(true)}>
+                                    <Button variant="secondary mx-2">{props.getStore().uploadFolder}</Button>
+                                </CopyToClipboard>
+                            </OverlayTrigger> în <code>Input Directory</code>
+                            {/* {isCopied ? <span className="text-success text-center">Copiat!</span> : <span className="text-warning text-center">Apasă pentru a copia!</span>} */}
+                        </ListGroup.Item>
+                        <ListGroup.Item as="li">Apasă pe <code>Select All</code> &nbsp;&nbsp;&nbsp; din
+                            <code>Files Not In Project</code>&nbsp;&nbsp;&nbsp;&nbsp; click pe <code>&#62;&#62;</code>&nbsp;&nbsp;&nbsp;&nbsp; și butonul <code>OK</code>
+                        </ListGroup.Item>
+                        <ListGroup.Item as="li">Din fereastra Fix DPI, selectează <code>All Pages</code>&nbsp;&nbsp;&nbsp;
+                            după care setează valorile <code>DPI (se recomandă 600*600 dpi)</code>
+                        </ListGroup.Item>
+                        <ListGroup.Item as="li">Este recomandat să treci prin următorii pași de preprocesare:
+                            Fix Orientation, Deskew, Select Conntent pană a ajunge la pasul Output. În dreptul fiecărui pas, apasă pe butonul "play".
+                        </ListGroup.Item>
+                        <ListGroup.Item as="li">În fereastra Output, apasă butonul "play" pentru a primi imaginea preprocesată.
+                        </ListGroup.Item>
+                        <ListGroup.Item as="li">După ce ai terminat, închide aplicația ScanTailor, fără a salva proiectul (alege "Discard").
+                        </ListGroup.Item>
+                        <ListGroup.Item as="li">Revino înapoi la fereastra platformei pentru a continua cu următorul pas.
+                        </ListGroup.Item>
+                    </ListGroup>
                     {/* <Button
                         className="btn btn-secondary mx-2"
                         onClick={handleOpenScanTailorRequest}>
@@ -218,7 +271,7 @@ const ScanTailor = (props) => {
 
                 {/* web functionalities */}
                 <Tab eventKey="web" title="Web">
-                    <Form.Group as={Row} className="mb-4">
+                    <Form.Group as={Row} className="my-3 mx-2">
                         <Form.Label className="mb-4">
                             Setează rezoluția imaginii preprocesate:
                         </Form.Label>
@@ -239,7 +292,7 @@ const ScanTailor = (props) => {
                             <Form.Control value={resolution} onChange={handleResolutionChange} />
                         </Col>
                     </Form.Group>
-                    <Form.Group as={Row} className="mb-4">
+                    <Form.Group as={Row} className="my-3 mx-2">
                         <Col>
                             <Form.Label>Setează culoarea imaginii preprocesate:</Form.Label>
                             <Form.Check
@@ -274,7 +327,7 @@ const ScanTailor = (props) => {
                             />
                         </Col>
                     </Form.Group>
-                    <Form.Group as={Row} className="mb-4">
+                    <Form.Group as={Row} className="my-3 mx-2">
                         <Col>
                             <Form.Label>Selectează opțiunea de curățare a petelor din imagine (despeckle):</Form.Label>
                             <Form.Check
@@ -320,7 +373,7 @@ const ScanTailor = (props) => {
                         </Col>
                     </Form.Group>
                     {/* orientation default is portrait <left|right|upsidedown|none> */}
-                    <Form.Group as={Row} className="mb-4">
+                    <Form.Group as={Row} className="my-3 mx-2">
                         <Col>
                             <Form.Label>Corectează orientarea imaginii:</Form.Label>
                             <Form.Check
@@ -367,7 +420,7 @@ const ScanTailor = (props) => {
                     </Form.Group>
 
                     {/* contentDetection default is normal <cautious|normal|aggressive> */}
-                    <Form.Group as={Row} className="mb-4">
+                    <Form.Group as={Row} className="my-3 mx-2">
                         <Col>
                             <Form.Label>Selectează modul de detectare a conținutului din imagine: </Form.Label>
                             <Form.Check
@@ -429,7 +482,7 @@ const ScanTailor = (props) => {
                         </Col>
                     </Form.Group>
 
-                    <Form.Group as={Row} className="mb-4">
+                    <Form.Group as={Row} className="my-3 mx-2">
                         <Form.Label className="mb-4">
                             Schimbă grosimea caracterelor:
                         </Form.Label>

@@ -1,3 +1,30 @@
+.multi-step {
+  margin-top: 20px;
+}
+
+.step {
+  width: 75%;
+  background-color: #fff;
+  /* min-height: 450px; */
+  padding: 20px 5px;
+  box-shadow: -15px 15px 50px -1px rgba(56, 103, 234, 0.15);
+  border-radius: 10px;
+}
+
+.footer-buttons {
+  top: 0px;
+  position: absolute;
+  right: 55px;
+  margin-top: 0 !important;
+}
+
+.tab-content {
+  overflow: scroll;
+  height: 300px;
+  border: 1px solid #dee2e6;
+  border-top: 0;
+}
+
 ol.progtrckr {
   list-style-type: none;
   padding: 0;
@@ -129,22 +156,20 @@ ol.progtrckr li.progtrckr-done:hover:before {
 
 .dzu-previewContainer {
   flex-direction: column;
-  width: 300px;
-  margin: 20px;
-  padding: 10px;
+  width: 180px;
+  margin: 3px;
+  padding: 5px 3px;
   background: rgb(255, 255, 255);
-  padding-top: 30px;
-  padding-bottom: 20px;
   border-radius: 10px;
   box-shadow: 0px 8px 15px -1px rgba(0, 0, 0, 0.15);
 }
 
 .dzu-previewImage {
-  width: 100%;
-  max-height: 100px;
-  object-fit: contain;
+  /* width: 100%; */
+  max-height: 120px;
+  object-fit: cover;
   border-radius: 4px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   border: 1px solid rgba(213, 213, 213, 0.4);
 }
 

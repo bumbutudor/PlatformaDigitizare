@@ -114,7 +114,7 @@ const Step2 = (props) => {
         setShowError(true);
       })
       .finally(() => {
-        setShow(true);
+        setShow(false);
         setShowLoader(false);
       });
 
@@ -217,16 +217,15 @@ const Step2 = (props) => {
                   {showLoader ? (<><Spinner animation="border" /> Se preprocesează...</>) : (<>Start preprocesare</>)}
                 </Button>
               )}
-              {showNextStep && (
-                <>
-                  {" "}
-                  <Button
-                    variant="primary mx-4"
-                    onClick={() => props.jumpToStep(2)}
-                  >
-                    Mergi la pasul următor - OCR
-                  </Button>{" "}
-                </>
+              {showNextStep && (<>
+                {" "}
+                <Button
+                  variant="primary mx-4"
+                  onClick={() => props.jumpToStep(2)}
+                >
+                  Mergi la pasul următor - OCR
+                </Button>{" "}
+              </>
               )}
             </div>
             {showError && (
