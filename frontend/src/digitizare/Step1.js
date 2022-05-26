@@ -61,7 +61,7 @@ export default class Step1 extends Component {
           <Form id="Form" className="form-horizontal">
             <Form.Group className="form-group">
               <Form.Label className="col-md-12 control-label d-flex">
-                <h1>Pasul 1: Incarcă imagini sau fișiere PDF</h1>
+                <h1>Pasul 1: Incarcă documentul tău</h1>
                 <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.step1Info}>
                   <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
                 </OverlayTrigger>

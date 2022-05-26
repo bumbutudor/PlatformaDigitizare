@@ -9,7 +9,15 @@ import Popover from "react-bootstrap/Popover";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import FetchWrapper from '../components/FetchWrapper';
 import Spinner from "react-bootstrap/Spinner";
-import Alert from 'react-bootstrap/Alert'
+import Alert from 'react-bootstrap/Alert';
+import { Fancybox } from "@fancyapps/ui/src/Fancybox/Fancybox.js";
+import "@fancyapps/ui/dist/fancybox.css";
+import { Resizable } from "re-resizable";
+import Draggable from 'react-draggable'; // The default
+import { Rnd } from "react-rnd";
+
+
+
 
 // OCR
 export default class Step3 extends Component {
@@ -235,7 +243,7 @@ export default class Step3 extends Component {
                       checked={this.state.ocrModel === "cyrillic"}
                       onChange={() => { this.setState({ ocrModel: "cyrillic", alphabet: "cyrillic", show: true }); this.props.updateStore({ ocrModel: "cyrillic", alphabet: "cyrillic" }); }}
                     />
-
+                    {/* 
                     <Form.Check
                       label="Model bazat pe alfabetul românesc (latin)"
                       name="secolulXX"
@@ -244,7 +252,7 @@ export default class Step3 extends Component {
                       value="latin"
                       checked={this.state.ocrModel === "latin"}
                       onChange={() => { this.setState({ ocrModel: "latin", alphabet: "latin", show: true }); this.props.updateStore({ ocrModel: "latin", alphabet: "latin" }); }}
-                    />
+                    /> */}
                   </Form.Group>
 
                 </>}
@@ -402,7 +410,7 @@ export default class Step3 extends Component {
                   <Button
                     variant="primary mx-4"
                     onClick={() => this.props.jumpToStep(3)}>
-                    Mergi la pasul următor
+                    Mergi la pasul următor - verificarea textului recunoscut
                   </Button>
                 </>)}
               </div>
@@ -416,56 +424,72 @@ export default class Step3 extends Component {
         </div>
 
         {/* preprocessed image and reognized text */}
-        <div className="row">
-          <div className="col-md-12 d-flex justify-content-around">
-            <div className="col-sm">
-              {this.state.sourceFiles.length != 0 && <>
-                <Accordion defaultActiveKey={['0']} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>Sursa - imagine preprocesată</Accordion.Header>
-                    <Accordion.Body>
-                      {
-                        this.state.preprocessedFiles.map((src, index) => (
-                          <div key={index} className="preprocessedFile mb-2">
-                            <span className="ocrResultTitle text-info">{`Imaginea ${index + 1}:`}</span>
-                            <img
-                              src={this.handleFilePath(src)}
-                              onClick={() => openImageViewer(index)}
-                              width="90%"
-                              key={index}
-                              alt="" />
-                          </div>
-                        ))
-                      }
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
-              </>}
-            </div>
+        <Draggable>
 
-            <div className="col-sm">
-              {this.state.ocrResults != 0 && <>
-                <Accordion defaultActiveKey={['0']} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>Ținta - rezultatul OCR </Accordion.Header>
-                    <Accordion.Body>
-                      {
-                        this.state.ocrResults.map((text, index) => (
-                          <div className="ocrResult mb-4" key={index}>
-                            <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span>
-                            <p key={index} alt="">{text}</p>
-                          </div>
-                        ))
-                      }
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
-              </>}
+          <div className="row">
+            {/* <span className='text-right'>Drag me</span> */}
+            <div className="col-md-12 d-flex justify-content-around">
+
+              <div className="col-sm mr-2">
+                {this.state.sourceFiles.length != 0 && <>
+
+                  <Accordion defaultActiveKey={0} alwaysOpen>
+                    {
+                      this.state.preprocessedFiles.map((src, index) => (
+                        console.log(index),
+                        <Accordion.Item eventKey={index}>
+                          <Accordion.Header>Sursa - imagine preprocesată</Accordion.Header>
+                          <Accordion.Body>
+                            <div key={index} className="preprocessedFile mb-2">
+                              <a
+                                className=""
+                                data-fancybox="gallery_2"
+                                data-src={this.handleFilePath(src)}
+                                data-caption={`${src} (imagine procesată)`}
+                                key={index}
+                              >
+                                {/* <span className="ocrResultTitle text-info">{`Imaginea ${index + 1}:`}</span> */}
+                                <img
+                                  src={this.handleFilePath(src)}
+                                  // onClick={() => openImageViewer(index)}
+                                  className="Accordion_image"
+                                  width="90%"
+                                  alt="" />
+                              </a>
+                            </div>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      ))
+                    }
+
+                  </Accordion>
+                </>}
+              </div>
+
+              <div className="col-sm">
+                {this.state.ocrResults != 0 && <>
+                  <Accordion defaultActiveKey={0} alwaysOpen>
+                    {
+                      this.state.ocrResults.map((text, index) => (
+                        <Accordion.Item eventKey={index} key={index}>
+                          <Accordion.Header>Ținta - textul recunoscut </Accordion.Header>
+                          <Accordion.Body>
+                            <div className="ocrResult mb-4"  >
+                              {/* <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${this.state.preprocessedFiles[index]}:`}</span> */}
+                              <p alt="">{text}</p>
+                            </div>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      ))
+                    }
+
+                  </Accordion>
+                </>}
+              </div>
             </div>
           </div>
-        </div>
 
-
+        </Draggable>
       </div>
     )
   }

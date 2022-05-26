@@ -13,6 +13,7 @@ import ImgsViewer from "react-images-viewer";
 import { Fancybox } from "@fancyapps/ui/src/Fancybox/Fancybox.js";
 import "@fancyapps/ui/dist/fancybox.css";
 import { saveAs } from "file-saver";
+import { Rnd } from "react-rnd";
 
 export default class Step7 extends Component {
   constructor(props) {
@@ -143,32 +144,43 @@ export default class Step7 extends Component {
           <form id="Form" className="form-horizontal">
             <div className="form-group">
               <label className="col-md-12 control-label mb-3">
-                <h1>Step 7: Revizuiește rezultatele și salvează-le</h1>
+                <h1>Step 7: Salvează rezultatele</h1>
               </label>
             </div>
             <div className="form-group row">
               <div className="col-4">
                 {this.props.getStore().preprocessedFiles.length != 0 && (
-                  <>
+                  <> <Rnd
+                    default={{
+                      x: 150,
+                      y: 205,
+                      width: 500,
+                      height: 190,
+                    }}
+                    minWidth={500}
+                    minHeight={190}
+                    bounds="window"
+                  >
                     <Accordion defaultActiveKey={["0"]} alwaysOpen>
                       <Accordion.Item eventKey="0">
                         <Accordion.Header>
-                          Ținta - imagine preprocesată
+                          Documentul original
                         </Accordion.Header>
                         <Accordion.Body>
                           {this.props
                             .getStore()
-                            .preprocessedFiles.map((src, index) => (
+                            .sourceFiles.map((src, index) => (
+                              console.log(src),
                               <a
                                 className=""
                                 data-fancybox="gallery_2"
-                                data-src={this.handleFilePath(src)}
+                                data-src={this.handleFilePath(src.name)}
                                 data-caption={"imagine preprocesată"}
                                 key={index}
                               >
                                 <img
                                   className="Accordion_image"
-                                  src={this.handleFilePath(src)}
+                                  src={this.handleFilePath(src.name)}
                                 />
                               </a>
                             ))}
@@ -182,86 +194,113 @@ export default class Step7 extends Component {
                         </Accordion.Body>
                       </Accordion.Item>
                     </Accordion>
+                  </Rnd>
                   </>
                 )}
               </div>
 
               <div className="col-4">
-                <Accordion defaultActiveKey={["0"]} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>Textul recunoscut</Accordion.Header>
-                    <Accordion.Body>
-                      {this.state.ocrResults &&
-                        this.state.ocrResults.map((item, index) => {
-                          return (
-                            <textarea
-                              key={index}
-                              id={index}
-                              /* onFocus={this.setActiveInput.bind(this)} */
-                              value={item}
-                              /* onChange={this.onChangeInput.bind(this)} */
-                              readOnly
-                              className="form-control_result mb-4"
-                              rows="10"
-                            ></textarea>
-                          );
-                        })}
-                      <button
-                        type="button"
-                        className="btn btn-primary col-12"
-                        onClick={this.save_ocr.bind(this)}
-                      >
-                        Download (.txt)
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-primary col-12 mt-2"
-                        onClick={this.save_ocr_doc.bind(this)}
-                      >
-                        Download (.doc)
-                      </button>
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
+                <Rnd
+                  default={{
+                    x: 150,
+                    y: 205,
+                    width: 500,
+                    height: 190,
+                  }}
+                  minWidth={500}
+                  minHeight={190}
+                  bounds="window"
+                >
+                  <Accordion defaultActiveKey={["0"]} alwaysOpen>
+
+                    <Accordion.Item eventKey="0">
+                      <Accordion.Header>Textul recunoscut</Accordion.Header>
+                      <Accordion.Body>
+                        {this.state.ocrResults &&
+                          this.state.ocrResults.map((item, index) => {
+                            return (
+                              <textarea
+                                key={index}
+                                id={index}
+                                /* onFocus={this.setActiveInput.bind(this)} */
+                                value={item}
+                                /* onChange={this.onChangeInput.bind(this)} */
+                                readOnly
+                                className="form-control_result mb-4"
+                                rows="20"
+                              ></textarea>
+                            );
+                          })}
+                        <button
+                          type="button"
+                          className="btn btn-primary col-12"
+                          onClick={this.save_ocr.bind(this)}
+                        >
+                          Descarcă în format .txt
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-primary col-12 mt-2"
+                          onClick={this.save_ocr_doc.bind(this)}
+                        >
+                          Descarcă în format .doc
+                        </button>
+                      </Accordion.Body>
+                    </Accordion.Item>
+
+                  </Accordion>
+                </Rnd>
               </div>
 
               <div className="col-4">
-                <Accordion defaultActiveKey={["0"]} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>Text transliterat</Accordion.Header>
-                    <Accordion.Body>
-                      {this.state.transResults &&
-                        this.state.transResults.map((item, index) => {
-                          return (
-                            <textarea
-                              key={index}
-                              id={index}
-                              /* onFocus={this.setActiveInput.bind(this)} */
-                              value={item}
-                              /* onChange={this.onChangeInput.bind(this)} */
-                              readOnly
-                              className="form-control_result mb-4"
-                              rows="10"
-                            ></textarea>
-                          );
-                        })}
-                      <button
-                        type="button"
-                        className="btn btn-primary col-12"
-                        onClick={this.save_trans.bind(this)}
-                      >
-                        Download (.txt)
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-primary col-12 mt-2"
-                        onClick={this.save_trans_doc.bind(this)}
-                      >
-                        Download (.doc)
-                      </button>
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
+                <Rnd
+                  default={{
+                    x: 150,
+                    y: 205,
+                    width: 500,
+                    height: 190,
+                  }}
+                  minWidth={500}
+                  minHeight={190}
+                  bounds="window"
+                >
+                  <Accordion defaultActiveKey={["0"]} alwaysOpen>
+                    <Accordion.Item eventKey="0">
+                      <Accordion.Header>Text transliterat</Accordion.Header>
+                      <Accordion.Body>
+                        {this.state.transResults &&
+                          this.state.transResults.map((item, index) => {
+                            return (
+                              <textarea
+                                key={index}
+                                id={index}
+                                /* onFocus={this.setActiveInput.bind(this)} */
+                                value={item}
+                                /* onChange={this.onChangeInput.bind(this)} */
+                                readOnly
+                                className="form-control_result mb-4"
+                                rows="20"
+                              ></textarea>
+                            );
+                          })}
+                        <button
+                          type="button"
+                          className="btn btn-primary col-12"
+                          onClick={this.save_trans.bind(this)}
+                        >
+                          Descarcă în format .txt
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-primary col-12 mt-2"
+                          onClick={this.save_trans_doc.bind(this)}
+                        >
+                          Descarcă în format .doc
+                        </button>
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  </Accordion>
+                </Rnd>
               </div>
 
               {/* <div className="col-md-12 control-label">
@@ -276,16 +315,28 @@ export default class Step7 extends Component {
                 {<h2 className={savingCls}></h2>}
               </div> */}
             </div>
-          </form>
-          <div className="col-2 m-4">
+          </form >
+          {/* <div className="col-2 m-4">
             <button className="btn btn-secondary" onClick={() =>
               this.setState({ show: !this.state.show })
             }>Obiectul digitizat</button>
             {this.state.show && (JSON.stringify(this.props.getStore()))}
-          </div>
-        </div>
+          </div> */}
 
-      </div>
+          < div className="col-2 m-4" >
+            <button className="btn btn-success" onClick={() => {
+              this.props.jumpToStep(0); Object.getOwnPropertyNames(this.props.getStore()).forEach(function (prop) {
+                delete obj[prop];
+              });
+            }}>
+              Digitizează un document nou
+            </button>
+
+          </div >
+
+        </div >
+
+      </div >
     );
   }
 }

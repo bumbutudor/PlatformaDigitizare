@@ -8,6 +8,11 @@ import Joi from "joi";
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
 import layouts from "../components/KeyboardLayouts";
+import Row from "react-bootstrap/esm/Row";
+import Col from "react-bootstrap/esm/Col";
+import Accordion from "react-bootstrap/Accordion";
+import Button from "react-bootstrap/Button";
+
 
 class Step6 extends Component {
   constructor(props) {
@@ -23,6 +28,7 @@ class Step6 extends Component {
       preprocessedFiles: props.getStore().preprocessedFiles,
       layoutName: "default",
       show: false,
+      showNextStep: false,
       // input: ""
       inputID: 0,
     };
@@ -72,6 +78,10 @@ class Step6 extends Component {
     this.setState({ transResults: [...transResults] });
   }
 
+  handleSubmit() {
+    this.setState({ showNextStep: true });
+  }
+
   render() {
     // Fisierele sursa
     const handleFilePath = (filePath) => {
@@ -95,6 +105,8 @@ class Step6 extends Component {
               <div className="form-group col-md-12 content form-block-holder">
                 <label className="control-label col-12">
                   {this.state.transResults &&
+
+
                     this.state.transResults.map((item, index) => {
                       return (
                         <div key={index}>
@@ -127,7 +139,7 @@ class Step6 extends Component {
                             onFocus={this.setActiveInput.bind(this)}
                             value={item}
                             onChange={this.onChangeInput.bind(this)}
-                            className="form-control mb-4"
+                            className="form-control mb-4 text"
                             rows="10"
                           ></textarea>
                           <a
@@ -173,26 +185,30 @@ class Step6 extends Component {
                   />
                 )}
               </div>
-              {/* <div className="form-group col-md-3 content form-block-image">
-                
-                {this.state.preprocessedFiles.map((src, index) => (
-                  <a
-                    className=""
-                    data-fancybox="gallery_2"
-                    data-src={handleFilePath(src)}
-                    data-caption="imagine originală"
-                    key={index}
-                  >
-                    <img
-                      className="Accordion_image"
-                      src={handleFilePath(src)}
-                    />
-                  </a>
-                ))}
-              </div> */}
+
             </div>
           </form>
+
         </div>
+
+        <Row className="mt-2">
+          <Col>
+            <Button className="save-trans float-end" onClick={this.handleSubmit.bind(this)}>
+              Salvează modificările
+            </Button>
+          </Col>
+          <Col>
+            {this.state.showNextStep && (<>
+              {document.querySelector(".save-trans").disabled = true}
+              {" "}
+              <Button
+                variant="primary mx-4"
+                onClick={() => this.props.jumpToStep(6)}>
+                Mergi la pasul următor - salvează rezultatele finale
+              </Button>
+            </>)}
+          </Col>
+        </Row>
       </div>
     );
   }

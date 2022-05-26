@@ -12,6 +12,8 @@ import Button from "react-bootstrap/Button";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import StepsInfo from "../components/StepsInfo";
+import Row from "react-bootstrap/esm/Row";
+import Col from "react-bootstrap/esm/Col";
 
 class Step4 extends Component {
   constructor(props) {
@@ -27,6 +29,7 @@ class Step4 extends Component {
       preprocessedFiles: props.getStore().preprocessedFiles,
       layoutName: "default",
       showk: false,
+      showNextStep: false,
       // input: ""
       inputID: 0,
     };
@@ -128,6 +131,10 @@ class Step4 extends Component {
     return "Deschide tastatura virtuală";
   }
 
+  handleSubmit() {
+    this.setState({ showNextStep: true });
+  }
+
   render() {
     // Fisierele sursa
     const handleFilePath = (filePath) => {
@@ -156,40 +163,43 @@ class Step4 extends Component {
                     Info
                   </Button>
                 </OverlayTrigger>
+                <button
+                  id="keyboard-button"
+                  className="btn btn-primary"
+                  type="button"
+                  title="Tastatura Virtuală"
+                  onClick={() =>
+                    this.setState({ showk: !this.state.showk })
+                  }
+                >
+                  <svg
+                    className="svg_keyboard mx-2 pb-1"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
+                    />
+                  </svg>
+                  {this.handleKeyboardButton(this.state.showk)}
+                </button>
               </label>
             </div>
             <div className="row mt-3">
               <div className="form-group col-md-12 content form-block-holder">
-                {/* <label className="control-label col-12"> */}
-                {this.state.ocrResults &&
-                  this.state.ocrResults.map((item, index) => {
-                    return (
-                      <Accordion key={index} defaultActiveKey={["0"]} alwaysOpen>
-                        <Accordion.Item eventKey="0">
+                <Accordion defaultActiveKey={0} alwaysOpen>
+                  {/* <label className="control-label col-12"> */}
+                  {this.state.ocrResults &&
+
+                    this.state.ocrResults.map((item, index) => {
+                      return (
+
+                        <Accordion.Item eventKey={index} key={index}>
                           <Accordion.Header>
-                            {`Rezultatul OCR pentru imaginea ${index + 1}:`}
+                            {`Rezultatul OCR pentru documentul ${this.state.sourceFiles[index].name}`}
                           </Accordion.Header>
                           <Accordion.Body>
-                            <button
-                              id="keyboard-button"
-                              className="btn btn-primary"
-                              type="button"
-                              title="Tastatura Virtuală"
-                              onClick={() =>
-                                this.setState({ showk: !this.state.showk })
-                              }
-                            >
-                              <svg
-                                className="svg_keyboard"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  fill="currentColor"
-                                  d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
-                                />
-                              </svg>
-                              {this.handleKeyboardButton(this.state.showk)}
-                            </button>
+
                             <div>
                               {/* <RichTextEditor
                                 editorState={item}
@@ -202,8 +212,9 @@ class Step4 extends Component {
                                 onFocus={this.setActiveInput.bind(this)}
                                 value={item}
                                 onChange={this.onChangeInput.bind(this)}
-                                className="form-control mb-4"
-                                rows="10"
+                                className="form-control text"
+
+                                rows="14"
                               ></textarea>
 
                               <a
@@ -234,9 +245,12 @@ class Step4 extends Component {
                             </div>
                           </Accordion.Body>
                         </Accordion.Item>
-                      </Accordion>
-                    );
-                  })}
+
+                      );
+                    })}
+                </Accordion>
+
+
                 {/* </label> */}
 
                 {this.state.showk && (
@@ -275,6 +289,27 @@ class Step4 extends Component {
             </div>
           </form>
         </div>
+
+        <Row className="mt-2">
+          <Col>
+            <Button className="save-ocr  float-end" onClick={this.handleSubmit.bind(this)}>
+              Salvează modificările
+            </Button>
+            <span className="text-muted mx-2 mt-2 float-end">Ai verificat textul? Dacă da atunci </span>
+
+          </Col>
+          <Col>
+            {this.state.showNextStep && (<>
+              {document.querySelector(".save-ocr").disabled = true}
+              {" "}
+              <Button
+                variant="primary mx-4"
+                onClick={() => this.props.jumpToStep(4)}>
+                Mergi la pasul următor - transliterarea textului verificat
+              </Button>
+            </>)}
+          </Col>
+        </Row>
       </div>
     );
   }

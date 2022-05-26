@@ -223,7 +223,7 @@ const Step2 = (props) => {
                   variant="primary mx-4"
                   onClick={() => props.jumpToStep(2)}
                 >
-                  Mergi la pasul următor - OCR
+                  Mergi la pasul următor - recunoaşterea textului din imaginea preprocesată
                 </Button>{" "}
               </>
               )}
@@ -254,7 +254,7 @@ const Step2 = (props) => {
                           className=""
                           data-fancybox="gallery_1"
                           data-src={handleFilePath(src.name)}
-                          data-caption="imagine originală"
+                          data-caption={`${src.name} (imagine originală)`}
                           key={index}
                         >
                           <img
@@ -284,7 +284,7 @@ const Step2 = (props) => {
                           className=""
                           data-fancybox="gallery_2"
                           data-src={handleFilePath(src)}
-                          data-caption="imagine preprocesată"
+                          data-caption={`${src} (imagine procesată)`}
                           key={index}
                         >
                           <img

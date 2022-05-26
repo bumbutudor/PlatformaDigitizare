@@ -4,8 +4,13 @@ import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
+import OverlayTrigger from 'react-bootstrap/esm/OverlayTrigger';
+import Overlay from 'react-bootstrap/esm/Overlay';
+import Popover from "react-bootstrap/Popover";
+import Draggable from 'react-draggable'; // The default
+import { Rnd } from "react-rnd";
 
-// OCR
+// Transliteraion
 export default class Step5 extends Component {
   constructor(props) {
     super(props);
@@ -20,6 +25,16 @@ export default class Step5 extends Component {
       transResults: props.getStore().transResults,
       transOptions: props.getStore().transOptions,
       show: true,
+      dictionaryInfo:
+        (
+          <Popover id="popover-basic">
+            <Popover.Header as="h4">Dicționarul de excepții</Popover.Header>
+            <Popover.Body>
+              Cuprinde cuvinte care nu pot fi transliterate utilând reguli de transliterare.
+              <p>Exemplu: <em>амязэ</em> conform regulilor trece in <em>amează</em>, iar varianta corecă <b><em>amiază</em></b> se află în dicționar.</p>
+            </Popover.Body>
+          </Popover>
+        )
     };
 
     this.alphabetOptions = props.getStore().alphabetOptions;
@@ -44,6 +59,7 @@ export default class Step5 extends Component {
     this.setState(newState);
     // this.props.updateStore({ transOptions: { ...this.state.transOptions, [e.target.name]: e.target.checked } });
   }
+
 
 
   render() {
@@ -162,7 +178,7 @@ export default class Step5 extends Component {
                   checked={this.state.transOptions.actualizeWordForm}
                   onChange={this.handleTransOptionsChange.bind(this)}
                 />
-                <Form.Check
+                {/* <Form.Check
                   label="Înlocuiește apostroful cu cratima (n’ar => n-ar)"
                   name="replaceApostrophe"
                   id="checkboxTrans2"
@@ -177,7 +193,23 @@ export default class Step5 extends Component {
                   type="checkbox"
                   checked={this.state.transOptions.removeHyphen}
                   onChange={this.handleTransOptionsChange.bind(this)}
-                />
+                /> */}
+                <div className='d-flex'>
+                  <Form.Check
+                    disabled
+                    label="Corectează textul cu dicționarul de excepții"
+                    name="removeHyphen"
+                    id="checkboxTrans3"
+                    type="checkbox"
+                  // checked={this.state.transOptions.removeHyphen}
+                  // onChange={this.handleTransOptionsChange.bind(this)}
+                  />
+                  <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.state.dictionaryInfo}>
+                    <Button type="button" className="btn btn-info text-white mx-4">?</Button>
+                  </OverlayTrigger>
+
+                </div>
+
               </Form.Group>
 
 
@@ -192,50 +224,51 @@ export default class Step5 extends Component {
         </div>
 
         {/* preprocessed image and reognized text */}
-        <div className="row">
-          <div className="col-md-12 d-flex justify-content-around">
-            <div className="col-sm">
-              {this.state.ocrResults.length != 0 && <>
-                <Accordion defaultActiveKey={['0']} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>Sursa - textul recunoscut și editat</Accordion.Header>
-                    <Accordion.Body>
-                      {
-                        this.state.ocrResults.map((text, index) => (
-                          <div className="ocrResult mb-4" key={index}>
-                            <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span>
-                            <p key={index} alt="">{text}</p>
-                          </div>
-                        ))
-                      }
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
-              </>}
-            </div>
+        <Draggable>
+          <div className="row">
+            <div className="col-md-12 d-flex justify-content-around">
+              <div className="col-sm">
+                {this.state.ocrResults.length != 0 && <>
+                  <Accordion defaultActiveKey={['0']} alwaysOpen>
+                    <Accordion.Item eventKey="0">
+                      <Accordion.Header>Sursa - textul recunoscut și editat</Accordion.Header>
+                      <Accordion.Body>
+                        {
+                          this.state.ocrResults.map((text, index) => (
+                            <div className="ocrResult mb-4" key={index}>
+                              {/* <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
+                              <p key={index} alt="">{text}</p>
+                            </div>
+                          ))
+                        }
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  </Accordion>
+                </>}
+              </div>
 
-            <div className="col-sm">
-              {this.state.transResults != 0 && <>
-                <Accordion defaultActiveKey={['0']} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>Ținta - textul transliterat </Accordion.Header>
-                    <Accordion.Body>
-                      {
-                        this.state.transResults.map((text, index) => (
-                          <div className="transResult mb-4" key={index}>
-                            <span className="transResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span>
-                            <p key={index} alt="">{text}</p>
-                          </div>
-                        ))
-                      }
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
-              </>}
+              <div className="col-sm">
+                {this.state.transResults != 0 && <>
+                  <Accordion defaultActiveKey={['0']} alwaysOpen>
+                    <Accordion.Item eventKey="0">
+                      <Accordion.Header>Ținta - textul transliterat </Accordion.Header>
+                      <Accordion.Body>
+                        {
+                          this.state.transResults.map((text, index) => (
+                            <div className="transResult mb-4" key={index}>
+                              {/* <span className="transResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
+                              <p key={index} alt="">{text}</p>
+                            </div>
+                          ))
+                        }
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  </Accordion>
+                </>}
+              </div>
             </div>
           </div>
-        </div>
-
+        </Draggable>
 
       </div>
     )

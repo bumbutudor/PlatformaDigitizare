@@ -105,7 +105,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "2. Preprocesează imaginea",
+        name: "2. Procesează imaginea",
         component: (
           <Step2
             getStore={() => this.getStore()}
@@ -116,7 +116,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "3. OCR",
+        name: "3. Recunoaște textul",
         component: (
           <Step3
             getStore={() => this.getStore()}
@@ -127,7 +127,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "4. Verifică OCR",
+        name: "4. Verifică textul recunoscut",
         component: (
           <Step4
             getStore={() => this.getStore()}
@@ -138,7 +138,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "5. Transliterează",
+        name: "5. Transliterează textul",
         component: (
           <Step5
             getStore={() => this.getStore()}
@@ -149,7 +149,7 @@ export default class DigitizationSteps extends Component {
         ),
       },
       {
-        name: "6. Verifică Transliterația",
+        name: "6. Verifică textul transliterat",
         component: (
           <Step6
             getStore={() => this.getStore()}

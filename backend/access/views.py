@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import File
 from django.core.files.storage import FileSystemStorage
-from .utils import process_image_for_ocr, preprocess_scantailor_cli, load_txt, periodOptions, remove_hyphen, tiff_to_jpg
+from .utils import process_image_for_ocr, preprocess_scantailor_cli, load_txt, periodOptions, remove_hyphen, tiff_to_jpg, replace_all_exceptions
 import os
 from django.conf import settings
 import json
@@ -137,6 +137,11 @@ def ocr(request):
             pass
         elif period == 'secolulXVII':
             ocr_path = '/ocr/secolulXVII/'
+            first_file_path = settings.MEDIA_ROOT + ocr_path + os.path.splitext(files[0]["name"])[0] + '.txt'
+            
+            while not os.path.exists(first_file_path):
+                print("waiting for file", first_file_path)
+                time.sleep(1)
             # ocr_model_path = '/ocr/secolulXVII/models/FR15_secXVII_NT/batch.options.xml'
             for file in files:
                 uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
@@ -167,14 +172,16 @@ def transliterate(request):
             response = requests.post("https://translitera.cc/ProcessServlet", data=data)
             trans_result = response.text
             if trans_options['replaceApostrophe'] and trans_options["removeHyphen"]:
-                text_no_apostrophe = trans_result.replace("’", "-").replace('\'', "-")
-                clean_text = remove_hyphen(text_no_apostrophe)
+                text_no_hyphenation = remove_hyphen(trans_result)
+                text_no_apostrophe = text_no_hyphenation.replace("’", "-").replace('\'', "-")
+                clean_text = replace_all_exceptions(text_no_apostrophe)
                 trans_results.append(clean_text)
             elif trans_options['replaceApostrophe'] and not trans_options["removeHyphen"]:
                 clean_text = trans_result.replace("’", "-").replace('\'', "-")
                 trans_results.append(clean_text)
             elif not trans_options['replaceApostrophe'] and trans_options["removeHyphen"]:
-                clean_text = remove_hyphen(trans_result)
+                text_no_hyphenation = remove_hyphen(trans_result)
+                clean_text = replace_all_exceptions(text_no_hyphenation)
                 trans_results.append(clean_text)
             elif not trans_options['replaceApostrophe'] and not trans_options["removeHyphen"]:
                 trans_results.append(trans_result)
