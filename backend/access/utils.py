@@ -118,13 +118,13 @@ periodOptions = {
 
 
 vocabula = {
+    'mltiv' : 'milostiv',
     ' amează ':' amiază ',
     'Îbiruire': 'În biruire',
     'colocolo': 'colo-colo',
     ' șio ': ' și-o ',
     ' nui ': ' nu-i ',
     ' ee ': ' ia ',
-    
     'aciaa': 'aceea',
     'Netezinduse': 'Netezindu-se',
     'netezinduse': 'netezindu-se',

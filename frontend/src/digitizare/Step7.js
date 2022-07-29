@@ -226,7 +226,7 @@ export default class Step7 extends Component {
                                 value={item}
                                 /* onChange={this.onChangeInput.bind(this)} */
                                 readOnly
-                                className="form-control_result mb-4"
+                                className="form-control_result mb-4 text"
                                 rows="20"
                               ></textarea>
                             );
@@ -278,7 +278,7 @@ export default class Step7 extends Component {
                                 value={item}
                                 /* onChange={this.onChangeInput.bind(this)} */
                                 readOnly
-                                className="form-control_result mb-4"
+                                className="form-control_result mb-4 text"
                                 rows="20"
                               ></textarea>
                             );
