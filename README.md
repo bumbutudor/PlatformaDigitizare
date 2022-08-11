@@ -1,6 +1,6 @@
 # PlatformaDigitizare
 
-Platforma pentru preprocesarea, recunoasterea, transliterarea si editarea documentelor chirilice
+Platformă pentru preprocesarea, recunoașterea, transliterarea și editarea documentelor chirilice românești.
 
 ## Install
 
