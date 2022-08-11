@@ -1,4 +1,4 @@
-# PlatformaDigitizare
+# Platforma de Digitizare
 
 Platformă pentru preprocesarea, recunoașterea, transliterarea și editarea documentelor chirilice românești.
 
