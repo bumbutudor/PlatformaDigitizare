@@ -201,7 +201,7 @@ def transliterate(request):
                 "https://translitera.cc/ProcessServlet", data=data)
             trans_result = response.text
             if trans_options['removeHyphen']:
-                text_no_hyphenation = remove_mid_lines(trans_result)
+                text_no_hyphenation = remove_hyphen(trans_result)
                 text_without_appostrophe = text_no_hyphenation.replace(
                     "’", "-").replace('\'', "-").replace('^ ', "").replace('^', "")
                 trans_results.append(text_without_appostrophe)

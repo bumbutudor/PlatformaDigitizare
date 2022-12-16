@@ -75,7 +75,7 @@ export default class DigitizationSteps extends Component {
         replaceApostrophe: true,
         removeHyphen: true,
         removeDiacritics: false,
-        correctTextWithGPT3: true,
+        correctTextWithGPT3: false,
         exceptions: Exceptions,
 
 

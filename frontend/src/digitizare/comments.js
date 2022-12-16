@@ -151,3 +151,18 @@ line 80
                   checked={this.state.transOptions.removeHyphen}
                   onChange={this.handleTransOptionsChange.bind(this)}
                 /> */}
+
+//step 7 comments
+// line 269
+
+{/* <div className="col-md-12 control-label">
+                <div className="col-md-12 txt">
+                  <div className="col-md-4">Data</div>
+                  <div className="col-md-4">
+                    {{JSON.stringify(this.props.getStore())}}
+                    {JSON.stringify(preprocessedFiles)}
+                    {console.log(preprocessedFiles)}
+                  </div>
+                </div>
+                {<h2 className={savingCls}></h2>}
+              </div> */}
