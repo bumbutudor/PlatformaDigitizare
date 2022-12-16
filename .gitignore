@@ -52,7 +52,7 @@ backend/media/ocr/secolulXVIII
 backend/media/ocr/secolulXIX
 backend/media/ocr/secolulXX
 backend/db.sqlite3
-backend/ocr_models
+# backend/ocr_models
 backend/media/*.pdf
 backend/media/*.jpg
 backend/media/*.png
