@@ -154,11 +154,11 @@ export default class Step7 extends Component {
                     default={{
                       x: 150,
                       y: 205,
-                      width: 500,
-                      height: 190,
+                      width: 200,
+                      height: 90,
                     }}
-                    minWidth={500}
-                    minHeight={190}
+                    minWidth={200}
+                    minHeight={90}
                     bounds="window"
                   >
                     <Accordion defaultActiveKey={["0"]} alwaysOpen>
@@ -189,7 +189,7 @@ export default class Step7 extends Component {
                             className="btn btn-primary col-12"
                             onClick={this.save_image.bind(this)}
                           >
-                            Download
+                            Descarcă imaginea preprocesată
                           </button>
                         </Accordion.Body>
                       </Accordion.Item>
@@ -204,11 +204,11 @@ export default class Step7 extends Component {
                   default={{
                     x: 150,
                     y: 205,
-                    width: 500,
-                    height: 190,
+                    width: 200,
+                    height: 90,
                   }}
-                  minWidth={500}
-                  minHeight={190}
+                  minWidth={200}
+                  minHeight={90}
                   bounds="window"
                 >
                   <Accordion defaultActiveKey={["0"]} alwaysOpen>
@@ -227,7 +227,7 @@ export default class Step7 extends Component {
                                 /* onChange={this.onChangeInput.bind(this)} */
                                 readOnly
                                 className="form-control_result mb-4 text"
-                                rows="20"
+                                rows="10"
                               ></textarea>
                             );
                           })}
@@ -255,13 +255,13 @@ export default class Step7 extends Component {
               <div className="col-4">
                 <Rnd
                   default={{
-                    x: 150,
-                    y: 205,
-                    width: 500,
-                    height: 190,
+                    x: 50,
+                    y: 150,
+                    width: 200,
+                    height: 90,
                   }}
-                  minWidth={500}
-                  minHeight={190}
+                  minWidth={200}
+                  minHeight={90}
                   bounds="window"
                 >
                   <Accordion defaultActiveKey={["0"]} alwaysOpen>
@@ -279,7 +279,7 @@ export default class Step7 extends Component {
                                 /* onChange={this.onChangeInput.bind(this)} */
                                 readOnly
                                 className="form-control_result mb-4 text"
-                                rows="20"
+                                rows="10"
                               ></textarea>
                             );
                           })}
@@ -323,8 +323,8 @@ export default class Step7 extends Component {
             {this.state.show && (JSON.stringify(this.props.getStore()))}
           </div> */}
 
-          < div className="col-2 m-4" >
-            <button className="btn btn-success" onClick={() => {
+          < div className="col-5" >
+            <button className="btn btn-primary" onClick={() => {
               this.props.jumpToStep(0); Object.getOwnPropertyNames(this.props.getStore()).forEach(function (prop) {
                 delete obj[prop];
               });
@@ -333,6 +333,15 @@ export default class Step7 extends Component {
             </button>
 
           </div >
+          <div className="col-5">
+            <button className="btn btn-success" onClick={() => {
+              this.props.jumpToStep(0); Object.getOwnPropertyNames(this.props.getStore()).forEach(function (prop) {
+                delete obj[prop];
+              });
+            }}>
+              Publică documentul digitizat
+            </button>
+          </div>
 
         </div >
 

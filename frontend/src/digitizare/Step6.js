@@ -105,7 +105,7 @@ class Step6 extends Component {
               <div className="form-group col-md-12 content form-block-holder">
                 <label className="control-label col-12">
                   {this.state.transResults &&
-
+                    // use google translate to translate the transilterated  text
 
                     this.state.transResults.map((item, index) => {
                       return (

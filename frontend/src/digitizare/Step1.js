@@ -31,7 +31,7 @@ export default class Step1 extends Component {
           Un singur fișier incărcat nu va trece limita de 100MB.
           Toate fișierele incărcate la un singur ciclu de digitizare nu vor trece limita de 700MB.
           <br /><br />
-          Atunci când vor fi selectate mai două sau mai multe fișiere, trebuie de luat în considerare că toate aceste fișiere vor fi procesate cu aceleași opțiuni de procesare, respectiv, trebuie să vă asigurați că fișierele încărcate sunt din aceeași perioadă, au unul și același alfabet și necesită aceleași opțiuni de preprocesare a imaginii. Dacă aveți seturi de documente din mai multe perioade, atunci aceste seturi vor fi digitizate în diferite cicluri de digitizare.
+          Atunci când vor fi selectate două sau mai multe fișiere, trebuie de luat în considerare că toate aceste fișiere vor fi procesate cu aceleași opțiuni de procesare, respectiv, trebuie să vă asigurați că fișierele încărcate sunt din aceeași perioadă, au unul și același alfabet și necesită aceleași opțiuni de preprocesare a imaginii. Dacă aveți seturi de documente din mai multe perioade, atunci aceste seturi vor fi digitizate în diferite cicluri de digitizare.
           <br /><br />
           Este posibilitatea de a șterge unele fișiere care au fost întamplator selectate in acest pas.
         </Popover.Body>
