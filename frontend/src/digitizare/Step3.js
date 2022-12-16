@@ -12,11 +12,7 @@ import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert';
 import { Fancybox } from "@fancyapps/ui/src/Fancybox/Fancybox.js";
 import "@fancyapps/ui/dist/fancybox.css";
-import { Resizable } from "re-resizable";
 import Draggable from 'react-draggable'; // The default
-import { Rnd } from "react-rnd";
-
-
 
 
 // OCR
@@ -35,12 +31,7 @@ export default class Step3 extends Component {
       show: false,
       showLoader: false,
       showNextStep: false,
-      showErroe: false,
-      // TODO
-      // const [show, setShow] = React.useState(true);
-      // const [showLoader, setShowLoader] = React.useState(false);
-      // const [showNextStep, setShowNextStep] = React.useState(false);
-      // const [showError, setShowError] = React.useState(false);
+      showError: false,
     };
 
     this.step3Info = (
@@ -52,46 +43,19 @@ export default class Step3 extends Component {
       </Popover>
 
     );
-    this.API = new FetchWrapper('http://localhost:8000/');
+    // Post request
+    this.API = new FetchWrapper("https://a926-81-180-76-251.eu.ngrok.io/"); // localhost dev server url http://127.0.0.1:8000/
 
-    // this._validateOnDemand = true; // this flag enables onBlur validation as user fills forms
-
-    // this.validationCheck = this.validationCheck.bind(this);
-    // this.isValidated = this.isValidated.bind(this);
   }
 
   handleFilePath(filePath) {
-    if (filePath.length > 0) return 'http://127.0.0.1:8000/media/' + filePath;
+    if (filePath.length > 0) return 'https://a926-81-180-76-251.eu.ngrok.io/media/' + filePath;
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   }
 
   componentDidMount() { }
 
   componentWillUnmount() { }
-
-  // isValidated() {
-  //   const userInput = this._grabUserInput(); // grab user entered vals
-  //   const validateNewInput = this._validateData(userInput); // run the new input against the validator
-  //   let isDataValid = false;
-
-  //   // if full validation passes then save to store and pass as valid
-  //   if (Object.keys(validateNewInput).every((k) => { return validateNewInput[k] === true })) {
-  //     if (this.props.getStore().email != userInput.email || this.props.getStore().period != userInput.period) { // only update store of something changed
-  //       this.props.updateStore({
-  //         ...userInput,
-  //         savedToCloud: false // use this to notify step4 that some changes took place and prompt the user to save again
-  //       });  // Update store here (this is just an example, in reality you will do it via redux or flux)
-  //     }
-
-  //     isDataValid = true;
-  //   }
-  //   else {
-  //     // if anything fails then update the UI validation state but NOT the UI Data State
-  //     this.setState(Object.assign(userInput, validateNewInput, this._validationErrors(validateNewInput)));
-  //   }
-
-  //   return isDataValid;
-  // }
 
   validationCheck() {
     if (!this._validateOnDemand)
@@ -103,27 +67,6 @@ export default class Step3 extends Component {
     this.setState(Object.assign(userInput, validateNewInput, this._validationErrors(validateNewInput)));
   }
 
-  // _validateData(data) {
-  //   return {
-  //     periodVal: (data.period != 0), // required: anything besides N/A
-  //     emailVal: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(data.email), // required: regex w3c uses in html5
-  //   }
-  // }
-
-  // _validationErrors(val) {
-  //   const errMsgs = {
-  //     periodValMsg: val.periodVal ? '' : 'A period selection is required',
-  //     emailValMsg: val.emailVal ? '' : 'A valid email is required'
-  //   }
-  //   return errMsgs;
-  // }
-
-  // _grabUserInput() {
-  //   return {
-  //     period: this.refs.period.value,
-  //     email: this.refs.email.value
-  //   };
-  // }
 
   async handleOCRRequest() {
     this.setState({ show: false });
@@ -132,6 +75,7 @@ export default class Step3 extends Component {
 
     const ocrEndpoint = "ocr/";
     const postData = this.state;
+    // console.log(postData);
 
     this.API.post(ocrEndpoint, postData)
       .then(data => {
@@ -145,7 +89,7 @@ export default class Step3 extends Component {
         }
       })
       .catch(error => {
-        console.log(error);
+        // console.log(error);
         this.setState({ showError: true });
       })
       .finally(() => {
@@ -155,26 +99,6 @@ export default class Step3 extends Component {
 
 
   render() {
-    // explicit class assigning based on validation
-    // let notValidClasses = {};
-
-    // if (typeof this.state.periodVal == 'undefined' || this.state.periodVal) {
-    //   notValidClasses.periodCls = 'no-error col-md-8';
-    // }
-    // else {
-    //   notValidClasses.periodCls = 'has-error col-md-8';
-    //   notValidClasses.periodValGrpCls = 'val-err-tooltip';
-    // }
-
-    // if (typeof this.state.emailVal == 'undefined' || this.state.emailVal) {
-    //   notValidClasses.emailCls = 'no-error col-md-8';
-    // }
-    // else {
-    //   notValidClasses.emailCls = 'has-error col-md-8';
-    //   notValidClasses.emailValGrpCls = 'val-err-tooltip';
-    // }
-
-
     return (
       <div className="step step3">
         <div className="row">
@@ -232,7 +156,7 @@ export default class Step3 extends Component {
               <div className="col-sm mb-3">
                 {this.state.period === "secolulXX" && <>
                   <Form.Group className="mb-3">
-                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
+                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documentul tău:</Form.Label>
                     <Form.Check
                       label="Model bazat pe alfabetul chirilic sovietic"
                       name="secolulXX"
@@ -243,16 +167,7 @@ export default class Step3 extends Component {
                       checked={this.state.ocrModel === "cyrillic"}
                       onChange={() => { this.setState({ ocrModel: "cyrillic", alphabet: "cyrillic", show: true }); this.props.updateStore({ ocrModel: "cyrillic", alphabet: "cyrillic" }); }}
                     />
-                    {/* 
-                    <Form.Check
-                      label="Model bazat pe alfabetul românesc (latin)"
-                      name="secolulXX"
-                      type="radio"
-                      id="radio12"
-                      value="latin"
-                      checked={this.state.ocrModel === "latin"}
-                      onChange={() => { this.setState({ ocrModel: "latin", alphabet: "latin", show: true }); this.props.updateStore({ ocrModel: "latin", alphabet: "latin" }); }}
-                    /> */}
+
                   </Form.Group>
 
                 </>}
@@ -424,14 +339,15 @@ export default class Step3 extends Component {
         </div>
 
         {/* preprocessed image and reognized text */}
-        <Draggable>
 
-          <div className="row">
-            {/* <span className='text-right'>Drag me</span> */}
-            <div className="col-md-12 d-flex justify-content-around">
 
-              <div className="col-sm mr-2">
-                {this.state.sourceFiles.length != 0 && <>
+        <div className="row">
+          {/* <span className='text-right'>Drag me</span> */}
+          <div className="container-for-results col-md-12 d-flex justify-content-around">
+
+            <div className="col-sm mr-2">
+              {this.state.sourceFiles.length != 0 && <>
+                <Draggable>
 
                   <Accordion defaultActiveKey={0} alwaysOpen>
                     {
@@ -463,11 +379,13 @@ export default class Step3 extends Component {
                     }
 
                   </Accordion>
-                </>}
-              </div>
+                </Draggable>
+              </>}
+            </div>
 
-              <div className="col-sm">
-                {this.state.ocrResults != 0 && <>
+            <div className="col-sm">
+              {this.state.ocrResults != 0 && <>
+                <Draggable>
                   <Accordion defaultActiveKey={0} alwaysOpen>
                     {
                       this.state.ocrResults.map((text, index) => (
@@ -484,12 +402,13 @@ export default class Step3 extends Component {
                     }
 
                   </Accordion>
-                </>}
-              </div>
+                </Draggable>
+              </>}
             </div>
           </div>
+        </div>
 
-        </Draggable>
+
       </div>
     )
   }

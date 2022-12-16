@@ -23,6 +23,7 @@ import OpenCV from "../components/OpenCV";
 import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert'
 import FetchWrapper from "../components/FetchWrapper";
+import Draggable from 'react-draggable'; // The default
 
 // Step 2 - preprocess the images
 const Step2 = (props) => {
@@ -77,14 +78,14 @@ const Step2 = (props) => {
 
   // Fisierele sursa
   const handleFilePath = (filePath) => {
-    if (filePath.length > 0) return "http://127.0.0.1:8000/media/" + filePath;
+    if (filePath.length > 0) return "https://a926-81-180-76-251.eu.ngrok.io/media/" + filePath; // localhost dev server url http://127.0.0.1:8000/media/
     //https://httpbin.org/post
     //http://127.0.0.1:8000/media/
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   };
 
   // Post request
-  const API = new FetchWrapper("http://127.0.0.1:8000/");
+  const API = new FetchWrapper("https://a926-81-180-76-251.eu.ngrok.io/"); // localhost dev server url http://127.0.0.1:8000/
 
   const handlePreprocessRequest = async () => {
     setShow(false);
@@ -239,66 +240,71 @@ const Step2 = (props) => {
 
       {/* source image and preprocessed images */}
       < div className="row" >
-        <div className="col-md-12 d-flex justify-content-around">
-          <div className="col-sm">
-            {sourceFiles.length != 0 && (
-              <>
-                <Accordion defaultActiveKey={["0"]} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>
-                      Sursa - imagine originală{" "}
-                    </Accordion.Header>
-                    <Accordion.Body>
-                      {sourceFiles.map((src, index) => (
-                        <a
-                          className=""
-                          data-fancybox="gallery_1"
-                          data-src={handleFilePath(src.name)}
-                          data-caption={`${src.name} (imagine originală)`}
-                          key={index}
-                        >
-                          <img
-                            className="Accordion_image"
-                            src={handleFilePath(src.name)}
-                          />
-                        </a>
-                      ))}
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
-              </>
-            )}
-          </div>
+        <div className="container-for-results col-md-12 d-flex justify-content-around">
+          <Draggable>
+            <div className="col-sm">
+              {sourceFiles.length != 0 && (
+                <>
+                  <Accordion defaultActiveKey={["0"]} alwaysOpen>
+                    <Accordion.Item eventKey="0">
+                      <Accordion.Header>
+                        Sursa - imagine originală{" "}
+                      </Accordion.Header>
+                      <Accordion.Body>
+                        {sourceFiles.map((src, index) => (
+                          <a
+                            className=""
+                            data-fancybox="gallery_1"
+                            data-src={handleFilePath(src.name)}
+                            data-caption={`${src.name} (imagine originală)`}
+                            key={index}
+                          >
+                            <img
+                              className="Accordion_image"
+                              src={handleFilePath(src.name)}
+                            />
+                          </a>
+                        ))}
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  </Accordion>
+                </>
+              )}
+            </div>
+          </Draggable>
 
-          <div className="col-sm">
-            {preprocessedFiles.length != 0 && (
-              <>
-                <Accordion defaultActiveKey={["0"]} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>
-                      Ținta - imagine preprocesată
-                    </Accordion.Header>
-                    <Accordion.Body>
-                      {preprocessedFiles.map((src, index) => (
-                        <a
-                          className=""
-                          data-fancybox="gallery_2"
-                          data-src={handleFilePath(src)}
-                          data-caption={`${src} (imagine procesată)`}
-                          key={index}
-                        >
-                          <img
-                            className="Accordion_image"
-                            src={handleFilePath(src)}
-                          />
-                        </a>
-                      ))}
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
-              </>
-            )}
-          </div>
+          <Draggable>
+            <div className="col-sm">
+              {preprocessedFiles.length != 0 && (
+                <>
+                  <Accordion defaultActiveKey={["0"]} alwaysOpen>
+                    <Accordion.Item eventKey="0">
+                      <Accordion.Header>
+                        Ținta - imagine preprocesată
+                      </Accordion.Header>
+                      <Accordion.Body>
+                        {preprocessedFiles.map((src, index) => (
+                          <a
+                            className=""
+                            data-fancybox="gallery_2"
+                            data-src={handleFilePath(src)}
+                            data-caption={`${src} (imagine procesată)`}
+                            key={index}
+                          >
+                            <img
+                              className="Accordion_image"
+                              src={handleFilePath(src)}
+                            />
+                          </a>
+                        ))}
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  </Accordion>
+                </>
+              )}
+            </div>
+          </Draggable>
+
         </div>
       </div >
     </div >

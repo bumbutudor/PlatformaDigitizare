@@ -9,7 +9,7 @@ const FileUpload = (props) => {
         const body = new FormData();
         body.append("uploadedFiles", file);
         // console.log(file);
-        return { url: "http://127.0.0.1:8000/get_file/", body }; // localhost http://127.0.0.1:8000/get_file/
+        return { url: "https://a926-81-180-76-251.eu.ngrok.io/get_file/", body }; // localhost http://127.0.0.1:8000/get_file/
     };
 
     const onFileChange = ({ meta, file }, status) => {

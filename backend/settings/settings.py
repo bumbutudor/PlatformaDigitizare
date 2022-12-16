@@ -51,7 +51,6 @@ MIDDLEWARE = [
 ]
 
 
-
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = [
@@ -151,6 +150,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-MEDIA_URL='/media/'
+MEDIA_URL = '/media/'
 
-MEDIA_ROOT=os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+OPENAI_API_KEY = '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'

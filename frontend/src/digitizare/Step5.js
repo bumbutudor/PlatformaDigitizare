@@ -6,9 +6,12 @@ import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 import OverlayTrigger from 'react-bootstrap/esm/OverlayTrigger';
 import Overlay from 'react-bootstrap/esm/Overlay';
+import FetchWrapper from '../components/FetchWrapper';
+import Spinner from "react-bootstrap/Spinner";
+import Alert from 'react-bootstrap/Alert';
 import Popover from "react-bootstrap/Popover";
 import Draggable from 'react-draggable'; // The default
-import { Rnd } from "react-rnd";
+
 
 // Transliteraion
 export default class Step5 extends Component {
@@ -24,7 +27,6 @@ export default class Step5 extends Component {
       ocrResults: props.getStore().ocrResults,
       transResults: props.getStore().transResults,
       transOptions: props.getStore().transOptions,
-      show: true,
       dictionaryInfo:
         (
           <Popover id="popover-basic">
@@ -34,11 +36,28 @@ export default class Step5 extends Component {
               <p>Exemplu: <em>амязэ</em> conform regulilor trece in <em>amează</em>, iar varianta corecă <b><em>amiază</em></b> se află în dicționar.</p>
             </Popover.Body>
           </Popover>
-        )
+        ),
+      aboutOpenAI:
+        (
+          <Popover id="popover-basic">
+            <Popover.Header as="h4">OpenAI și GPT-3</Popover.Header>
+            <Popover.Body>
+              <p>OpenAI este o companie de cercetare în inteligență artificială (IA) care se concentrează pe dezvoltarea tehnologiilor de învățare automată (machine learning) avansate și pe aplicarea lor în domenii precum jocuri, limbaj și robotică. OpenAI a fost fondată în 2015 de Elon Musk, Sam Altman, Greg Brockman și Ilya Sutskever cu scopul de a promova și proteja IA prin dezvoltarea unor tehnologii responsabile și sigure.</p>
+              <p>GPT-3 (Generative Pre-training Transformer 3) este un model de învățare automată dezvoltat de OpenAI care poate fi utilizat pentru a genera text, răspunde la întrebări și îndeplini diverse sarcini de procesare a limbajului natural. GPT-3 este unul dintre cele mai mari modele de învățare automată disponibile public, cu 175 miliarde de parametri, și este considerat un pas important în direcția dezvoltării modelelor de învățare automată capabile să îndeplinească diverse sarcini de procesare a limbajului natural.</p>
+              <p>Pentru mai multe informații despre GPT-3, puteți vizita site-ul oficial al OpenAI la adresa <a href="https://openai.com/blog/gpt-3-apps/">https://openai.com/blog/gpt-3-apps/</a>. Acolo veți găsi detalii despre funcționarea și utilizarea GPT-3, precum și exemple de aplicații care au fost construite utilizând acest model. De asemenea, puteți găsi mai multe informații despre GPT-3 pe Wikipedia la adresa <a href="https://en.wikipedia.org/wiki/GPT-3">https://en.wikipedia.org/wiki/GPT-3</a>.</p>
+            </Popover.Body>
+          </Popover>
+        ),
+      show: true,
+      showLoader: false,
+      showNextStep: false,
+      showErrors: false,
     };
 
     this.alphabetOptions = props.getStore().alphabetOptions;
     this.periodOptions = props.getStore().periodOptions;
+    this.API = new FetchWrapper("https://a926-81-180-76-251.eu.ngrok.io/"); // localhost dev server url http://127.0.0.1:8000/
+
   }
 
   componentDidMount() { }
@@ -48,11 +67,10 @@ export default class Step5 extends Component {
 
 
   handleFilePath(filePath) {
-    if (filePath.length > 0) return 'http://127.0.0.1:8000/media/' + filePath;
+    if (filePath.length > 0) return 'https://a926-81-180-76-251.eu.ngrok.io/media/' + filePath;
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   }
 
-  // Preprocesare cu FineReader
   handleTransOptionsChange(e) {
     let newState = this.state.transOptions;
     newState[e.target.name] = e.target.checked;
@@ -60,30 +78,36 @@ export default class Step5 extends Component {
     // this.props.updateStore({ transOptions: { ...this.state.transOptions, [e.target.name]: e.target.checked } });
   }
 
+  async handleTransRequest() {
+    this.setState({ show: false });
+    this.setState({ showError: false });
+    this.setState({ showLoader: true });
 
+    const transEndpoint = 'transliterate/';
+    const postData = this.state;
+    this.API.post(transEndpoint, postData)
+      .then((data) => {
+        if (data.transResults.length > 0) {
+          console.log(data.transResults);
+          this.setState({ transResults: data.transResults });
+          this.props.updateStore({ transResults: data.transResults });
+          this.setState({ showNextStep: true });
+        } else {
+          this.setState({ showError: true });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        this.setState({ showError: true });
+      })
+      .finally(() => {
+        this.setState({ showLoader: false });
+      });
 
+  }
   render() {
-    // explicit class assigning based on validation
-    // let notValidClasses = {};
 
-    const handleTransRequest = async () => {
-      const transAPI = "http://127.0.0.1:8000/transliterate/";
-
-      this.setState({ show: false });
-      const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.state)
-      };
-      const response = await fetch(transAPI, requestOptions);
-      const data = await response.json();
-
-      this.setState({ transResults: data.transResults });
-      this.props.updateStore({ transResults: data.transResults });
-      console.log(data);
-
-    }
-
+    console.log(this.state.transOptions.exceptions.dict);
 
     return (
       <div className="step step3">
@@ -101,71 +125,13 @@ export default class Step5 extends Component {
                   <Form.Label>5.1 Perioada documentului este:
                     <span className='text-primary mx-2'>{this.periodOptions[this.state.period]}</span>
                   </Form.Label>
-                  {/* <Form.Check
-                    inline
-                    label="Secolul XX"
-                    name="group5"
-                    type="radio"
-                    id="radio1"
-                    value="secolulXX"
-                    checked={this.state.period === "secolulXX"}
-                    onChange={() => { this.setState({ period: "secolulXX" }); this.props.updateStore({ period: "secolulXX" }); }}
-                  />
-                  <Form.Check
-                    inline
-                    label="Secolul XIX"
-                    name="group5"
-                    type="radio"
-                    id="radio2"
-                    value="secolulXIX"
-                    checked={this.state.period === "secolulXIX"}
-                    onChange={() => { this.setState({ period: "secolulXIX" }); this.props.updateStore({ period: "secolulXIX" }); }}
-                  />
-                  <Form.Check
-                    inline
-                    label="Secolul XVIII"
-                    name="group5"
-                    type="radio"
-                    id="radio3"
-                    value="secolulXVIII"
-                    checked={this.state.period === "secolulXVIII"}
-                    onChange={() => { this.setState({ period: "secolulXVIII" }); this.props.updateStore({ period: "secolulXVIII" }); }}
 
-                  />
-                  <Form.Check
-                    inline
-                    label="Secolul XVII"
-                    name="group5"
-                    type="radio"
-                    id="radio4"
-                    value="secolulXVII"
-                    checked={this.state.period === "secolulXVII"}
-                    onChange={() => { this.setState({ period: "secolulXVII" }); this.props.updateStore({ period: "secolulXVII" }); }}
-                  /> */}
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>5.2 Alfabetul documentului este:
                     <span className='text-primary mx-2'>{this.alphabetOptions[this.state.alphabet]}</span>
                   </Form.Label>
-                  {/* <Form.Check
-                    label="Alfabetul chirilic sovietic"
-                    name="group6"
-                    type="checkbox"
-                    id="radio11"
-                    value="cyrillic"
-                    checked={this.state.alphabet === "cyrillic"}
-                    onChange={() => { this.setState({ alphabet: "cyrillic" }); this.props.updateStore({ alphabet: "cyrillic" }); }}
-                  />
 
-                  <Form.Check
-                    label="Alfabetul românesc (latin)"
-                    name="group6"
-                    type="checkbox"
-                    id="radio12"
-                    value="latin"
-                    checked={this.state.alphabet === "latin"}
-                    onChange={() => { this.setState({ alphabet: "latin" }); this.props.updateStore({ alphabet: "latin" }); }}
-                  /> */}
                 </Form.Group>
               </div>
               <Form.Group className="col-sm">
@@ -178,26 +144,13 @@ export default class Step5 extends Component {
                   checked={this.state.transOptions.actualizeWordForm}
                   onChange={this.handleTransOptionsChange.bind(this)}
                 />
-                {/* <Form.Check
-                  label="Înlocuiește apostroful cu cratima (n’ar => n-ar)"
-                  name="replaceApostrophe"
-                  id="checkboxTrans2"
-                  type="checkbox"
-                  checked={this.state.transOptions.replaceApostrophe}
-                  onChange={this.handleTransOptionsChange.bind(this)}
-                />
-                <Form.Check
-                  label="Șterge cratima care desparte cuvântul de la sfârșit de rând"
-                  name="removeHyphen"
-                  id="checkboxTrans3"
-                  type="checkbox"
-                  checked={this.state.transOptions.removeHyphen}
-                  onChange={this.handleTransOptionsChange.bind(this)}
-                /> */}
+
+
+
                 <div className='d-flex'>
                   <Form.Check
                     disabled
-                    label="Corectează textul cu dicționarul de excepții"
+                    label="Folosește dicționarul de excepții"
                     name="removeHyphen"
                     id="checkboxTrans3"
                     type="checkbox"
@@ -209,16 +162,55 @@ export default class Step5 extends Component {
                   </OverlayTrigger>
 
                 </div>
+                <div className='d-flex'>
+
+                  <Form.Check
+                    label="Corectează textul cu agentul inteligent de la OpenAI"
+                    name="correctTextWithGPT3"
+                    id="checkboxTrans4"
+                    type="checkbox"
+                    checked={this.state.transOptions.correctTextWithGPT3}
+                    onChange={this.handleTransOptionsChange.bind(this)}
+                  />
+
+                  <OverlayTrigger trigger="click" rootClose placement="left" overlay={this.state.aboutOpenAI}>
+                    <Button type="button" className="btn btn-info text-white mx-4">?</Button>
+                  </OverlayTrigger>
+
+                </div>
 
               </Form.Group>
-
-
-
               <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
-                {this.state.period && this.state.show ? <Button variant="primary" onClick={handleTransRequest}>Start Transliterare</Button> : <Button variant="primary" disabled>Start Transliterare</Button>}
-                {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(5)}>Verifică și editează rezultatul</Button> </>}
+                {
+                  this.state.show ?
+                    <Button
+                      variant="primary"
+                      onClick={this.handleTransRequest.bind(this)}>
+                      Start Transliterare
+                    </Button>
+                    :
+                    <Button
+                      variant="primary"
+                      disabled>{
+                        this.state.showLoader ? <>
+                          <Spinner animation="border" role="status" />
+                          <span className="sr-only">Se transliterează...</span>
+                        </>
+                          : "Start Transliterare"
+                      }
+                    </Button>
+                }
+                {
+                  this.state.showNextStep && !this.state.showLoader && (
+                    <>
+                      <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(5)}>Verifică și editează rezultatul</Button>
+                    </>
+                  )
+                }
+                {/* {this.state.period && this.state.show ? <Button variant="primary" onClick={handleTransRequest}>Start Transliterare</Button> : <Button variant="primary" disabled>Start Transliterare</Button>}
+                {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(5)}>Verifică și editează rezultatul</Button> </>} */}
               </div>
-
+              {this.state.showError && <Alert variant="danger">A apărut o eroare la transliterare. Vă rugăm să încercați din nou.</Alert>}
             </div>
           </Form>
         </div>

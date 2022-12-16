@@ -164,7 +164,7 @@ const ScanTailor = (props) => {
                 <ListGroup as="ol" numbered>
                     <ListGroup.Item>
                         <Player>
-                            <source src="http://127.0.0.1:8000/media/pre/ScanTailor/tutorial.mp4" />
+                            <source src="https://a926-81-180-76-251.eu.ngrok.io/media/pre/ScanTailor/tutorial.mp4" />
                         </Player>
                     </ListGroup.Item>
                     <ListGroup.Item as="li">Apasă butonul <code>Start preprocesare</code>&nbsp;&nbsp;&nbsp;&nbsp; de mai jos pentru a deschide aplicația ScanTailor în calculatorul tău.

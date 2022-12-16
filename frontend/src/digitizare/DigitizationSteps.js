@@ -9,6 +9,7 @@ import Step4 from "./Step4";
 import Step5 from "./Step5";
 import Step6 from "./Step6";
 import Step7 from "./Step7";
+import Exceptions from "../components/ExceptionDict";
 
 import "../css/main.css";
 
@@ -25,7 +26,8 @@ export default class DigitizationSteps extends Component {
       typography: "",
       alphabet: "cyrillic", //default is cyrillic
       savedToCloud: false,
-      uploadFolder: "C:\\Users\\bumbu\\OneDrive\\Desktop\\Projects\\PlatformaDigitizare\\backend\\media",
+      // uploadFolder: "C:\\Users\\bumbu\\OneDrive\\Desktop\\Projects\\PlatformaDigitizare\\backend\\media",
+      uploadFolder: "https://a926-81-180-76-251.eu.ngrok.io/media/",
       sourceFiles: [{ "name": "5.jpg", "size": 1535454, "type": "image/jpeg", "lastModifiedDate": "2021-05-27T15:49:52.594Z", "uploadedDate": "2022-05-17T19:15:44.681Z", "percent": 100, "id": "1652814944681-0", "status": "removed", "previewUrl": "blob:http://localhost:8080/3a701ff3-27a9-47ff-9ca3-fc2ce6554e10", "width": 1305, "height": 1333 }],
       preprocessedFiles: [],
       preprocessWith: "",
@@ -72,6 +74,11 @@ export default class DigitizationSteps extends Component {
         actualizeWordForm: true,
         replaceApostrophe: true,
         removeHyphen: true,
+        removeDiacritics: false,
+        correctTextWithGPT3: true,
+        exceptions: Exceptions,
+
+
       },
     };
   }

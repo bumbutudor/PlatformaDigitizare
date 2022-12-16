@@ -8,12 +8,15 @@ from PIL import Image
 import spacy
 import nltk
 import re
+import openai
+from django.conf import settings
 
 
 IMAGE_SIZE = 1800
 BINARY_THREHOLD = 180
 
-def process_image_for_ocr(file_path, out_path, resolution = 300):
+
+def process_image_for_ocr(file_path, out_path, resolution=300):
     # TODO : Implement using opencv
     dpi = (resolution, resolution)
     temp_filename = set_image_dpi(file_path, dpi=dpi)
@@ -21,7 +24,8 @@ def process_image_for_ocr(file_path, out_path, resolution = 300):
     cv2.imwrite(out_path, im_new)
     return im_new
 
-def set_image_dpi(file_path, dpi = 300):
+
+def set_image_dpi(file_path, dpi=300):
     im = Image.open(file_path)
     length_x, width_y = im.size
     factor = max(1, int(IMAGE_SIZE / length_x))
@@ -33,12 +37,15 @@ def set_image_dpi(file_path, dpi = 300):
     im_resized.save(temp_filename, dpi=dpi)
     return temp_filename
 
+
 def image_smoothening(img):
     ret1, th1 = cv2.threshold(img, BINARY_THREHOLD, 255, cv2.THRESH_BINARY)
     ret2, th2 = cv2.threshold(th1, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     blur = cv2.GaussianBlur(th2, (1, 1), 0)
-    ret3, th3 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret3, th3 = cv2.threshold(
+        blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return th3
+
 
 def remove_noise_and_smooth(file_name):
     img = cv2.imread(file_name, 0)
@@ -50,6 +57,7 @@ def remove_noise_and_smooth(file_name):
     img = image_smoothening(img)
     or_image = cv2.bitwise_or(img, closing)
     return or_image
+
 
 def preprocess_scantailor_cli(input_file, options, output):
     dpi = str(options['resolution'])
@@ -63,14 +71,18 @@ def preprocess_scantailor_cli(input_file, options, output):
     content_detection = options['contentDetection']
     normalize_illumination = str(options['normalizeIllumination']).lower()
 
-    command = "scantailor-cli --dpi=" + dpi + " --normalize-illumination=" + normalize_illumination + " --content-detection=" + content_detection + orientation + " --despeckle=" + despeckle + " --white-margins=" + white_margins + " --color-mode=" + color_mode + " --threshold=" + threshold + " --output-dpi=" + dpi + " " + input_file + " " + output
+    command = "scantailor-cli --dpi=" + dpi + " --normalize-illumination=" + normalize_illumination + " --content-detection=" + content_detection + orientation + " --despeckle=" + \
+        despeckle + " --white-margins=" + white_margins + " --color-mode=" + color_mode + \
+        " --threshold=" + threshold + " --output-dpi=" + \
+        dpi + " " + input_file + " " + output
     return command
 
 
 def tiff_to_jpg(input_file):
     read = cv2.imread(input_file)
     outfile = input_file.split('.')[0] + '.jpg'
-    cv2.imwrite(outfile,read,[int(cv2.IMWRITE_JPEG_QUALITY), 200])
+    cv2.imwrite(outfile, read, [int(cv2.IMWRITE_JPEG_QUALITY), 200])
+
 
 def load_txt(filename):
     # open the file readonly
@@ -82,25 +94,29 @@ def load_txt(filename):
     return text
 
 
+def remove_mid_lines(text):
+    # Eliminam liniile de mijloc folosind o expresie regulata
+    text = re.sub(r'(?<=[a-zA-Z])-(?=[a-zA-Z])', '', text)
+    return text
+
+
 def remove_hyphen(trans_text):
     nlp = spacy.load("ro_core_news_lg")
-    lista1=[]
-    lista2=[]
+    lista1 = []
+    lista2 = []
     doc = nlp(trans_text)
 
     for token in doc:
         lista1.append(token.text)
         lista1.append(token.pos_)
         lista2.append(lista1)
-        lista1=[]
-
-
+        lista1 = []
 
     for word in lista2:
-        if word[0][-1]!="-":
+        if word[0][-1] != "-":
             if "-" in word[0]:
-                cuvant=word[0].replace("-","")
-                trans_text=trans_text.replace(word[0],cuvant)
+                cuvant = word[0].replace("-", "")
+                trans_text = trans_text.replace(word[0], cuvant)
     return trans_text
 
 
@@ -108,6 +124,33 @@ def replace_all_exceptions(text):
     for i, j in vocabula.items():
         text = text.replace(i, j)
     return text
+
+
+def correct_text_with_OpenAI(text):
+    openai.api_key = settings.OPENAI_API_KEY
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt="corecteaza textul :" + text,
+        temperature=0,
+        top_p=1.0,
+        max_tokens=100,
+        frequency_penalty=0.0,
+        presence_penalty=0.0
+    )
+    return response["choices"][0]["text"]
+
+
+def correct_text(text):
+    # split in ckunks of paragraphs
+    chunks = text.split("\n")
+    print(len(chunks))
+    # print(len(chunks))
+    corrected_text = ""
+    for chunk in chunks:
+        print(chunk)
+        corrected_text += correct_text_with_OpenAI(chunk)
+    return corrected_text
+
 
 periodOptions = {
     'secolulXX': '0',
@@ -118,8 +161,8 @@ periodOptions = {
 
 
 vocabula = {
-    'mltiv' : 'milostiv',
-    ' amează ':' amiază ',
+    'mltiv': 'milostiv',
+    ' amează ': ' amiază ',
     'Îbiruire': 'În biruire',
     'colocolo': 'colo-colo',
     ' șio ': ' și-o ',
@@ -134,24 +177,24 @@ vocabula = {
     'păzeșteo': 'păzește-o',
     'săși': 'să-și',
     'nuți': 'nu-ți',
-    'injinerul':'inginerul',
-    'Injinerul':'Inginerul',
-    'leji':'legi',
-    'lichia':'lichea',
-    'Lichia':'Lichea',
-    'lichiaua':'licheaua',
-    'mi-ră':'miră',
-    'chiamă':'cheamă',
-    ' ese ':' iese ',
-    'siamănă':'seamănă',
+    'injinerul': 'inginerul',
+    'Injinerul': 'Inginerul',
+    'leji': 'legi',
+    'lichia': 'lichea',
+    'Lichia': 'Lichea',
+    'lichiaua': 'licheaua',
+    'mi-ră': 'miră',
+    'chiamă': 'cheamă',
+    ' ese ': ' iese ',
+    'siamănă': 'seamănă',
     'treciau': 'treceau',
     ' oae ': ' oaie ',
     'mămăligai': 'mămăliga-i',
     'soldățiască': 'soldățească',
     ' carei ': ' care-i ',
     'prototipi': 'prototip',
-    'nechibzuig':'nechibzuit',
-    'zbere':'zbiere',
+    'nechibzuig': 'nechibzuit',
+    'zbere': 'zbiere',
     'închee': 'încheie',
     'îndoeală': 'îndoială',
     ' dee ': ' deie ',
@@ -192,14 +235,14 @@ vocabula = {
     ' şi ': ' și ',
     ' eălile ': ' sălile ',
     ' leje ': ' lege ',
-    ' frijidere ' : ' frigidere ',
+    ' frijidere ': ' frigidere ',
     ' aleje ': ' alege ',
-    ' țio ' : ' ți-o ',
+    ' țio ': ' ți-o ',
     'orijinal': 'original',
-    ' Nui ' : ' Nu-i ',
-    ' nui ' : ' nu-i ',
-    ' îidrăjit ' : ' îndrăgit ',
-    ' muăeielor ' : ' muzeelor ',
+    ' Nui ': ' Nu-i ',
+    ' nui ': ' nu-i ',
+    ' îidrăjit ': ' îndrăgit ',
+    ' muăeielor ': ' muzeelor ',
     ' În ': ' în ',
     ' leai ': ' le-ai ',
     'deneai': 'de ne-ai',
@@ -212,9 +255,9 @@ vocabula = {
     ',': ', ',
     ' neai ': ' ne-ai ',
     ' deneau ': ' de ne-au ',
-    ' pla tă ': ' plată ', 
+    ' pla tă ': ' plată ',
 
     # 'luseră':''
 
-    
-    }
+
+}
