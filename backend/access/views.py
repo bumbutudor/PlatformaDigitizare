@@ -10,20 +10,37 @@ from django.conf import settings
 import json
 import requests
 import time
+from upload_cloud import S3Uploader
+from datetime import datetime
 
+# AWS credentials
+AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
+AWS_ACCESS_KEY = os.environ['AWS_ACCESS_KEY']
 
-def home(request):
+# S3 bucket name
+bucket_name = 'emoldova.bucket'
+
+# S3 path
+today = datetime.now().strftime('%Y-%m-%d/')
+s3_path = "platforma-digi/" + today
+
+# S3 client
+s3_uploader = S3Uploader(bucket_name, s3_path, AWS_ACCESS_KEY, AWS_SECRET_KEY)
+
+def home():
     return JsonResponse({"code": 200, "msg": "success"})
 
 
-def get_file(request):
+def upload_file(request):
     # print(request.FILES['uploadedFile'])
     myfile = request.FILES['uploadedFiles']
     fs = FileSystemStorage()
+    print(myfile.name, myfile)
     filename = fs.save(myfile.name, myfile)
     uploaded_file_url = fs.url(filename)
     obj = File.objects.create(image=uploaded_file_url)
     if obj:
+        s3_uploader.upload_file(myfile.name, myfile)
         return JsonResponse({"code": 200, "msg": "success"})
     else:
         return JsonResponse({"code": 500, "msg": "server error"})

@@ -6,3 +6,4 @@ nltk
 numpy
 Pillow
 openai
+boto3
