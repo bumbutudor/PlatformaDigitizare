@@ -9,17 +9,23 @@ const FileUpload = (props) => {
         const body = new FormData();
         body.append("uploadedFiles", file);
         // console.log(file);
-        return { url: "https://a926-81-180-76-251.eu.ngrok.io/get_file/", body }; // localhost http://127.0.0.1:8000/get_file/
+        return { url: "https://a926-81-180-76-251.eu.ngrok.io/upload/", body }; // localhost http://127.0.0.1:8000/get_file/
     };
 
     const onFileChange = ({ meta, file }, status) => {
         // console.log(file, meta, status);
     };
+    const getS3Files = (files) => {
+        return files.map((f) => {
+            const response = JSON.parse(f.xhr.response);
+            return response.s3File;
+        });
+
+    }
 
     const handleSubmit = (files, allFiles) => {
-        // console.log(props.get)
+        props.updateStore({ s3SourceFiles: getS3Files(files) });
         props.updateStore({ sourceFiles: files.map(f => f.meta) });
-        // console.log(props)
         allFiles.forEach(f => f.remove())
         props.jumpToStep(1);
     }

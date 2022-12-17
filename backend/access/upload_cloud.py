@@ -1,30 +1,35 @@
 import abc
 import boto3
 
+
 class CloudUploader(abc.ABC):
     @abc.abstractmethod
     def upload_file(self, file: str, file_name: str) -> str:
         pass
 
+
 class S3Uploader(CloudUploader):
     def __init__(self, bucket_name: str, s3_path: str, access_key: str, secret_key: str):
         self.bucket_name = bucket_name
         self.s3_path = s3_path
-        self.s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+        self.s3 = boto3.client(
+            's3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
 
     def upload_file(self, file: str, file_name: str) -> str:
         # Set the content type based on the file extension
         content_type = self.get_content_type(file_name)
 
-        self.s3.upload_file(file, self.bucket_name, self.s3_path + file_name, ExtraArgs={'ContentType': content_type})
-        return f'https://{self.bucket_name}.s3.amazonaws.com/{self.s3_path}{file_name}'
-    
+        self.s3.upload_file(file, self.bucket_name, self.s3_path +
+                            file_name, ExtraArgs={'ContentType': content_type})
+        return f'https://s3.eu-west-2.amazonaws.com/{self.bucket_name}/{self.s3_path}{file_name}'
+
     def delete_file(self, file_name: str) -> None:
-        self.s3.delete_object(Bucket=self.bucket_name, Key=self.s3_path + file_name)
-    
+        self.s3.delete_object(Bucket=self.bucket_name,
+                              Key=self.s3_path + file_name)
+
     def get_file(self, file_name: str) -> str:
         return f'https://{self.bucket_name}.s3.amazonaws.com/{self.s3_path}{file_name}'
-    
+
     # Set the content type based on the file extension
     def get_content_type(self, file_name: str) -> str:
         if file_name.endswith('.jpg') or file_name.endswith('.jpeg'):

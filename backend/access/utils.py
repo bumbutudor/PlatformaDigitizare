@@ -71,10 +71,13 @@ def preprocess_scantailor_cli(input_file, options, output):
     content_detection = options['contentDetection']
     normalize_illumination = str(options['normalizeIllumination']).lower()
 
-    command = "scantailor-cli --dpi=" + dpi + " --normalize-illumination=" + normalize_illumination + " --content-detection=" + content_detection + orientation + " --despeckle=" + \
-        despeckle + " --white-margins=" + white_margins + " --color-mode=" + color_mode + \
-        " --threshold=" + threshold + " --output-dpi=" + \
-        dpi + " " + input_file + " " + output
+    # command = "scantailor-cli --dpi=" + dpi + " --normalize-illumination=" + normalize_illumination + " --content-detection=" + content_detection + orientation + " --despeckle=" + \
+    #     despeckle + " --white-margins=" + white_margins + " --color-mode=" + color_mode + \
+    #     " --threshold=" + threshold + " --output-dpi=" + \
+    #     dpi + " " + input_file + " " + output
+
+    command = "scantailor-cli --dpi= " + dpi + input_file + " " + output
+
     return command
 
 

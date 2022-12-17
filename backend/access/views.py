@@ -10,12 +10,12 @@ from django.conf import settings
 import json
 import requests
 import time
-from upload_cloud import S3Uploader
+from .upload_cloud import S3Uploader
 from datetime import datetime
 
 # AWS credentials
-AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
 AWS_ACCESS_KEY = os.environ['AWS_ACCESS_KEY']
+AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
 
 # S3 bucket name
 bucket_name = 'emoldova.bucket'
@@ -27,21 +27,23 @@ s3_path = "platforma-digi/" + today
 # S3 client
 s3_uploader = S3Uploader(bucket_name, s3_path, AWS_ACCESS_KEY, AWS_SECRET_KEY)
 
+
 def home():
     return JsonResponse({"code": 200, "msg": "success"})
 
 
-def upload_file(request):
+def upload(request):
     # print(request.FILES['uploadedFile'])
     myfile = request.FILES['uploadedFiles']
     fs = FileSystemStorage()
-    print(myfile.name, myfile)
     filename = fs.save(myfile.name, myfile)
+    print(filename)
     uploaded_file_url = fs.url(filename)
+    uploaded_file_path = settings.MEDIA_ROOT + '/' + filename
     obj = File.objects.create(image=uploaded_file_url)
     if obj:
-        s3_uploader.upload_file(myfile.name, myfile)
-        return JsonResponse({"code": 200, "msg": "success"})
+        s3_file_url = s3_uploader.upload_file(uploaded_file_path, filename)
+        return JsonResponse({"code": 200, "msg": "success", "s3File": {"name": filename, "url": s3_file_url}})
     else:
         return JsonResponse({"code": 500, "msg": "server error"})
 
@@ -53,7 +55,8 @@ def preprocess(request):
         preprocess_with = data['preprocessWith']
         files = data['sourceFiles']
 
-        preprocessedFilesURLS = []
+        preprocessedFiles = []
+        s3PreprocessedFiles = []
         if preprocess_with == 'OpenCV':
             preprocess_opencv = data['preprocessOpenCV']
             pre_path = '/pre/OpenCV/'
@@ -64,10 +67,13 @@ def preprocess(request):
                         '/' + file["name"]
                     processed_file_path = settings.MEDIA_ROOT + \
                         pre_path + file["name"]
-                    preprocessedFilesURLS.append('pre/OpenCV/' + file["name"])
                     process_image_for_ocr(
                         uploaded_file_path, processed_file_path, resolution)
-                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFilesURLS})
+                    s3_url = s3_uploader.upload_file(
+                        processed_file_path, 'pre/OpenCV/' + file["name"])
+                    preprocessedFiles.append('pre/OpenCV/' + file["name"])
+                    s3PreprocessedFiles.append(s3_url)
+                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFiles, "s3PreprocessedFiles": s3PreprocessedFiles})
 
             else:
                 for file in files:
@@ -75,10 +81,14 @@ def preprocess(request):
                         '/' + file["name"]
                     processed_file_path = settings.MEDIA_ROOT + \
                         pre_path + file["name"]
-                    preprocessedFilesURLS.append('pre/OpenCV/' + file["name"])
                     process_image_for_ocr(
                         uploaded_file_path, processed_file_path)
-                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFilesURLS})
+
+                    s3_url = s3_uploader.upload_file(
+                        processed_file_path, 'pre/OpenCV/' + file["name"])
+                    s3PreprocessedFiles.append(s3_url)
+                    preprocessedFiles.append('pre/OpenCV/' + file["name"])
+                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles, "preprocessedFiles": preprocessedFiles})
 
         elif preprocess_with == 'FR':
             preprocess_fr = data['preprocessFR']
@@ -91,19 +101,16 @@ def preprocess(request):
                 print("waiting for file", first_file_path)
                 time.sleep(1)
 
-            if preprocess_fr['convertToBlackAndWhite']:
-                for file in files:
-                    pre_file_path = pre_path + \
-                        os.path.splitext(file["name"])[0] + '.jpg'
-                    preprocessedFilesURLS.append(pre_file_path)
-                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFilesURLS})
-            elif not preprocess_fr['convertToBlackAndWhite']:
-                for file in files:
-                    pre_file_path = pre_path + '/preNoBlackAndWhite' + \
-                        os.path.splitext(file["name"])[0] + '.jpg'
-                    preprocessedFilesURLS.append(pre_file_path)
-                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFilesURLS})
-            pass
+            for file in files:
+                pre_file_path = pre_path + \
+                    os.path.splitext(file["name"])[0] + '.jpg'
+                processed_file_path = settings.MEDIA_ROOT + pre_file_path
+                s3_url = s3_uploader.upload_file(
+                    processed_file_path, 'pre/FR/' + os.path.splitext(file["name"])[0] + '.jpg')
+                s3PreprocessedFiles.append(s3_url)
+                preprocessedFiles.append(pre_file_path)
+            return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles, "preprocessedFiles": preprocessedFiles})
+
         elif preprocess_with == 'ScanTailor':
             if data["preprocessMode"] == 'desktop':
                 command = "scantailor.exe"
@@ -120,11 +127,17 @@ def preprocess(request):
                     for file in files:
                         # uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
                         # output_folder =  settings.MEDIA_ROOT + pre_path
+                        tiff_file = os.path.splitext(file["name"])[0] + '.tif'
+                        jpg_file = os.path.splitext(file["name"])[0] + '.jpg'
+
                         tiff_to_jpg(
-                            pre_path + os.path.splitext(file["name"])[0] + '.tif')
-                        preprocessedFilesURLS.append(
-                            'out/' + os.path.splitext(file["name"])[0] + '.jpg')
-                    return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFilesURLS})
+                            pre_path + tiff_file)
+
+                        s3_url = s3_uploader.upload_file(
+                            pre_path + jpg_file, 'pre/ScanTailorDesktop/' + jpg_file)
+                        s3PreprocessedFiles.append(s3_url)
+                        preprocessedFiles.append('out/' + jpg_file)
+                    return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles, "preprocessedFiles": preprocessedFiles})
             elif data["preprocessMode"] == 'web':
                 pre_path = '/pre/ScanTailor/'
                 preprocess_scantailor = data['preprocessScanTailor']
@@ -134,13 +147,16 @@ def preprocess(request):
                     output_folder = settings.MEDIA_ROOT + pre_path
                     command = preprocess_scantailor_cli(
                         uploaded_file_path, preprocess_scantailor, output_folder)
-                    print(command)
+                    tiff_file = os.path.splitext(file["name"])[0] + '.tif'
+                    jpg_file = os.path.splitext(file["name"])[0] + '.jpg'
+
                     os.system(command)
-                    tiff_to_jpg(output_folder +
-                                os.path.splitext(file["name"])[0] + '.tif')
-                    preprocessedFilesURLS.append(
-                        'pre/ScanTailor/' + os.path.splitext(file["name"])[0] + '.jpg')
-                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFilesURLS})
+                    tiff_to_jpg(output_folder + tiff_file)
+
+                    s3_url = s3_uploader.upload_file(
+                        output_folder + jpg_file, 'pre/ScanTailor/' + jpg_file)
+                    preprocessedFiles.append('pre/ScanTailor/' + jpg_file)
+                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles, "preprocessedFiles": preprocessedFiles})
         elif preprocess_with == 'Gimp':
             # TODO : Implement using Gimp
             pass

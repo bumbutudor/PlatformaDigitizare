@@ -154,4 +154,4 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-OPENAI_API_KEY = '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'
+OPENAI_API_KEY = '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'

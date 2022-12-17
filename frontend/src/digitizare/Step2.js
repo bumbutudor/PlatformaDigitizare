@@ -54,9 +54,14 @@ const Step2 = (props) => {
   // console.log(props.getStore());
 
   const sourceFiles = props.getStore().sourceFiles;
+  const s3SourceFiles = props.getStore().s3SourceFiles;
 
   const [preprocessedFiles, setpreprocessedFiles] = React.useState(
     props.getStore().preprocessedFiles
+  );
+
+  const [s3PreprocessedFiles, setS3PreprocessedFiles] = React.useState(
+    props.getStore().s3PreprocessedFiles
   );
 
   const [selectedOption, setSelectedOption] = React.useState(
@@ -104,7 +109,8 @@ const Step2 = (props) => {
         if (data.preprocessedFiles.length > 0) {
           setShowNextStep(true);
           setpreprocessedFiles(data.preprocessedFiles);
-          props.updateStore({ preprocessedFiles: data.preprocessedFiles });
+          setS3PreprocessedFiles(data.s3PreprocessedFiles);
+          props.updateStore({ preprocessedFiles: data.preprocessedFiles, s3PreprocessedFiles: data.s3PreprocessedFiles });
         } else {
           setShowError(true);
         }
@@ -240,7 +246,7 @@ const Step2 = (props) => {
 
       {/* source image and preprocessed images */}
       < div className="row" >
-        <div className="container-for-results col-md-12 d-flex justify-content-around">
+        <div className="container-for-results col-md-12 d-flex p-2 border gap-2 bg-light rounded">
           <Draggable>
             <div className="col-sm">
               {sourceFiles.length != 0 && (
@@ -251,17 +257,17 @@ const Step2 = (props) => {
                         Sursa - imagine originală{" "}
                       </Accordion.Header>
                       <Accordion.Body>
-                        {sourceFiles.map((src, index) => (
+                        {s3SourceFiles.map((file, index) => (
                           <a
                             className=""
                             data-fancybox="gallery_1"
-                            data-src={handleFilePath(src.name)}
-                            data-caption={`${src.name} (imagine originală)`}
+                            data-src={file.url}
+                            data-caption={`${file.name} (imagine originală)`}
                             key={index}
                           >
                             <img
                               className="Accordion_image"
-                              src={handleFilePath(src.name)}
+                              src={file.url}
                             />
                           </a>
                         ))}
@@ -275,7 +281,7 @@ const Step2 = (props) => {
 
           <Draggable>
             <div className="col-sm">
-              {preprocessedFiles.length != 0 && (
+              {s3PreprocessedFiles.length != 0 && (
                 <>
                   <Accordion defaultActiveKey={["0"]} alwaysOpen>
                     <Accordion.Item eventKey="0">
@@ -283,17 +289,17 @@ const Step2 = (props) => {
                         Ținta - imagine preprocesată
                       </Accordion.Header>
                       <Accordion.Body>
-                        {preprocessedFiles.map((src, index) => (
+                        {s3PreprocessedFiles.map((s3_url, index) => (
                           <a
                             className=""
                             data-fancybox="gallery_2"
-                            data-src={handleFilePath(src)}
-                            data-caption={`${src} (imagine procesată)`}
+                            data-src={s3_url}
+                            data-caption="imagine procesată"
                             key={index}
                           >
                             <img
                               className="Accordion_image"
-                              src={handleFilePath(src)}
+                              src={s3_url}
                             />
                           </a>
                         ))}

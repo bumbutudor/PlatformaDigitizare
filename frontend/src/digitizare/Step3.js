@@ -24,8 +24,10 @@ export default class Step3 extends Component {
       period: props.getStore().period,
       typography: props.getStore().typography,
       preprocessedFiles: props.getStore().preprocessedFiles,
+      s3PreprocessedFiles: props.getStore().s3PreprocessedFiles,
       alphabet: props.getStore().alphabet,
       sourceFiles: props.getStore().sourceFiles,
+      s3SourceFiles: props.getStore().s3SourceFiles,
       ocrModel: props.getStore().ocrModel,
       ocrResults: props.getStore().ocrResults,
       show: false,
@@ -343,7 +345,7 @@ export default class Step3 extends Component {
 
         <div className="row">
           {/* <span className='text-right'>Drag me</span> */}
-          <div className="container-for-results col-md-12 d-flex justify-content-around">
+          <div className="container-for-results col-md-12 d-flex p-2 border gap-2 bg-light rounded">
 
             <div className="col-sm mr-2">
               {this.state.sourceFiles.length != 0 && <>
@@ -351,7 +353,7 @@ export default class Step3 extends Component {
 
                   <Accordion defaultActiveKey={0} alwaysOpen>
                     {
-                      this.state.preprocessedFiles.map((src, index) => (
+                      this.state.s3PreprocessedFiles.map((s3_url, index) => (
                         console.log(index),
                         <Accordion.Item eventKey={index}>
                           <Accordion.Header>Sursa - imagine preprocesată</Accordion.Header>
@@ -360,13 +362,13 @@ export default class Step3 extends Component {
                               <a
                                 className=""
                                 data-fancybox="gallery_2"
-                                data-src={this.handleFilePath(src)}
-                                data-caption={`${src} (imagine procesată)`}
+                                data-src={s3_url}
+                                data-caption='imagine procesată'
                                 key={index}
                               >
                                 {/* <span className="ocrResultTitle text-info">{`Imaginea ${index + 1}:`}</span> */}
                                 <img
-                                  src={this.handleFilePath(src)}
+                                  src={s3_url}
                                   // onClick={() => openImageViewer(index)}
                                   className="Accordion_image"
                                   width="90%"

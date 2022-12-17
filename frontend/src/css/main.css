@@ -230,8 +230,7 @@ ol.progtrckr li.progtrckr-done:hover:before {
   height: auto;
 }
 
-.form-block-image {
-}
+.form-block-image {}
 
 .btn-keyboard {
   /* position: absolute; */
@@ -242,8 +241,8 @@ ol.progtrckr li.progtrckr-done:hover:before {
   /* width: 70% !important;
   display: inline !important; */
   font-size: 14px;
-  margin-right: 2%;
-  width: 75% !important;
+  /* margin-right: 2%;
+  width: 75% !important; */
   display: inline-block !important;
   border-radius: 6px;
   cursor: text;
@@ -338,6 +337,7 @@ html .step7 label {
 .popover {
   max-width: 400px !important;
 }
+
 /* .App {
   margin-top: 10%;
 }
