@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import File
 from django.core.files.storage import FileSystemStorage
-from .utils import process_image_for_ocr, remove_mid_lines, preprocess_scantailor_cli, load_txt, periodOptions, remove_hyphen, tiff_to_jpg, replace_all_exceptions, correct_text
+from .utils import *
 import os
 from django.conf import settings
 import json
@@ -234,7 +234,7 @@ def transliterate(request):
                 "https://translitera.cc/ProcessServlet", data=data)
             trans_result = response.text
             if trans_options['removeHyphen']:
-                text_no_hyphenation = remove_hyphen(trans_result)
+                text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(trans_result)
                 text_without_appostrophe = text_no_hyphenation.replace(
                     "’", "-").replace('\'', "-").replace('^ ', "").replace('^', "")
                 trans_results.append(text_without_appostrophe)

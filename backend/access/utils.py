@@ -11,6 +11,8 @@ import re
 import openai
 from django.conf import settings
 
+nlp = spacy.load("ro_core_news_lg")
+
 
 IMAGE_SIZE = 1800
 BINARY_THREHOLD = 180
@@ -97,14 +99,54 @@ def load_txt(filename):
     return text
 
 
-def remove_mid_lines(text):
-    # Eliminam liniile de mijloc folosind o expresie regulata
-    text = re.sub(r'(?<=[a-zA-Z])-(?=[a-zA-Z])', '', text)
+def obtine_vocabular(nume_fisier):
+  # Deschide fisierul
+  with open(nume_fisier, "r") as f:
+    # Citeste continutul fisierului linie cu linie
+    linii = f.readlines()
+
+  # Initializam lista de cuvinte
+  cuvinte = []
+
+  # Parcurgem fiecare linie din fisier
+  for linie in linii:
+    # Impartim linia in cuvinte folosind functia split()
+    cuvinte_linie = linie.split()
+    
+    # Adaugam fiecare cuvant cu cratima din lista obtinuta in lista de cuvinte totale
+    for cuvant in cuvinte_linie:
+        if "-" in cuvant:
+            cuvinte.extend(cuvinte_linie)
+
+  # Returnam lista de cuvinte
+  return cuvinte
+
+
+# Apelam functia pentru a obtine vocabularul din fisierul "vocabular.txt"
+vocabular = obtine_vocabular("vocabular.txt")
+def remove_cratima_with_spacy_and_vocabulary(text, vocabulary):
+   # remove apostrophes
+    text = text.replace("’", "-").replace('\'', "-").replace('^ ', "").replace('^', "")
+    # remove spaces left right to "-"
+    text = re.sub(r'\s*-\s*', "-", text)
+    
+    lista1 = []
+    lista2 = []
+    doc = nlp(str(text))
+
+    for token in doc:
+        lista1.append(token.text)
+        lista1.append(token.pos_)
+        lista2.append(lista1)
+        lista1 = []
+
+    for word in lista2:
+        if "-" in word[0] and word[0].lower() not in vocabulary:
+            cuvant = word[0].replace("-", "")
+            text = text.replace(word[0], cuvant)
     return text
 
-
 def remove_hyphen(trans_text):
-    nlp = spacy.load("ro_core_news_lg")
     lista1 = []
     lista2 = []
     doc = nlp(trans_text)
