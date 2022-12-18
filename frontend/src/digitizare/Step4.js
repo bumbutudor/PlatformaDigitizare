@@ -156,9 +156,9 @@ class Step4 extends Component {
                       return (
 
                         <Accordion.Item eventKey={index} key={index}>
-                          {/* <Accordion.Header>
+                          <Accordion.Header>
                             {`Rezultatul OCR pentru documentul ${this.state.sourceFiles[index].name}`}
-                          </Accordion.Header> */}
+                          </Accordion.Header>
                           <Accordion.Body>
 
                             <Row>

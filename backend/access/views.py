@@ -12,7 +12,9 @@ import requests
 import time
 from .upload_cloud import S3Uploader
 from datetime import datetime
-
+# Apelam functia pentru a obtine vocabularul din fisierul "vocabular.txt"
+filepath = settings.BASE_DIR + '/vocabular.txt'
+vocabulary = obtine_vocabular(filepath)
 # AWS credentials
 AWS_ACCESS_KEY = os.environ['AWS_ACCESS_KEY']
 AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
@@ -234,10 +236,11 @@ def transliterate(request):
                 "https://translitera.cc/ProcessServlet", data=data)
             trans_result = response.text
             if trans_options['removeHyphen']:
-                text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(trans_result)
-                text_without_appostrophe = text_no_hyphenation.replace(
-                    "’", "-").replace('\'', "-").replace('^ ', "").replace('^', "")
-                trans_results.append(text_without_appostrophe)
+                text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(
+                    trans_result, vocabulary)
+                # text_without_appostrophe = text_no_hyphenation.replace(
+                #     "’", "-").replace('\'', "-").replace('^ ', "").replace('^', "")
+                trans_results.append(text_no_hyphenation)
             if trans_options['correctTextWithGPT3']:
                 corrected_text = correct_text(trans_result)
                 trans_results.append(corrected_text)
