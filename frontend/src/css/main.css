@@ -230,7 +230,8 @@ ol.progtrckr li.progtrckr-done:hover:before {
   height: auto;
 }
 
-.form-block-image {}
+.form-block-image {
+}
 
 .btn-keyboard {
   /* position: absolute; */
@@ -259,11 +260,11 @@ ol.progtrckr li.progtrckr-done:hover:before {
 .image_ocr {
   /* margin-left: 4%; */
   /* margin-top: 4rem; */
-  width: 23%;
+  /* width: 23%;
   margin-bottom: 20px;
   border-radius: 4px;
   box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.15);
-  transition: 0.2s;
+  transition: 0.2s; */
 }
 
 .image_ocr:hover {

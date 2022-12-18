@@ -156,14 +156,14 @@ class Step4 extends Component {
                       return (
 
                         <Accordion.Item eventKey={index} key={index}>
-                          <Accordion.Header>
+                          {/* <Accordion.Header>
                             {`Rezultatul OCR pentru documentul ${this.state.sourceFiles[index].name}`}
-                          </Accordion.Header>
+                          </Accordion.Header> */}
                           <Accordion.Body>
 
                             <Row>
 
-                              <Col sm={8}>
+                              <Col sm={9}>
                                 <textarea
                                   key={index}
                                   id={index}
@@ -175,31 +175,29 @@ class Step4 extends Component {
                                 ></textarea>
                               </Col>
 
-                              <Col sm={4}>
-                                <button
-                                  id="keyboard-button"
-                                  className="btn btn-primary"
-                                  type="button"
-                                  title="Tastatura Virtuală"
-                                  onClick={() => this.setState({ showk: !this.state.showk })}>
-                                  <svg className="svg_keyboard mx-2 pb-1" viewBox="0 0 24 24">
-                                    <path fill="currentColor"
-                                      d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
-                                    /></svg>
-                                  {this.handleKeyboardButton(this.state.showk)}
-                                </button>
+                              <Col sm={3}>
+                                <Col sm={12}>
+                                  <button
+                                    id="keyboard-button"
+                                    className="btn btn-primary"
+                                    type="button"
+                                    title="Tastatura Virtuală"
+                                    onClick={() => this.setState({ showk: !this.state.showk })}>
+                                    <svg className="svg_keyboard mx-2 pb-1" viewBox="0 0 24 24">
+                                      <path fill="currentColor"
+                                        d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
+                                      /></svg>
+                                    {this.handleKeyboardButton(this.state.showk)}
+                                  </button>
+                                  <div className="mt-3">
+                                    Compară rezultatul OCR cu imaginea sursă preprocesată:
+                                    <img src={this.state.s3PreprocessedFiles[index]}
+                                    />
+                                  </div>
 
-                                <a
-                                  className="image_ocr_a"
-                                  data-fancybox="gallery_2"
-                                  data-src={this.state.s3PreprocessedFiles[index]}
-                                  data-caption={"imagine preprocesată"}
-                                >
-                                  <img
-                                    className="image_ocr"
-                                    src={this.state.s3PreprocessedFiles[index]}
-                                  />
-                                </a>
+                                </Col>
+
+
                               </Col>
 
 
@@ -250,7 +248,7 @@ class Step4 extends Component {
               </div> */}
             </div>
           </form>
-        </div>
+        </div >
 
         <Row className="mt-2">
           <Col>
@@ -272,7 +270,7 @@ class Step4 extends Component {
             </>)}
           </Col>
         </Row>
-      </div>
+      </div >
     );
   }
 }
