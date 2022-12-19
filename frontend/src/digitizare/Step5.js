@@ -41,6 +41,7 @@ export default class Step5 extends Component {
             </Popover.Body>
           </Popover>
         ),
+      exceptionDictionary: [],
       aboutOpenAI:
         (
           <Popover id="popover-basic">
@@ -74,7 +75,7 @@ export default class Step5 extends Component {
 
 
   handleFilePath(filePath) {
-    if (filePath.length > 0) return 'https://a926-81-180-76-251.eu.ngrok.io/media/' + filePath;
+    if (filePath.length > 0) return this.API.baseURL + 'media/' + filePath;
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   }
 
@@ -168,7 +169,7 @@ export default class Step5 extends Component {
                     <Button type="button" className="btn btn-info text-white mx-4">?</Button>
                   </OverlayTrigger>
 
-                  <DictionaryModal show={this.state.showModal} onHide={() => this.setState({ showModal: false })} />
+                  <DictionaryModal api={this.API} show={this.state.showModal} onHide={() => this.setState({ showModal: false })} />
 
                 </div>
                 <div className='d-flex'>
@@ -238,7 +239,10 @@ export default class Step5 extends Component {
                           this.state.ocrResults.map((text, index) => (
                             <div className="ocrResult mb-4" key={index}>
                               {/* <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
-                              <p key={index} alt="">{text}</p>
+                              {text.split('\n').map((item, key) => {
+                                return <span key={key}>{item}<br /></span>
+                              })}
+
                             </div>
                           ))
                         }
@@ -258,7 +262,9 @@ export default class Step5 extends Component {
                           this.state.transResults.map((text, index) => (
                             <div className="transResult mb-4" key={index}>
                               {/* <span className="transResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
-                              <p key={index} alt="">{text}</p>
+                              {text.split('\n').map((item, key) => {
+                                return <span key={key}>{item}<br /></span>
+                              })}
                             </div>
                           ))
                         }

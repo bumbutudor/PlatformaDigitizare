@@ -7,7 +7,22 @@ import Row from 'react-bootstrap/Row';
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 
+
+
 const DictionaryModal = (props) => {
+    const [exceptionsDict, setExceptionDict] = useState([]);
+
+    const handleGetDictionary = () => {
+        const dictionaryEndpoint = 'api/exception-dictionary/';
+        props.api.get(dictionaryEndpoint).then((data) => {
+            setExceptionDict(data);
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+
+
     return (
         <Modal size='lg' fullscreen={false} {...props} aria-labelledby="contained-modal-title-vcenter">
             <Modal.Header closeButton>
@@ -20,6 +35,17 @@ const DictionaryModal = (props) => {
                 <Row>
                     <Col xs={12} md={4}>
                         Lista de exceptii
+                        <Button onClick={handleGetDictionary}>Get dictionary</Button>
+                        {
+                            exceptionsDict.map((item) => {
+                                return (
+                                    <div>
+                                        <p>{item.exception}</p>
+                                        <p>{item.correct_word}</p>
+                                    </div>
+                                )
+                            })
+                        }
 
                     </Col>
                     <Col xs={12} md={8}>
@@ -38,11 +64,26 @@ const DictionaryModal = (props) => {
                                         aria-label="Varianta corecta"
                                         aria-describedby=""
                                     />
-                                    <Button variant="outline-secondary" id="button-addon2">
-                                        Adaugă
-                                    </Button>
                                 </InputGroup>
                             </Form.Group>
+                            <Form.Group className="mb-3" controlId="formBasicEmail">
+                                <Form.Label>Autor</Form.Label>
+                                <Form.Control type="email" placeholder="Enter email" />
+                                <Form.Text className="text-muted">
+                                    In mod implicit autorul este anonim.
+                                </Form.Text>
+                            </Form.Group>
+                            <Form.Group className="mb-3" controlId="formBasicCheckbox">
+
+                                <Form.Label>Secolul</Form.Label>
+                                <Form.Check type="checkbox" label=" XX" />
+                                <Form.Check type="checkbox" label=" XIX" />
+                                <Form.Check inline type="checkbox" label=" XVIII" />
+                                <Form.Check inline type="checkbox" label=" XVII" />
+                            </Form.Group>
+                            <Button variant="primary" type="submit">
+                                Adaugă
+                            </Button>
                         </Form>
                     </Col>
                 </Row>
