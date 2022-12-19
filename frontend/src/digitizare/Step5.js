@@ -11,6 +11,7 @@ import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert';
 import Popover from "react-bootstrap/Popover";
 import Draggable from 'react-draggable'; // The default
+import DictionaryModal from '../components/DictionaryModal';
 
 
 // Transliteraion
@@ -30,10 +31,13 @@ export default class Step5 extends Component {
       dictionaryInfo:
         (
           <Popover id="popover-basic">
-            <Popover.Header as="h4">Dicționarul de excepții</Popover.Header>
+            <Popover.Header as="h4">Dicționar de excepții</Popover.Header>
             <Popover.Body>
-              Cuprinde cuvinte care nu pot fi transliterate utilând reguli de transliterare.
-              <p>Exemplu: <em>амязэ</em> conform regulilor trece in <em>amează</em>, iar varianta corecă <b><em>amiază</em></b> se află în dicționar.</p>
+              <p>Dictionarul include cuvinte care nu pot fi transliterate utilând reguli de transliterare. </p>
+              <p>De exemplu, cuvântul <em>амязэ</em> conform regulilor de transliterare trece in <em>amează</em>, iar varianta corectă <b><em>amiază</em></b> se află în dicționar.</p>
+              <Button variant="primary" onClick={() => this.setState({ showModal: true })}>
+                Gestionează dicționarul
+              </Button>
             </Popover.Body>
           </Popover>
         ),
@@ -45,6 +49,7 @@ export default class Step5 extends Component {
               <p>OpenAI este o companie de cercetare în inteligență artificială (IA) care se concentrează pe dezvoltarea tehnologiilor de învățare automată (machine learning) avansate și pe aplicarea lor în domenii precum jocuri, limbaj și robotică. OpenAI a fost fondată în 2015 de Elon Musk, Sam Altman, Greg Brockman și Ilya Sutskever cu scopul de a promova și proteja IA prin dezvoltarea unor tehnologii responsabile și sigure.</p>
               <p>GPT-3 (Generative Pre-training Transformer 3) este un model de învățare automată dezvoltat de OpenAI care poate fi utilizat pentru a genera text, răspunde la întrebări și îndeplini diverse sarcini de procesare a limbajului natural. GPT-3 este unul dintre cele mai mari modele de învățare automată disponibile public, cu 175 miliarde de parametri, și este considerat un pas important în direcția dezvoltării modelelor de învățare automată capabile să îndeplinească diverse sarcini de procesare a limbajului natural.</p>
               <p>Pentru mai multe informații despre GPT-3, puteți vizita site-ul oficial al OpenAI la adresa <a href="https://openai.com/blog/gpt-3-apps/">https://openai.com/blog/gpt-3-apps/</a>. Acolo veți găsi detalii despre funcționarea și utilizarea GPT-3, precum și exemple de aplicații care au fost construite utilizând acest model. De asemenea, puteți găsi mai multe informații despre GPT-3 pe Wikipedia la adresa <a href="https://en.wikipedia.org/wiki/GPT-3">https://en.wikipedia.org/wiki/GPT-3</a>.</p>
+
             </Popover.Body>
           </Popover>
         ),
@@ -52,6 +57,7 @@ export default class Step5 extends Component {
       showLoader: false,
       showNextStep: false,
       showErrors: false,
+      showModal: false,
     };
 
     this.alphabetOptions = props.getStore().alphabetOptions;
@@ -160,6 +166,8 @@ export default class Step5 extends Component {
                   <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.state.dictionaryInfo}>
                     <Button type="button" className="btn btn-info text-white mx-4">?</Button>
                   </OverlayTrigger>
+
+                  <DictionaryModal show={this.state.showModal} onHide={() => this.setState({ showModal: false })} />
 
                 </div>
                 <div className='d-flex'>

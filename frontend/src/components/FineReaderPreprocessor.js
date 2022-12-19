@@ -10,7 +10,7 @@ import Col from "react-bootstrap/esm/Col";
 import Row from "react-bootstrap/esm/Row";
 
 
-const FineReaderPre = (props) => {
+const FineReaderPreprocessor = (props) => {
 
     // Preprocesare cu FineReader
 
@@ -34,14 +34,6 @@ const FineReaderPre = (props) => {
                 </Form.Label>
             </Form.Group>
             <Form.Group>
-                <Form.Check
-                    label="Divizarea imaginii în mai multe pagini"
-                    name="divideIntoPages"
-                    id="checkboxFR6"
-                    type="checkbox"
-                    checked={preprocessFR.divideIntoPages}
-                    onChange={handlePreprocessFRChange}
-                />
                 <Form.Check
                     label="Corectează rezoluția imaginii"
                     name="correctResolution"
@@ -82,10 +74,18 @@ const FineReaderPre = (props) => {
                     checked={preprocessFR.straightenTextLines}
                     onChange={handlePreprocessFRChange}
                 />
+                <Form.Check
+                    label="Taie imaginea în pagini"
+                    name="divideIntoPages"
+                    id="checkboxFR6"
+                    type="checkbox"
+                    checked={preprocessFR.divideIntoPages}
+                    onChange={handlePreprocessFRChange}
+                />
             </Form.Group>
         </>
     );
 
 }
 
-export default FineReaderPre;
+export default FineReaderPreprocessor;

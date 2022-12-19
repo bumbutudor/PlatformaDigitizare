@@ -6,19 +6,12 @@ import "react-awesome-lightbox/build/style.css";
 import Form from "react-bootstrap/Form";
 import Accordion from "react-bootstrap/Accordion";
 import Button from "react-bootstrap/Button";
-import ListGroup from "react-bootstrap/ListGroup";
-import Tabs from "react-bootstrap/Tabs";
-import Tab from "react-bootstrap/Tab";
-import RangeSlider from "react-bootstrap-range-slider";
 import "react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css";
-import { mdiSourceCommitStartNextLocal } from "@mdi/js";
-import ImgsViewer from "react-images-viewer";
-import { Fancybox } from "@fancyapps/ui/src/Fancybox/Fancybox.js";
 import "@fancyapps/ui/dist/fancybox.css";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import ScanTailor from "../components/ScanTailor";
-import FineReaderPre from "../components/FineReaderPre";
+import FineReaderPreprocessor from "../components/FineReaderPreprocessor";
 import OpenCV from "../components/OpenCV";
 import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert'
@@ -73,20 +66,9 @@ const Step2 = (props) => {
   const [showError, setShowError] = React.useState(false);
 
   const handleOptionChange = (e) => {
-    // this.setState({
-    //   selectedOption: e.target.value,
-    // });
     setSelectedOption(e.target.value);
     props.updateStore({ preprocessWith: e.target.value });
     setShow(true);
-  };
-
-  // Fisierele sursa
-  const handleFilePath = (filePath) => {
-    if (filePath.length > 0) return "https://a926-81-180-76-251.eu.ngrok.io/media/" + filePath; // localhost dev server url http://127.0.0.1:8000/media/
-    //https://httpbin.org/post
-    //http://127.0.0.1:8000/media/
-    return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   };
 
   // Post request
@@ -105,7 +87,6 @@ const Step2 = (props) => {
 
     API.post(preprocessEndpoint, requestBody)
       .then(data => {
-        // console.log(data);
         if (data.preprocessedFiles.length > 0) {
           setShowNextStep(true);
           setpreprocessedFiles(data.preprocessedFiles);
@@ -140,8 +121,8 @@ const Step2 = (props) => {
             </Form.Label>
           </Form.Group>
 
-          <div className="row content">
-            <Form.Group className="mb-3 col-sm-3 border">
+          <div className="row content gap-2 ">
+            <Form.Group className="mb-3 col-sm-3 border rounded p-2 bg-light">
               <Form.Label>2.1 Selectează motorul de preprocesare:</Form.Label>
               <Form.Check
                 // disabled
@@ -182,36 +163,36 @@ const Step2 = (props) => {
                 onChange={handleOptionChange}
               />
             </Form.Group>
-            <div className="col-sm mb-3">
-              {selectedOption === "FR" && (
-                <>
-                  <FineReaderPre getStore={() => props.getStore()}
-                    updateStore={(u) => {
-                      props.updateStore(u);
-                    }} />
-                </>
-              )}
 
-              {/* Preprocesare cu OpenCV */}
-              {selectedOption === "OpenCV" && (
-                <>
-                  <OpenCV getStore={() => props.getStore()}
-                    updateStore={(u) => {
-                      props.updateStore(u);
-                    }} />
-                </>
-              )}
+            {selectedOption === "FR" && (
+              <div className="col-sm border rounded p-2 bg-light">
+                <FineReaderPreprocessor getStore={() => props.getStore()}
+                  updateStore={(u) => {
+                    props.updateStore(u);
+                  }} />
+              </div>
+            )}
 
-              {/* Preprocesare cu ScanTailor */}
-              {selectedOption === "ScanTailor" && (
-                <>
-                  <ScanTailor getStore={() => props.getStore()}
-                    updateStore={(u) => {
-                      props.updateStore(u);
-                    }} />
-                </>
-              )}
-            </div>
+            {/* Preprocesare cu OpenCV */}
+            {selectedOption === "OpenCV" && (
+              <div className="col-sm border rounded p-2 bg-light">
+                <OpenCV getStore={() => props.getStore()}
+                  updateStore={(u) => {
+                    props.updateStore(u);
+                  }} />
+              </div>
+            )}
+
+            {/* Preprocesare cu ScanTailor */}
+            {selectedOption === "ScanTailor" && (
+              <div className="col-sm border rounded p-2 bg-light">
+                <ScanTailor getStore={() => props.getStore()}
+                  updateStore={(u) => {
+                    props.updateStore(u);
+                  }} />
+              </div>
+            )}
+
 
             <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
 
@@ -245,75 +226,75 @@ const Step2 = (props) => {
       </div >
 
       {/* source image and preprocessed images */}
-      < div className="row" >
-        <div className="container-for-results col-md-12 d-flex p-2 border gap-2 bg-light rounded">
-          <Draggable>
-            <div className="col-sm">
-              {sourceFiles.length != 0 && (
-                <>
-                  <Accordion defaultActiveKey={["0"]} alwaysOpen>
-                    <Accordion.Item eventKey="0">
-                      <Accordion.Header>
-                        Sursa - imagine originală{" "}
-                      </Accordion.Header>
-                      <Accordion.Body>
-                        {s3SourceFiles.map((file, index) => (
-                          <a
-                            className=""
-                            data-fancybox="gallery_1"
-                            data-src={file.url}
-                            data-caption={`${file.name} (imagine originală)`}
-                            key={index}
-                          >
-                            <img
-                              className="Accordion_image"
-                              src={file.url}
-                            />
-                          </a>
-                        ))}
-                      </Accordion.Body>
-                    </Accordion.Item>
-                  </Accordion>
-                </>
-              )}
+      <div className="row container-for-results p-2 border gap-2 bg-light rounded">
+        {s3SourceFiles.length == 0 && <>
+          <h1 className="text-center">Aici vor apărea rezultatele</h1>
+          <div className="d-flex justify-content-evenly">
+            <h3>In stanga vei vedea imaginile originale.</h3>
+            <h3>Iar in dreapta imaginile preprocesate.</h3>
+          </div>
+        </>}
+        {s3SourceFiles.length != 0 && (
+          <>
+            <div className="col-6">
+              <Accordion defaultActiveKey={["0"]} alwaysOpen>
+                {s3SourceFiles.map((file, index) => (
+                  <Accordion.Item eventKey={index} key={index}>
+                    <Accordion.Header>
+                      Sursa - imagine originală {index + 1}
+                    </Accordion.Header>
+                    <Accordion.Body>
+                      <a
+                        className=""
+                        data-fancybox="gallery_1"
+                        data-src={file.url}
+                        data-caption={`${file.name} (imagine originală)`}
+                        key={index}
+                      >
+                        <img
+                          className="Accordion_image"
+                          src={file.url}
+                        />
+                      </a>
+                    </Accordion.Body>
+                  </Accordion.Item>
+                ))}
+              </Accordion>
             </div>
-          </Draggable>
-
-          <Draggable>
+          </>
+        )}
+        {s3PreprocessedFiles.length != 0 && (
+          <>
             <div className="col-sm">
-              {s3PreprocessedFiles.length != 0 && (
-                <>
-                  <Accordion defaultActiveKey={["0"]} alwaysOpen>
-                    <Accordion.Item eventKey="0">
-                      <Accordion.Header>
-                        Ținta - imagine preprocesată
-                      </Accordion.Header>
-                      <Accordion.Body>
-                        {s3PreprocessedFiles.map((s3_url, index) => (
-                          <a
-                            className=""
-                            data-fancybox="gallery_2"
-                            data-src={s3_url}
-                            data-caption="imagine procesată"
-                            key={index}
-                          >
-                            <img
-                              className="Accordion_image"
-                              src={s3_url}
-                            />
-                          </a>
-                        ))}
-                      </Accordion.Body>
-                    </Accordion.Item>
-                  </Accordion>
-                </>
-              )}
+              <Accordion defaultActiveKey={["0"]} alwaysOpen>
+                {s3PreprocessedFiles.map((s3_url, index) => (
+                  <Accordion.Item eventKey={index} key={index}>
+                    <Accordion.Header>
+                      Ținta - imagine preprocesată {index + 1}
+                    </Accordion.Header>
+                    <Accordion.Body>
+                      <a
+                        className=""
+                        data-fancybox="gallery_2"
+                        data-src={s3_url}
+                        data-caption="imagine procesată"
+                        key={index}
+                      >
+                        <img
+                          className="Accordion_image"
+                          src={s3_url}
+                        />
+                      </a>
+                    </Accordion.Body>
+                  </Accordion.Item>
+                ))}
+              </Accordion>
             </div>
-          </Draggable>
+          </>
+        )}
 
-        </div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };
 export default Step2;

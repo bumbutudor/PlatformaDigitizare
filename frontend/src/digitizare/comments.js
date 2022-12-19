@@ -29,6 +29,16 @@ line 80
       </div>
 
       */
+// step 2 comments
+// line 80
+// Fisierele sursa
+// const handleFilePath = (filePath) => {
+//   if (filePath.length > 0) return "https://a926-81-180-76-251.eu.ngrok.io/media/" + filePath; // localhost dev server url http://127.0.0.1:8000/media/
+//   //https://httpbin.org/post
+//   //http://127.0.0.1:8000/media/
+//   return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
+// };
+
 
 // step 3 comments
 // line 71
@@ -111,6 +121,15 @@ line 80
     checked={this.state.ocrModel === "latin"}
     onChange={() => { this.setState({ ocrModel: "latin", alphabet: "latin", show: true }); this.props.updateStore({ ocrModel: "latin", alphabet: "latin" }); }}
 /> */}
+
+
+
+// step 4 comments
+// line 186
+{/* <svg className="svg_keyboard mx-2 pb-1" viewBox="0 0 24 24">
+<path fill="currentColor"
+  d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
+/></svg> */}
 
 
 //step 5 comments

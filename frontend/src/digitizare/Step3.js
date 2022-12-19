@@ -55,7 +55,8 @@ export default class Step3 extends Component {
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   }
 
-  componentDidMount() { }
+  componentDidMount() {
+  }
 
   componentWillUnmount() { }
 
@@ -114,8 +115,8 @@ export default class Step3 extends Component {
               </Form.Label>
             </Form.Group>
 
-            <div className="row content">
-              <Form.Group className="mb-3 col-sm-3 border">
+            <div className="row content gap-2">
+              <Form.Group className="mb-3 col-sm-3 border rounded p-2 bg-light">
                 <Form.Label>3.1 Selectează perioada documentului:</Form.Label>
                 <Form.Check
                   label="Secolul XX"
@@ -124,7 +125,7 @@ export default class Step3 extends Component {
                   id="radio1"
                   value="secolulXX"
                   checked={this.state.period === "secolulXX"}
-                  onChange={() => { this.setState({ period: "secolulXX" }); this.props.updateStore({ period: "secolulXX" }); }}
+                  onChange={() => { this.setState({ period: "secolulXX", show: true }); this.props.updateStore({ period: "secolulXX" }); }}
                 />
                 <Form.Check
                   label="Secolul XIX"
@@ -133,7 +134,7 @@ export default class Step3 extends Component {
                   id="radio2"
                   value="secolulXIX"
                   checked={this.state.period === "secolulXIX"}
-                  onChange={() => { this.setState({ period: "secolulXIX" }); this.props.updateStore({ period: "secolulXIX" }); }}
+                  onChange={() => { this.setState({ period: "secolulXIX", show: true }); this.props.updateStore({ period: "secolulXIX" }); }}
                 />
                 <Form.Check
                   label="Secolul XVIII"
@@ -142,7 +143,7 @@ export default class Step3 extends Component {
                   id="radio3"
                   value="secolulXVIII"
                   checked={this.state.period === "secolulXVIII"}
-                  onChange={() => { this.setState({ period: "secolulXVIII", alphabet: "cyrillicRomanian" }); this.props.updateStore({ period: "secolulXVIII", alphabet: "cyrillicRomanian" }); }}
+                  onChange={() => { this.setState({ period: "secolulXVIII", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ period: "secolulXVIII", alphabet: "cyrillicRomanian" }); }}
 
                 />
                 <Form.Check
@@ -152,11 +153,12 @@ export default class Step3 extends Component {
                   id="radio4"
                   value="secolulXVII"
                   checked={this.state.period === "secolulXVII"}
-                  onChange={() => { this.setState({ period: "secolulXVII", alphabet: "cyrillicRomanian" }); this.props.updateStore({ period: "secolulXVII", alphabet: "cyrillicRomanian" }); }}
+                  onChange={() => { this.setState({ period: "secolulXVII", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ period: "secolulXVII", alphabet: "cyrillicRomanian" }); }}
                 />
               </Form.Group>
-              <div className="col-sm mb-3">
-                {this.state.period === "secolulXX" && <>
+
+              {this.state.period === "secolulXX" && <>
+                <div className="col-sm mb-3 border rounded p-2 bg-light">
                   <Form.Group className="mb-3">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documentul tău:</Form.Label>
                     <Form.Check
@@ -171,9 +173,11 @@ export default class Step3 extends Component {
                     />
 
                   </Form.Group>
+                </div>
+              </>}
 
-                </>}
-                {this.state.period === "secolulXIX" && <>
+              {this.state.period === "secolulXIX" && <>
+                <div className="col-sm mb-3 border rounded p-2 bg-light">
                   <Form.Group className="mb-3 col-sm">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check
@@ -205,9 +209,11 @@ export default class Step3 extends Component {
 
                     />
                   </Form.Group>
+                </div>
+              </>}
 
-                </>}
-                {this.state.period === "secolulXVIII" && <>
+              {this.state.period === "secolulXVIII" && <>
+                <div className="col-sm mb-3 border rounded p-2 bg-light">
                   <Form.Group className="mb-3 col-sm">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check
@@ -239,9 +245,11 @@ export default class Step3 extends Component {
 
                     />
                   </Form.Group>
+                </div>
+              </>}
 
-                </>}
-                {this.state.period === "secolulXVII" && <>
+              {this.state.period === "secolulXVII" && <>
+                <div className="col-sm mb-3 border rounded p-2 bg-light">
                   <Form.Group className="mb-4">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check
@@ -298,8 +306,8 @@ export default class Step3 extends Component {
                     </Form.Select>
                     <span className='m-2' />
                   </Form.Group>
-                </>}
-              </div>
+                </div>
+              </>}
 
 
               <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
@@ -338,80 +346,78 @@ export default class Step3 extends Component {
               )}
             </div>
           </Form>
-        </div>
+        </div >
 
         {/* preprocessed image and reognized text */}
 
 
-        <div className="row">
+        < div className="row" >
           {/* <span className='text-right'>Drag me</span> */}
-          <div className="container-for-results col-md-12 d-flex p-2 border gap-2 bg-light rounded">
+          < div className="container-for-results col-md-12 d-flex p-2 border gap-2 bg-light rounded" >
 
-            <div className="col-sm mr-2">
+            <div className="col-sm">
               {this.state.sourceFiles.length != 0 && <>
-                <Draggable>
 
-                  <Accordion defaultActiveKey={0} alwaysOpen>
-                    {
-                      this.state.s3PreprocessedFiles.map((s3_url, index) => (
-                        console.log(index),
-                        <Accordion.Item eventKey={index}>
-                          <Accordion.Header>Sursa - imagine preprocesată</Accordion.Header>
-                          <Accordion.Body>
-                            <div key={index} className="preprocessedFile mb-2">
-                              <a
-                                className=""
-                                data-fancybox="gallery_2"
-                                data-src={s3_url}
-                                data-caption='imagine procesată'
-                                key={index}
-                              >
-                                {/* <span className="ocrResultTitle text-info">{`Imaginea ${index + 1}:`}</span> */}
-                                <img
-                                  src={s3_url}
-                                  // onClick={() => openImageViewer(index)}
-                                  className="Accordion_image"
-                                  width="90%"
-                                  alt="" />
-                              </a>
-                            </div>
-                          </Accordion.Body>
-                        </Accordion.Item>
-                      ))
-                    }
+                <Accordion defaultActiveKey={0} alwaysOpen>
+                  {
+                    this.state.s3PreprocessedFiles.map((s3_url, index) => (
+                      console.log(index),
+                      <Accordion.Item eventKey={index} key={index}>
+                        <Accordion.Header>Sursa - imagine preprocesată {index + 1}</Accordion.Header>
+                        <Accordion.Body>
+                          <div key={index} className="preprocessedFile mb-2">
+                            <a
+                              className=""
+                              data-fancybox="gallery_2"
+                              data-src={s3_url}
+                              data-caption='imagine procesată'
+                              key={index}
+                            >
+                              {/* <span className="ocrResultTitle text-info">{`Imaginea ${index + 1}:`}</span> */}
+                              <img
+                                src={s3_url}
+                                // onClick={() => openImageViewer(index)}
+                                className="Accordion_image"
+                                width="90%"
+                                alt="" />
+                            </a>
+                          </div>
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    ))
+                  }
 
-                  </Accordion>
-                </Draggable>
+                </Accordion>
               </>}
             </div>
 
             <div className="col-sm">
               {this.state.ocrResults != 0 && <>
-                <Draggable>
-                  <Accordion defaultActiveKey={0} alwaysOpen>
-                    {
-                      this.state.ocrResults.map((text, index) => (
-                        <Accordion.Item eventKey={index} key={index}>
-                          <Accordion.Header>Ținta - textul recunoscut </Accordion.Header>
-                          <Accordion.Body>
-                            <div className="ocrResult mb-4"  >
-                              {/* <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${this.state.preprocessedFiles[index]}:`}</span> */}
-                              <p alt="">{text}</p>
-                            </div>
-                          </Accordion.Body>
-                        </Accordion.Item>
-                      ))
-                    }
+                <Accordion defaultActiveKey={0} alwaysOpen>
+                  {
+                    this.state.ocrResults.map((text, index) => (
+                      <Accordion.Item eventKey={index} key={index}>
+                        <Accordion.Header>Ținta - textul recunoscut {index + 1}</Accordion.Header>
+                        <Accordion.Body>
+                          <div className="ocrResult mb-4"  >
+                            {/* <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${this.state.preprocessedFiles[index]}:`}</span> */}
+                            {text.split('\n').map((item, key) => {
+                              return <span key={key}>{item}<br /></span>
+                            })}
+                          </div>
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    ))
+                  }
 
-                  </Accordion>
-                </Draggable>
+                </Accordion>
               </>}
             </div>
-          </div>
-        </div>
+          </div >
+        </div >
 
 
-      </div>
+      </div >
     )
   }
 }

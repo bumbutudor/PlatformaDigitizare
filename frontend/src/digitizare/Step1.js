@@ -2,10 +2,7 @@
 
 import React, { Component, useRef, useState, useEffect } from "react";
 import FileUpload from "../components/FileUpload";
-import Icon from "@mdi/react";
-import { mdiInformation } from "@mdi/js";
 import "tui-image-editor/dist/tui-image-editor.css";
-import ImageEditor from "@toast-ui/react-image-editor";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
