@@ -46,12 +46,12 @@ export default class Step3 extends Component {
 
     );
     // Post request
-    this.API = new FetchWrapper("https://a926-81-180-76-251.eu.ngrok.io/"); // localhost dev server url http://127.0.0.1:8000/
+    this.API = new FetchWrapper(props.getStore().api); // localhost dev server url http://127.0.0.1:8000/
 
   }
 
   handleFilePath(filePath) {
-    if (filePath.length > 0) return 'https://a926-81-180-76-251.eu.ngrok.io/media/' + filePath;
+    if (filePath.length > 0) return this.API.baseURL + 'media/' + filePath;
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   }
 

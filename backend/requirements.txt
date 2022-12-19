@@ -7,3 +7,4 @@ numpy
 Pillow
 openai
 boto3
+djangorestframework

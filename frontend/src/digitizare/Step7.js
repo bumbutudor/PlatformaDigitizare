@@ -32,6 +32,7 @@ export default class Step7 extends Component {
       saving: false,
     };
     this.isValidated = this.isValidated.bind(this);
+    this.API = props.getStore().api;
   }
 
   componentDidMount() { }
@@ -81,7 +82,7 @@ export default class Step7 extends Component {
   }
 
   handleFilePath(filePath) {
-    if (filePath.length > 0) return "https://a926-81-180-76-251.eu.ngrok.io/media/" + filePath;
+    if (filePath.length > 0) return this.API + filePath;
     //https://httpbin.org/post
     //http://127.0.0.1:8000/media/
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";

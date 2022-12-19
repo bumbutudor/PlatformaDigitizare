@@ -1,4 +1,5 @@
 import tempfile
+from .models import ExceptionDictionaryEntry
 
 import cv2
 from cv2 import threshold
@@ -171,6 +172,11 @@ def remove_hyphen(trans_text):
 def replace_all_exceptions(text):
     for i, j in vocabula.items():
         text = text.replace(i, j)
+
+    queryset = ExceptionDictionaryEntry.objects.all()
+    for entry in queryset:
+        text = text.replace(entry.exception, entry.correct_word)
+        # print(entry.exception, entry.correct_word, type(entry.period))
     return text
 
 
@@ -207,33 +213,25 @@ periodOptions = {
     'secolulXVII': '3',
 }
 
-
 vocabula = {
     'mltiv': 'milostiv',
     ' amează ': ' amiază ',
     'Îbiruire': 'În biruire',
     'colocolo': 'colo-colo',
-    ' șio ': ' și-o ',
-    ' nui ': ' nu-i ',
+
     ' ee ': ' ia ',
     'aciaa': 'aceea',
     'Netezinduse': 'Netezindu-se',
     'netezinduse': 'netezindu-se',
-    'căși': 'că-și',
+
     'bieata': 'biata',
-    'Păzeșteo': 'Păzește-o',
-    'păzeșteo': 'păzește-o',
-    'săși': 'să-și',
-    'nuți': 'nu-ți',
+
+
     'injinerul': 'inginerul',
     'Injinerul': 'Inginerul',
     'leji': 'legi',
-    'lichia': 'lichea',
-    'Lichia': 'Lichea',
-    'lichiaua': 'licheaua',
-    'mi-ră': 'miră',
+
     'chiamă': 'cheamă',
-    ' ese ': ' iese ',
     'siamănă': 'seamănă',
     'treciau': 'treceau',
     ' oae ': ' oaie ',

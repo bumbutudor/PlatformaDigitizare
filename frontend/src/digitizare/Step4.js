@@ -36,6 +36,7 @@ class Step4 extends Component {
       inputID: 0,
     };
     // this.keyboard = React.createRef();
+    this.API = this.props.getStore().api;
 
     this.cyrillicRomanianLayout = layouts[props.getStore().alphabet];
 
@@ -118,7 +119,7 @@ class Step4 extends Component {
   render() {
     // Fisierele sursa
     const handleFilePath = (filePath) => {
-      if (filePath.length > 0) return "https://a926-81-180-76-251.eu.ngrok.io/media/" + filePath;
+      if (filePath.length > 0) return this.API + filePath;
       //https://httpbin.org/post
       //http://127.0.0.1:8000/media/
       return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";

@@ -1,7 +1,7 @@
 from multiprocessing.connection import wait
 from click import command
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .models import File
 from django.core.files.storage import FileSystemStorage
 from .utils import *
@@ -12,6 +12,17 @@ import requests
 import time
 from .upload_cloud import S3Uploader
 from datetime import datetime
+from django.shortcuts import render
+from rest_framework import viewsets
+from .serializers import ExceptionDictionaryEntrySerializer
+from .models import ExceptionDictionaryEntry
+
+
+class ExceptionDictionaryEntryViewSet(viewsets.ModelViewSet):
+    queryset = ExceptionDictionaryEntry.objects.all()
+    serializer_class = ExceptionDictionaryEntrySerializer
+
+
 # Apelam functia pentru a obtine vocabularul din fisierul "vocabular.txt"
 filepath = settings.BASE_DIR + '/vocabular.txt'
 vocabulary = obtine_vocabular(filepath)
@@ -30,8 +41,8 @@ s3_path = "platforma-digi/" + today
 s3_uploader = S3Uploader(bucket_name, s3_path, AWS_ACCESS_KEY, AWS_SECRET_KEY)
 
 
-def home():
-    return JsonResponse({"code": 200, "msg": "success"})
+def home(request):
+    return HttpResponse('<h4 style="color: #52C41A">API pentru Platforma de Digitizare</h4>')
 
 
 def upload(request):
@@ -238,9 +249,10 @@ def transliterate(request):
             if trans_options['removeHyphen']:
                 text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(
                     trans_result, vocabulary)
+                clean_text = replace_all_exceptions(text_no_hyphenation)
                 # text_without_appostrophe = text_no_hyphenation.replace(
                 #     "’", "-").replace('\'', "-").replace('^ ', "").replace('^', "")
-                trans_results.append(text_no_hyphenation)
+                trans_results.append(clean_text)
             if trans_options['correctTextWithGPT3']:
                 corrected_text = correct_text(trans_result)
                 trans_results.append(corrected_text)

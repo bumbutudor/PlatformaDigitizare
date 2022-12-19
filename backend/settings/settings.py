@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'access',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +58,12 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
     'http://localhost:8000',
     'http://localhost:8080',
+    'https://ngrok.io',
+    'https://a1ef-81-180-76-251.eu.ngrok.io',
 ]
+
+CSRF_TRUSTED_ORIGINS = ['https://a1ef-81-180-76-251.eu.ngrok.io', 'http://localhost:3000',
+                        'http://localhost:8000', 'http://localhost:8080', 'https://ngrok.io']
 
 CORS_ALLOW_METHODS = (
     'DELETE',

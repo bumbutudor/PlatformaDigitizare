@@ -62,7 +62,8 @@ export default class Step5 extends Component {
 
     this.alphabetOptions = props.getStore().alphabetOptions;
     this.periodOptions = props.getStore().periodOptions;
-    this.API = new FetchWrapper("https://a926-81-180-76-251.eu.ngrok.io/"); // localhost dev server url http://127.0.0.1:8000/
+
+    this.API = new FetchWrapper(props.getStore().api); // localhost dev server url http://127.0.0.1:8000/
 
   }
 

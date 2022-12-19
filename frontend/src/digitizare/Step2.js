@@ -72,7 +72,7 @@ const Step2 = (props) => {
   };
 
   // Post request
-  const API = new FetchWrapper("https://a926-81-180-76-251.eu.ngrok.io/"); // localhost dev server url http://127.0.0.1:8000/
+  const API = new FetchWrapper(props.getStore().api); // localhost dev server url http://127.0.0.1:8000/
 
   const handlePreprocessRequest = async () => {
     setShow(false);
