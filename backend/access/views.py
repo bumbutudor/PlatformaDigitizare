@@ -23,6 +23,18 @@ class ExceptionDictionaryEntryViewSet(viewsets.ModelViewSet):
     serializer_class = ExceptionDictionaryEntrySerializer
 
 
+def exception_dictionary(request):
+    # in reverse order
+    entries = ExceptionDictionaryEntry.objects.all().order_by('-added_on')
+
+    # entries = ExceptionDictionaryEntry.objects.all()
+
+    entries = [entry.__dict__ for entry in entries]
+    for entry in entries:
+        entry.pop('_state')
+    return JsonResponse({"code": 200, "msg": "success", "entries": entries})
+
+
 # Apelam functia pentru a obtine vocabularul din fisierul "vocabular.txt"
 filepath = settings.BASE_DIR + '/vocabular.txt'
 vocabulary = obtine_vocabular(filepath)

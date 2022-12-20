@@ -153,18 +153,18 @@ export default class Step7 extends Component {
                         <Accordion.Body>
                           {this.props
                             .getStore()
-                            .preprocessedFiles.map((src, index) => (
+                            .s3PreprocessedFiles.map((src, index) => (
                               console.log(src),
                               <a
                                 className=""
                                 data-fancybox="gallery_2"
-                                data-src={this.handleFilePath(src)}
+                                data-src={src}
                                 data-caption={"imagine preprocesată"}
                                 key={index}
                               >
                                 <img
                                   className="Accordion_image"
-                                  src={this.handleFilePath(src)}
+                                  src={src}
                                 />
                               </a>
                             ))}
