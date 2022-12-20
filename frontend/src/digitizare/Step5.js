@@ -96,7 +96,7 @@ export default class Step5 extends Component {
     this.API.post(transEndpoint, postData)
       .then((data) => {
         if (data.transResults.length > 0) {
-          console.log(data.transResults);
+          // console.log(data.transResults);
           this.setState({ transResults: data.transResults });
           this.props.updateStore({ transResults: data.transResults });
           this.setState({ showNextStep: true });
@@ -114,9 +114,6 @@ export default class Step5 extends Component {
 
   }
   render() {
-
-    console.log(this.state.transOptions.exceptions.dict);
-
     return (
       <div className="step step3">
         <div className="row">
@@ -169,7 +166,7 @@ export default class Step5 extends Component {
                     <Button type="button" className="btn btn-info text-white mx-4">?</Button>
                   </OverlayTrigger>
 
-                  <DictionaryModal api={this.API} show={this.state.showModal} onHide={() => this.setState({ showModal: false })} />
+                  <DictionaryModal period={this.state.period} api={this.API} show={this.state.showModal} onHide={() => this.setState({ showModal: false })} />
 
                 </div>
                 <div className='d-flex'>
