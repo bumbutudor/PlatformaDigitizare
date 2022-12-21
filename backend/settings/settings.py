@@ -39,7 +39,7 @@ INSTALLED_APPS = [
 ]
 
 
-ALLOWED_HOSTS = ["localhost", "ngrok.io", "a1ef-81-180-76-251.eu.ngrok.io", "digitizare.math.md"]
+ALLOWED_HOSTS = ['localhost', 'ngrok.io', 'a1ef-81-180-76-251.eu.ngrok.io', 'digitizare.math.md',]
 # CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -50,11 +50,11 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080',
     'https://ngrok.io',
     'https://a1ef-81-180-76-251.eu.ngrok.io',
-    'digitizare.math.md'
+    'digitizare.math.md',
 ]
 
 CSRF_TRUSTED_ORIGINS = ['https://a1ef-81-180-76-251.eu.ngrok.io', 'http://localhost:3000',
-                        'http://localhost:8000', 'http://localhost:8080', 'https://ngrok.io']
+                        'http://localhost:8000', 'http://localhost:8080', 'https://ngrok.io',]
 
 CORS_ALLOW_METHODS = (
     'DELETE',
