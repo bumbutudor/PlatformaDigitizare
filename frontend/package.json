@@ -14,7 +14,7 @@
     "prepublish": "npm run build",
     "example": "webpack-dev-server --open",
     "start": "npm run example",
-    "build-example": "node ./node_modules/gulp/bin/gulp.js build-example"
+    "build-digitizare": "node ./node_modules/gulp/bin/gulp.js build-digitizare"
   },
   "repository": {
     "type": "git",
@@ -40,7 +40,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.2",
-    "babel-eslint": "^10.0.1",
+    "babel-eslint": "^10.1.0",
     "babel-loader": "^8.0.5",
     "chai": "^3.5.0",
     "css-loader": "^0.23.1",

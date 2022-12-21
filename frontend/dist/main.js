@@ -4,48 +4,38 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = StepZilla;
-
 var _react = _interopRequireWildcard(require("react"));
-
 var _propTypes = _interopRequireDefault(require("prop-types"));
-
 var _promise = _interopRequireDefault(require("promise"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _iterableToArrayLimit(arr, i) { var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"]; if (null != _i) { var _s, _e, _x, _r, _arr = [], _n = !0, _d = !1; try { if (_x = (_i = _i.call(arr)).next, 0 === i) { if (Object(_i) !== _i) return; _n = !1; } else for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i); _n = !0) { ; } } catch (err) { _d = !0, _e = err; } finally { try { if (!_n && null != _i.return && (_r = _i.return(), Object(_r) !== _r)) return; } finally { if (_d) throw _e; } } return _arr; } }
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 function StepZilla(props) {
   var _useState = (0, _react.useState)(props.startAtStep),
-      _useState2 = _slicedToArray(_useState, 2),
-      compState = _useState2[0],
-      setCompState = _useState2[1];
-
+    _useState2 = _slicedToArray(_useState, 2),
+    compState = _useState2[0],
+    setCompState = _useState2[1];
   var _useState3 = (0, _react.useState)(null),
-      _useState4 = _slicedToArray(_useState3, 2),
-      navState = _useState4[0],
-      setNavState = _useState4[1];
-
+    _useState4 = _slicedToArray(_useState3, 2),
+    navState = _useState4[0],
+    setNavState = _useState4[1];
   var hidden = {
     display: "none"
   };
   (0, _react.useEffect)(function () {
     setNavState(getNavStates(props.startAtStep, props.steps.length));
-  }, []); // update the header nav states via classes so they can be styled via css
+  }, []);
 
+  // update the header nav states via classes so they can be styled via css
   var getNavStates = function getNavStates(indx, length) {
     var styles = [];
-
     for (var i = 0; i < length; i++) {
       if (i < indx || !props.prevBtnOnLastStep && indx === length - 1) {
         styles.push("done");
@@ -55,61 +45,57 @@ function StepZilla(props) {
         styles.push("todo");
       }
     }
-
     return {
       styles: styles
     };
   };
-
   var getPrevNextBtnLayout = function getPrevNextBtnLayout(currentStep) {
     // first set default values
     var showPreviousBtn = true;
     var showNextBtn = true;
-    var nextStepText = props.nextButtonText; // first step hide previous btn
+    var nextStepText = props.nextButtonText;
 
+    // first step hide previous btn
     if (currentStep === 0) {
       showPreviousBtn = false;
-    } // second to last step change next btn text if supplied as props
+    }
 
-
+    // second to last step change next btn text if supplied as props
     if (currentStep === props.steps.length - 2) {
       // if user did not give a custom nextTextOnFinalActionStep, the nextButtonText becomes the default
       var nextTextOnFinalActionStep = props.nextTextOnFinalActionStep ? props.nextTextOnFinalActionStep : props.nextButtonText;
       nextStepText = nextTextOnFinalActionStep || nextStepText;
-    } // last step hide next btn, hide previous btn if supplied as props
+    }
 
-
+    // last step hide next btn, hide previous btn if supplied as props
     if (currentStep >= props.steps.length - 1) {
       showNextBtn = false;
       showPreviousBtn = props.prevBtnOnLastStep === false ? false : true;
     }
-
     return {
       showPreviousBtn: showPreviousBtn,
       showNextBtn: showNextBtn,
       nextStepText: nextStepText
     };
-  }; // which step are we in?
+  };
 
-
+  // which step are we in?
   var checkNavState = function checkNavState(nextStep) {
     if (props.onStepChange) {
       props.onStepChange(nextStep);
     }
-  }; // set the nav state
+  };
 
-
+  // set the nav state
   var adjustNavState = function adjustNavState(next) {
     setNavState(getNavStates(next, props.steps.length));
-
     if (next < props.steps.length) {
       setCompState(next);
     }
-
     checkNavState(next);
-  }; // handles keydown on enter being pressed in any Child component input area. in this case it goes to the next (ignore textareas as they should allow line breaks)
+  };
 
-
+  // handles keydown on enter being pressed in any Child component input area. in this case it goes to the next (ignore textareas as they should allow line breaks)
   var handleKeyDown = function handleKeyDown(evt) {
     if (evt.which === 13) {
       if (!props.preventEnterSubmission && evt.target.type !== "textarea") {
@@ -118,9 +104,9 @@ function StepZilla(props) {
         evt.preventDefault();
       }
     }
-  }; // this utility method lets Child components invoke a direct jump to another step
+  };
 
-
+  // this utility method lets Child components invoke a direct jump to another step
   var _jumpToStep = function jumpToStep(evt) {
     if (typeof evt.target === "undefined") {
       // a child step wants to invoke a jump between steps. in this case 'evt' is the numeric step number and not the JS event
@@ -132,25 +118,21 @@ function StepZilla(props) {
         evt.preventDefault();
         evt.stopPropagation();
         return;
-      } // evt is a react event so we need to persist it as we deal with aync promises which nullifies these events (https://facebook.github.io/react/docs/events.html#event-pooling)
+      }
 
-
+      // evt is a react event so we need to persist it as we deal with aync promises which nullifies these events (https://facebook.github.io/react/docs/events.html#event-pooling)
       evt.persist();
       var movingBack = evt.target.value < compState; // are we trying to move back or front?
-
       var passThroughStepsNotValid = false; // if we are jumping forward, only allow that if inbetween steps are all validated. This flag informs the logic...
-
       var proceed = false; // flag on if we should move on
 
       abstractStepMoveAllowedToPromise(movingBack).then(function (valid) {
         // validation was a success (promise or sync validation). In it was a Promise's resolve()
         // ... then proceed will be undefined, so make it true. Or else 'proceed' will carry the true/false value from sync
         proceed = typeof valid === "undefined" ? true : valid;
-
         if (!movingBack) {
           updateStepValidationFlag(proceed);
         }
-
         if (proceed) {
           if (!movingBack) {
             // looks like we are moving forward, 'reduce' a new array of step>validated values we need to check and
@@ -159,7 +141,6 @@ function StepZilla(props) {
               if (i >= compState && i < evt.target.value) {
                 a.push(c.validated);
               }
-
               return a;
             }, []).some(function (c) {
               return c === false;
@@ -190,16 +171,15 @@ function StepZilla(props) {
         }
       });
     }
-  }; // move next via next button
+  };
 
-
+  // move next via next button
   var next = function next() {
     abstractStepMoveAllowedToPromise().then(function () {
       var proceed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
       // validation was a success (promise or sync validation). In it was a Promise's resolve() then proceed will be undefined,
       // ... so make it true. Or else 'proceed' will carry the true/false value from sync validation
       updateStepValidationFlag(proceed);
-
       if (proceed) {
         adjustNavState(compState + 1);
       }
@@ -212,32 +192,32 @@ function StepZilla(props) {
         setTimeout(function () {
           throw e;
         });
-      } // Promise based validation was a fail (i.e reject())
+      }
 
-
+      // Promise based validation was a fail (i.e reject())
       updateStepValidationFlag(false);
     });
-  }; // move behind via previous button
+  };
 
-
+  // move behind via previous button
   var previous = function previous() {
     if (compState > 0) {
       adjustNavState(compState - 1);
     }
-  }; // update step's validation flag
+  };
 
-
+  // update step's validation flag
   var updateStepValidationFlag = function updateStepValidationFlag() {
     var val = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
     props.steps[compState].validated = val; // note: if a step component returns 'underfined' then treat as "true".
   };
 
-  var activeComponentRef = (0, _react.useRef)(null); // are we allowed to move forward? via the next button or via jumpToStep?
+  var activeComponentRef = (0, _react.useRef)(null);
 
+  // are we allowed to move forward? via the next button or via jumpToStep?
   var stepMoveAllowed = function stepMoveAllowed() {
     var skipValidationExecution = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var proceed = false;
-
     if (props.dontValidate) {
       proceed = true;
     } else {
@@ -256,54 +236,50 @@ function StepZilla(props) {
         proceed = activeComponentRef.current.isValidated();
       }
     }
-
     return proceed;
   };
-
   var isStepAtIndexHOCValidationBased = function isStepAtIndexHOCValidationBased(stepIndex) {
     return props.hocValidationAppliedTo && props.hocValidationAppliedTo.length > 0 && props.hocValidationAppliedTo.indexOf(stepIndex) > -1;
-  }; // a validation method is each step can be sync or async (Promise based), this utility abstracts the wrapper stepMoveAllowed to be Promise driven regardless of validation return type
+  };
 
-
+  // a validation method is each step can be sync or async (Promise based), this utility abstracts the wrapper stepMoveAllowed to be Promise driven regardless of validation return type
   var abstractStepMoveAllowedToPromise = function abstractStepMoveAllowedToPromise(movingBack) {
     return _promise.default.resolve(stepMoveAllowed(movingBack));
-  }; // get the classmame of steps
+  };
 
-
+  // get the classmame of steps
   var getClassName = function getClassName(className, i) {
     var liClassName = "";
-
     if (navState && navState.styles) {
-      liClassName = "".concat(className, "-").concat(navState.styles[i]); // if step ui based navigation is disabled, then dont highlight step
+      liClassName = "".concat(className, "-").concat(navState.styles[i]);
 
+      // if step ui based navigation is disabled, then dont highlight step
       if (!props.stepsNavigation) {
         liClassName += " no-hl";
       }
     }
-
     return liClassName;
-  }; // render the steps as stepsNavigation
+  };
 
-
+  // render the steps as stepsNavigation
   var renderSteps = function renderSteps() {
     return props.steps.map(function (s, i) {
-      return _react.default.createElement("li", {
+      return /*#__PURE__*/_react.default.createElement("li", {
         className: getClassName("progtrckr", i),
         onClick: function onClick(evt) {
           _jumpToStep(evt);
         },
         key: i,
         value: i
-      }, _react.default.createElement("em", null, " ", i + 1, " "), " ", _react.default.createElement("span", null, " ", props.steps[i].name, " "), " ");
+      }, /*#__PURE__*/_react.default.createElement("em", null, " ", i + 1, " "), " ", /*#__PURE__*/_react.default.createElement("span", null, " ", props.steps[i].name, " "), " ");
     });
   };
-
   var _getPrevNextBtnLayout = getPrevNextBtnLayout(compState),
-      nextStepText = _getPrevNextBtnLayout.nextStepText,
-      showNextBtn = _getPrevNextBtnLayout.showNextBtn,
-      showPreviousBtn = _getPrevNextBtnLayout.showPreviousBtn; // clone the step component dynamically and tag it as activeComponent so we can validate it on next. also bind the jumpToStep piping method
+    nextStepText = _getPrevNextBtnLayout.nextStepText,
+    showNextBtn = _getPrevNextBtnLayout.showNextBtn,
+    showPreviousBtn = _getPrevNextBtnLayout.showPreviousBtn;
 
-
+  // clone the step component dynamically and tag it as activeComponent so we can validate it on next. also bind the jumpToStep piping method
   var cloneExtensions = {
     jumpToStep: function jumpToStep(t) {
       _jumpToStep(t);
@@ -311,13 +287,14 @@ function StepZilla(props) {
   };
   var componentPointer = null;
   var compToRender = null;
-
   if (props.steps[compState]) {
-    componentPointer = props.steps[compState].component; // S: ref binding -----
+    componentPointer = props.steps[compState].component;
+
+    // S: ref binding -----
     // we need to bind a ref to it so we can use the imperitive "isValidated" method when needed to prevent navigation
     // ... we only can do this if its a (1) React Class based component or (2) A Hooks based stateful component wrapped in forwardRef
-    // (1) can only update refs if its a regular React component (not a pure component - i.e. function components with no state), so lets check that
 
+    // (1) can only update refs if its a regular React component (not a pure component - i.e. function components with no state), so lets check that
     if (componentPointer instanceof _react.Component || componentPointer.type && componentPointer.type.prototype instanceof _react.Component) {
       // unit test deteceted that instanceof Component can be in either of these locations so test both (not sure why this is the case)
       cloneExtensions.ref = activeComponentRef;
@@ -328,17 +305,17 @@ function StepZilla(props) {
       if (_typeof(componentPointer) === "object" && _typeof(componentPointer.type) === "object") {
         cloneExtensions.ref = activeComponentRef;
       }
-    } // E: ref binding -----
+    }
+    // E: ref binding -----
 
+    compToRender = /*#__PURE__*/_react.default.cloneElement(componentPointer, cloneExtensions);
+  }
 
-    compToRender = _react.default.cloneElement(componentPointer, cloneExtensions);
-  } // main render of stepzilla container
-
-
-  return _react.default.createElement("div", null, _react.default.createElement("div", {
+  // main render of stepzilla container
+  return /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("div", {
     style: props.showNavigation ? {} : hidden,
     className: "footer-buttons"
-  }, _react.default.createElement("button", {
+  }, /*#__PURE__*/_react.default.createElement("button", {
     type: "button",
     style: showPreviousBtn ? {} : hidden,
     className: props.backButtonCls,
@@ -346,7 +323,7 @@ function StepZilla(props) {
       previous();
     },
     id: "prev-button"
-  }, props.backButtonText), _react.default.createElement("button", {
+  }, props.backButtonText), /*#__PURE__*/_react.default.createElement("button", {
     type: "button",
     style: showNextBtn ? {} : hidden,
     className: props.nextButtonCls,
@@ -354,16 +331,15 @@ function StepZilla(props) {
       next();
     },
     id: "next-button"
-  }, nextStepText)), " ", _react.default.createElement("div", {
+  }, nextStepText)), " ", /*#__PURE__*/_react.default.createElement("div", {
     className: "multi-step",
     onKeyDown: function onKeyDown(evt) {
       handleKeyDown(evt);
     }
-  }, props.showSteps ? _react.default.createElement("ol", {
+  }, props.showSteps ? /*#__PURE__*/_react.default.createElement("ol", {
     className: "progtrckr"
-  }, " ", renderSteps(), " ") : _react.default.createElement("span", null, " "), compToRender, " "));
+  }, " ", renderSteps(), " ") : /*#__PURE__*/_react.default.createElement("span", null, " "), compToRender, " "));
 }
-
 StepZilla.defaultProps = {
   showSteps: true,
   showNavigation: true,

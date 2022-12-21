@@ -19,7 +19,7 @@ gulp.task("lint", function (done) {
   done();
 
   return gulp
-    .src("./src/components/StepZilla.js")
+    .src("./src/components/main.js")
     .pipe($.plumber())
     .pipe($.eslint())
     .pipe($.eslint.format())
@@ -48,7 +48,7 @@ gulp.task(
   "test-watch",
   gulp.series("lint", "test", function (done) {
     gulp.watch(
-      ["./tests/**/*.spec.js", "./src/components/StepZilla.js"],
+      ["./tests/**/*.spec.js", "./src/components/main.js"],
       gulp.series("lint", "test")
     );
 
@@ -63,7 +63,7 @@ gulp.task(
     done();
 
     return gulp
-      .src("./src/components/StepZilla.js")
+      .src("./src/components/main.js")
       .pipe($.babel()) //this will also handle react transformations
       .pipe(gulp.dest("./dist"));
   })
@@ -71,7 +71,7 @@ gulp.task(
 
 // Build the example into 'docs' so we can ghpages it
 gulp.task(
-  "build-example",
+  "build-digitizare",
   gulp.series("build", function (done) {
     del.sync("./docs");
 
