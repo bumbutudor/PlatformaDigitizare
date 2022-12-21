@@ -52,15 +52,15 @@ MIDDLEWARE = [
 ]
 
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS: True
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'http://localhost:8000',
-    'http://localhost:8080',
-    'https://ngrok.io',
-    'https://a1ef-81-180-76-251.eu.ngrok.io',
-]
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:3000',
+#     'http://localhost:8000',
+#     'http://localhost:8080',
+#     'https://ngrok.io',
+#     'https://a1ef-81-180-76-251.eu.ngrok.io',
+# ]
 
 CSRF_TRUSTED_ORIGINS = ['https://a1ef-81-180-76-251.eu.ngrok.io', 'http://localhost:3000',
                         'http://localhost:8000', 'http://localhost:8080', 'https://ngrok.io']
