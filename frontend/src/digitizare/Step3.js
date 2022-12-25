@@ -38,9 +38,9 @@ export default class Step3 extends Component {
 
     this.step3Info = (
       <Popover id="popover-basic">
-        <Popover.Header as="h4">TODO</Popover.Header>
+        <Popover.Header as="h4">Informații referitoare la pasul 3</Popover.Header>
         <Popover.Body>
-          TODO
+          <Spinner />
         </Popover.Body>
       </Popover>
 
@@ -116,7 +116,7 @@ export default class Step3 extends Component {
             </Form.Group>
 
             <div className="row content gap-2">
-              <Form.Group className="mb-3 col-sm-3 border rounded p-2 bg-light">
+              <Form.Group className="mb-3 col-sm-3 border rounded px-2 bg-light">
                 <Form.Label>3.1 Selectează perioada documentului:</Form.Label>
                 <Form.Check
                   label="Secolul XX"
@@ -158,7 +158,7 @@ export default class Step3 extends Component {
               </Form.Group>
 
               {this.state.period === "secolulXX" && <>
-                <div className="col-sm mb-3 border rounded p-2 bg-light">
+                <div className="col-sm mb-3 border rounded px-2 bg-light">
                   <Form.Group className="mb-3">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documentul tău:</Form.Label>
                     <Form.Check
@@ -177,7 +177,7 @@ export default class Step3 extends Component {
               </>}
 
               {this.state.period === "secolulXIX" && <>
-                <div className="col-sm mb-3 border rounded p-2 bg-light">
+                <div className="col-sm mb-3 border rounded px-2 bg-light">
                   <Form.Group className="mb-3 col-sm">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check
@@ -213,7 +213,7 @@ export default class Step3 extends Component {
               </>}
 
               {this.state.period === "secolulXVIII" && <>
-                <div className="col-sm mb-3 border rounded p-2 bg-light">
+                <div className="col-sm mb-3 border rounded px-2 bg-light">
                   <Form.Group className="mb-3 col-sm">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check
@@ -249,7 +249,7 @@ export default class Step3 extends Component {
               </>}
 
               {this.state.period === "secolulXVII" && <>
-                <div className="col-sm mb-3 border rounded p-2 bg-light">
+                <div className="col-sm mb-3 border rounded px-2 bg-light">
                   <Form.Group className="mb-4">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check

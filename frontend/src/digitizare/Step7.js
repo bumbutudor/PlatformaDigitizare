@@ -25,6 +25,8 @@ export default class Step7 extends Component {
       transResults: props.getStore().transResults,
       sourceFiles: props.getStore().sourceFiles,
       preprocessedFiles: props.getStore().preprocessedFiles,
+      s3SourceFiles: props.getStore().s3SourceFiles,
+      s3PreprocessedFiles: props.getStore().s3PreprocessedFiles,
       layoutName: "default",
       show: false,
       // input: ""
@@ -88,10 +90,6 @@ export default class Step7 extends Component {
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   };
 
-  save_image(event) {
-    const file_url = this.handleFilePath(this.state.preprocessedFiles[0]);
-    saveAs(file_url, 'image.jpg')
-  }
   save_ocr(event) {
     /* let exampleText = "My text"; */
     /* this.state.ocrResults */
@@ -148,14 +146,14 @@ export default class Step7 extends Component {
                     <Accordion defaultActiveKey={["0"]} alwaysOpen>
                       <Accordion.Item eventKey="0">
                         <Accordion.Header>
-                          Documentul original
+                          Imagine preprocesată
                         </Accordion.Header>
                         <Accordion.Body>
                           {this.props
                             .getStore()
                             .s3PreprocessedFiles.map((src, index) => (
                               console.log(src),
-                              <a
+                              <><a
                                 className=""
                                 data-fancybox="gallery_2"
                                 data-src={src}
@@ -167,14 +165,17 @@ export default class Step7 extends Component {
                                   src={src}
                                 />
                               </a>
+                                <button
+                                  key={index}
+                                  type="button"
+                                  className="btn btn-link col-12"
+                                  onClick={() => saveAs(src)}
+                                >
+                                  Descarcă imaginea preprocesată
+                                </button>
+                              </>
                             ))}
-                          <button
-                            type="button"
-                            className="btn btn-link col-12"
-                            onClick={this.save_image.bind(this)}
-                          >
-                            Descarcă imaginea preprocesată
-                          </button>
+
                         </Accordion.Body>
                       </Accordion.Item>
                     </Accordion>

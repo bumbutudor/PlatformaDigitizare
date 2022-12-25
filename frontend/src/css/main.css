@@ -1,3 +1,18 @@
+.table-fixed {
+  height: 40vh;
+  overflow-y: auto;
+}
+
+.modal-backdrop.show {
+  opacity: 1 !important;
+}
+
+/* thead th {
+  background-color: white;
+  position: sticky;
+  top: 1px;
+} */
+
 .text {
   font-size: 24px !important;
   color: black;
@@ -8,23 +23,16 @@
 }
 
 .multi-step {
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .step {
-  width: 75%;
-  background-color: #fff;
+  width: 66%;
+  background-color: rgb(247, 249, 236);
   /* min-height: 450px; */
-  padding: 20px 5px;
-  box-shadow: -15px 15px 50px -1px rgba(56, 103, 234, 0.15);
-  border-radius: 10px;
-}
-
-.footer-buttons {
-  top: 0px;
-  position: absolute;
-  right: 55px;
-  margin-top: 0 !important;
+  padding: 10px 5px;
+  /* box-shadow: -15px 15px 50px -1px rgba(56, 103, 234, 0.15); */
+  /* border-radius: 3px; */
 }
 
 .tab-content {
@@ -41,13 +49,12 @@ ol.progtrckr {
 
 ol.progtrckr li {
   /* display: inline-block; */
-  text-align: center;
   line-height: 2.5rem;
   cursor: pointer;
 }
 
 ol.progtrckr li span {
-  padding: 0 1.5rem;
+  /* padding: 0 1.5rem; */
 }
 
 @media (max-width: 650px) {
@@ -59,7 +66,7 @@ ol.progtrckr li span {
 .progtrckr em {
   display: none;
   font-weight: 700;
-  padding-left: 1rem;
+  /* padding-left: 1rem; */
 }
 
 @media (max-width: 650px) {
@@ -71,8 +78,8 @@ ol.progtrckr li span {
 ol.progtrckr li.progtrckr-todo {
   color: silver;
   border-bottom: 1px solid silver;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 ol.progtrckr li.progtrckr-doing {
@@ -80,8 +87,8 @@ ol.progtrckr li.progtrckr-doing {
   border-bottom: 1px solid #cccccc;
   background: #65a3dc;
   font-weight: 500;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 ol.progtrckr li.progtrckr-done {
@@ -89,17 +96,19 @@ ol.progtrckr li.progtrckr-done {
   border-bottom: 1px solid #cccccc;
   background: #1c5d99;
   font-weight: 500;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  /* text-align: center; */
 }
 
 ol.progtrckr li:after {
   content: "\00a0\00a0";
+  text-align: center;
 }
 
 ol.progtrckr li:before {
   position: relative;
-  bottom: -3.2rem;
+  bottom: -2.2rem;
   float: left;
   left: 50%;
 }
@@ -110,10 +119,11 @@ ol.progtrckr li.progtrckr-todo:before {
   background-color: white;
   width: 1.2em;
   line-height: 1.4em;
+  text-align: center;
 }
 
 ol.progtrckr li.progtrckr-todo:hover:before {
-  color: #ff4500;
+  color: #ffa889;
 }
 
 ol.progtrckr li.progtrckr-doing:before {
@@ -123,10 +133,11 @@ ol.progtrckr li.progtrckr-doing:before {
   width: 1.2em;
   line-height: 1.2em;
   border-radius: 1.2em;
+  text-align: center;
 }
 
 ol.progtrckr li.progtrckr-doing:hover:before {
-  color: #ff4500;
+  color: #adbbff;
 }
 
 ol.progtrckr li.progtrckr-done:before {
@@ -136,10 +147,12 @@ ol.progtrckr li.progtrckr-done:before {
   width: 1.2em;
   line-height: 1.2em;
   border-radius: 1.2em;
+  text-align: center;
 }
 
 ol.progtrckr li.progtrckr-done:hover:before {
-  color: #333;
+  color: rgb(129, 206, 148);
+  text-align: center;
 }
 
 .dzu-dropzone {
@@ -218,7 +231,43 @@ ol.progtrckr li.progtrckr-done:hover:before {
   transition: 0.2s;
 }
 
+.logo-image {
+  transition: 0.2s;
+  animation-name: example;
+  animation-duration: 30s;
+}
+
+@keyframes example {
+  0% {
+    background-color: rgb(248, 248, 151);
+  }
+  15% {
+    background-color: yellow;
+  }
+  30% {
+    background-color: red;
+  }
+  50% {
+    background-color: green;
+  }
+
+  80% {
+    background-color: yellow;
+  }
+
+  80% {
+    background-color: rgb(248, 248, 151);
+  }
+}
+
 .Accordion_image:hover {
+  cursor: pointer;
+  transform: scale(1.02);
+  filter: brightness(1.1);
+  box-shadow: 0px 5px 8px rgba(0, 0, 0, 0.3);
+}
+
+.logo-image:hover {
   cursor: pointer;
   transform: scale(1.02);
   filter: brightness(1.1);
@@ -258,13 +307,13 @@ ol.progtrckr li.progtrckr-done:hover:before {
 }
 
 .image_ocr {
-  /* margin-left: 4%; */
-  /* margin-top: 4rem; */
-  /* width: 23%;
+  margin-left: 4%;
+  margin-top: 4rem;
+  width: 23%;
   margin-bottom: 20px;
   border-radius: 4px;
   box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.15);
-  transition: 0.2s; */
+  transition: 0.2s;
 }
 
 .image_ocr:hover {
@@ -427,3 +476,237 @@ ol.progtrckr li.progtrckr-done:before {
 ol.progtrckr li.progtrckr-done:hover:before {
   color: #333;
 } */
+html,
+html body {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-size: 100%;
+}
+
+.footer-buttons {
+  display: flex;
+  max-width: 50%;
+  padding: 3px;
+  padding-right: 64px;
+  top: 5px;
+  position: absolute;
+  right: 0;
+  margin-top: 0 !important;
+  gap: 10px;
+}
+
+.footer-buttons > button {
+  padding: 3px 7px !important;
+  border: unset !important;
+}
+.progtrckr {
+  padding-bottom: 16px;
+  background: #ffffff;
+  /* padding: 20px; */
+}
+
+.progtrckr li {
+  /* margin-bottom: 10px; */
+}
+
+.val-err-tooltip {
+  background-color: red;
+  padding: 3px 5px 3px 10px;
+  font-size: 14px;
+  color: #fff;
+}
+
+html .row,
+html .form-horizontal .form-group {
+  margin: 0;
+}
+
+html .step3 label,
+html .step4 label {
+  font-size: 20px;
+  text-align: left;
+}
+
+html .form-horizontal .control-label {
+  text-align: left;
+}
+
+.review .txt {
+  font-size: 20px;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+}
+
+html body .saving {
+  background-color: #5cb85c;
+  width: 90%;
+  padding: 5px;
+  font-size: 16px;
+}
+
+code {
+  position: relative;
+  left: 12px;
+  line-height: 25px;
+}
+
+.eg-jump-lnk {
+  margin-top: 50px;
+  font-style: italic;
+}
+
+.lib-version {
+  font-size: 12px;
+  background-color: rgba(255, 255, 0, 1);
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  padding: 5px;
+}
+
+html .content {
+  margin-left: 10px;
+}
+
+span.red {
+  color: #d9534f;
+}
+
+span.green {
+  color: #3c763d;
+}
+
+span.bold {
+  font-weight: bold;
+}
+
+html .hoc-alert {
+  margin-top: 20px;
+}
+
+html .form-block-holder {
+  margin-top: 20px !important;
+}
+/* overwrite the stepzilla styles */
+
+html ol.progtrckr li.progtrckr-todo:before {
+  /* background-color: #f2f9ff; */
+}
+
+#header {
+  padding: 8px;
+  text-align: center;
+  background: #1c5d99;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #e4edf6;
+  box-shadow: 0px 5px 10px rgba(56, 103, 234, 0.15);
+  transition: box-shadow 0.2s, -webkit-transform 0.2s;
+  padding: 8px;
+  border-bottom: 0;
+  height: 60px;
+}
+
+#header .content {
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+  width: 1100px;
+  height: 100%;
+}
+
+#header .title {
+  font-weight: 600;
+  font-size: 1.3rem;
+  font-size: 28px;
+  color: #ffffff;
+}
+
+#header .img_header {
+  height: 100%;
+  float: left;
+}
+
+.nav-tabs {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  /* border-bottom: unset !important; */
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-align: center;
+  font-size: 1.25em;
+}
+
+.nav-tabs .nav-link {
+  font-weight: 400 !important;
+  border: unset !important;
+}
+
+.tab-content {
+  height: unset !important;
+  border: unset !important;
+  overflow: unset !important;
+}
+
+.tab-content .tab-content-body {
+  max-width: 54em;
+  padding: 0 6em 1.5em;
+  margin: 0 auto;
+  font-size: 16px;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+.nav-tabs .nav-link.active {
+  color: #495057;
+  background-color: unset !important;
+  border-top-left-radius: unset !important;
+  border-top-right-radius: unset !important;
+  /* border-radius: 0.25rem !important; */
+}
+
+h1.title {
+  margin: 1.25em 0 1.5em !important;
+  font-size: 2.5em;
+}
+
+p.tagline {
+  font-weight: 300;
+  font-size: 1.5em;
+  margin-top: -0.75em;
+  padding: 0;
+  color: #333;
+  text-align: center;
+  margin-bottom: 30px;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+.announcement {
+  background: #eee;
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+
+html h1 {
+  font-size: 26px;
+  margin-left: 10px;
+}
+
+html h2 {
+  font-size: 22px;
+  margin-left: 10px;
+}
+
+html h3 {
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+html h4 {
+  font-size: 16px;
+}

@@ -370,7 +370,7 @@ export default function StepZilla(props) {
         }}
       >
         {props.showSteps ? (
-          <ol className="progtrckr"> {renderSteps()} </ol>
+          <div><ol className="progtrckr"> {renderSteps()} </ol></div>
         ) : (
           <span> </span>
         )}

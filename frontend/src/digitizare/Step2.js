@@ -24,21 +24,9 @@ const Step2 = (props) => {
   const step2Info =
     (
       <Popover id="popover-basic">
-        <Popover.Header as="h4">Informații despre pasul 2</Popover.Header>
+        <Popover.Header as="h4">Informații referitoare la pasul 2</Popover.Header>
         <Popover.Body>
-          La acest pas, utilizatorul poate sa aleaga motorul de preprocesare dorit in functie de ce
-          ajustari necesita documentul sau. Motoarele de preprocesare a imaginii sunt:
-          Modulul de preprocesare a imaginii din FineReader 15, Procesorul de imagini OpenCV, GIMP sau ScanTailor.
-          Poate sa aleaga douar unul din aceste 4 motoare de preprocesare a imaginii la un singur ciclu de digitizare.
-          Fiecare din aceste moatoare de preprocesare sunt configurate cu setările recomandate cu posibilitatea
-          de a modifica la necesitate. Motorul FineReader are urmatoarele optiuni de preprocesare:
-          divizarea imaginii in 2 sau mai multe pagini - se foloseste atunci cand avem o imagine
-          unde 2 pagini ale unei carti sunt lipite; corectarea automată a rezoluției imaginii - se folosește
-          când imaginea a fost scanată cu o rezoluție mai mică de 75dpi și caracterele text se vad neclar
-          la zoom maxim; indreptarea orientarii paginii - se foloseste atunci cand imaginea este inclinata cu
-          un unghi semnificativ ( mai mare decat 30grade) spre stanga sau dreapta; convertirea imaginii color in alb negru - este o tehnica folosita des la preprocesare a imaginii ce contribuie la o acuratete sporita la recunoastere; reducerea zgomotului ISO din text - se foloseste atunci cand in imagini se observa pete mici sub forma de fulgi in imagine sau cand rezolutia la scanare sau fotografiere este sub 50dpi; indreptarea randurilor de text [TODO].
-          Motorul OpenCV propune o multime de setari dintre care se recomanda utilizatorului:
-          setarea rezolutiei manual si filtre de curatarea a imaginii de pete si zone neclare.
+          <Spinner />
         </Popover.Body>
       </Popover>
     );
@@ -94,12 +82,14 @@ const Step2 = (props) => {
           props.updateStore({ preprocessedFiles: data.preprocessedFiles, s3PreprocessedFiles: data.s3PreprocessedFiles });
         } else {
           setShowError(true);
+          setShow(true);
         }
 
       })
       .catch(err => {
         console.error(err)
         setShowError(true);
+        setShow(true);
       })
       .finally(() => {
         setShow(false);
@@ -114,7 +104,7 @@ const Step2 = (props) => {
         <Form id="Form" className="form-horizontal">
           <Form.Group>
             <Form.Label className="col-md-12 control-label d-flex">
-              <h1>Pasul 2: Preprocesarea imaginilor încărcate</h1>
+              <h1>Pasul 2: Prelucrează imaginile încărcate</h1>
               <OverlayTrigger trigger="click" rootClose placement="right" overlay={step2Info}>
                 <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
               </OverlayTrigger>
@@ -122,18 +112,9 @@ const Step2 = (props) => {
           </Form.Group>
 
           <div className="row content gap-2 ">
-            <Form.Group className="mb-3 col-sm-3 border rounded p-2 bg-light">
-              <Form.Label>2.1 Selectează motorul de preprocesare:</Form.Label>
-              <Form.Check
-                // disabled
-                label="ScanTailor"
-                name="group1"
-                type="radio"
-                id="radio3"
-                value="ScanTailor"
-                checked={selectedOption === "ScanTailor"}
-                onChange={handleOptionChange}
-              />
+            <Form.Group className="mb-3 col-sm-3 border rounded px-2 bg-light">
+              <Form.Label>2.1 Selectează motorul:</Form.Label>
+
               <Form.Check
                 label="FineReader"
                 name="group1"
@@ -154,18 +135,28 @@ const Step2 = (props) => {
               />
               <Form.Check
                 disabled
-                label="Gimp (disabled)"
+                label="ScanTailor (disponibil în versiunea desktop)"
+                name="group1"
+                type="radio"
+                id="radio3"
+                value="ScanTailor"
+                checked={selectedOption === "ScanTailor"}
+                onChange={handleOptionChange}
+              />
+              {/* <Form.Check
+                disabled
+                label="Gimp (lispește)"
                 name="group1"
                 type="radio"
                 id="radio4"
                 value="Gimp"
                 checked={selectedOption === "Gimp"}
                 onChange={handleOptionChange}
-              />
+              /> */}
             </Form.Group>
 
             {selectedOption === "FR" && (
-              <div className="col-sm border rounded p-2 bg-light">
+              <div className="col-sm border rounded px-2 bg-light">
                 <FineReaderPreprocessor getStore={() => props.getStore()}
                   updateStore={(u) => {
                     props.updateStore(u);
@@ -175,7 +166,7 @@ const Step2 = (props) => {
 
             {/* Preprocesare cu OpenCV */}
             {selectedOption === "OpenCV" && (
-              <div className="col-sm border rounded p-2 bg-light">
+              <div className="col-sm border rounded px-2 bg-light">
                 <OpenCV getStore={() => props.getStore()}
                   updateStore={(u) => {
                     props.updateStore(u);
@@ -185,7 +176,7 @@ const Step2 = (props) => {
 
             {/* Preprocesare cu ScanTailor */}
             {selectedOption === "ScanTailor" && (
-              <div className="col-sm border rounded p-2 bg-light">
+              <div className="col-sm border border rounded px-2 bg-light">
                 <ScanTailor getStore={() => props.getStore()}
                   updateStore={(u) => {
                     props.updateStore(u);
@@ -217,8 +208,9 @@ const Step2 = (props) => {
               )}
             </div>
             {showError && (
+
               <Alert variant="danger">
-                <Alert.Heading>Eroare la preprocesare! Incearcă din nou...</Alert.Heading>
+                <Alert.Heading>Eroare la prelucrare! Incearcă din nou...</Alert.Heading>
               </Alert>
             )}
           </div>
@@ -226,73 +218,75 @@ const Step2 = (props) => {
       </div >
 
       {/* source image and preprocessed images */}
-      <div className="row container-for-results p-2 border gap-2 bg-light rounded">
-        {s3SourceFiles.length == 0 && <>
-          <h1 className="text-center">Aici vor apărea rezultatele</h1>
-          <div className="d-flex justify-content-evenly">
-            <h3>In stanga vei vedea imaginile originale.</h3>
-            <h3>Iar in dreapta imaginile preprocesate.</h3>
-          </div>
-        </>}
-        {s3SourceFiles.length != 0 && (
-          <>
-            <div className="col-6">
-              <Accordion defaultActiveKey={["0"]} alwaysOpen>
-                {s3SourceFiles.map((file, index) => (
-                  <Accordion.Item eventKey={index} key={index}>
-                    <Accordion.Header>
-                      Sursa - imagine originală {index + 1}
-                    </Accordion.Header>
-                    <Accordion.Body>
-                      <a
-                        className=""
-                        data-fancybox="gallery_1"
-                        data-src={file.url}
-                        data-caption={`${file.name} (imagine originală)`}
-                        key={index}
-                      >
-                        <img
-                          className="Accordion_image"
-                          src={file.url}
-                        />
-                      </a>
-                    </Accordion.Body>
-                  </Accordion.Item>
-                ))}
-              </Accordion>
+      <div className="row">
+        <div className="container-for-results col-md-12 d-flex p-2 border gap-2 bg-light rounded">
+          {/* {s3SourceFiles.length == 0 && <>
+            <h1 className="text-center">Aici vor apărea rezultatele</h1>
+            <div className="d-flex justify-content-evenly">
+              <h3>In stanga vei vedea imaginile originale.</h3>
+              <h3>Iar in dreapta imaginile preprocesate.</h3>
             </div>
-          </>
-        )}
-        {s3PreprocessedFiles.length != 0 && (
-          <>
-            <div className="col-sm">
-              <Accordion defaultActiveKey={["0"]} alwaysOpen>
-                {s3PreprocessedFiles.map((s3_url, index) => (
-                  <Accordion.Item eventKey={index} key={index}>
-                    <Accordion.Header>
-                      Ținta - imagine preprocesată {index + 1}
-                    </Accordion.Header>
-                    <Accordion.Body>
-                      <a
-                        className=""
-                        data-fancybox="gallery_2"
-                        data-src={s3_url}
-                        data-caption="imagine procesată"
-                        key={index}
-                      >
-                        <img
-                          className="Accordion_image"
-                          src={s3_url}
-                        />
-                      </a>
-                    </Accordion.Body>
-                  </Accordion.Item>
-                ))}
-              </Accordion>
-            </div>
-          </>
-        )}
+          </>} */}
+          {s3SourceFiles.length != 0 && (
+            <>
+              <div className="col-sm">
+                <Accordion defaultActiveKey={0} alwaysOpen>
+                  {s3SourceFiles.map((file, index) => (
+                    <Accordion.Item eventKey={index} key={index}>
+                      <Accordion.Header>
+                        Sursa - imagine originală {index + 1}
+                      </Accordion.Header>
+                      <Accordion.Body>
+                        <a
+                          className=""
+                          data-fancybox="gallery_1"
+                          data-src={file.url}
+                          data-caption={`${file.name} (imagine originală)`}
+                          key={index}
+                        >
+                          <img
+                            className="Accordion_image"
+                            src={file.url}
+                          />
+                        </a>
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  ))}
+                </Accordion>
+              </div>
+            </>
+          )}
+          {s3PreprocessedFiles.length != 0 && (
+            <>
+              <div className="col-sm">
+                <Accordion defaultActiveKey={0} alwaysOpen>
+                  {s3PreprocessedFiles.map((s3_url, index) => (
+                    <Accordion.Item eventKey={index} key={index}>
+                      <Accordion.Header>
+                        Ținta - imagine preprocesată {index + 1}
+                      </Accordion.Header>
+                      <Accordion.Body>
+                        <a
+                          className=""
+                          data-fancybox="gallery_2"
+                          data-src={s3_url}
+                          data-caption="imagine procesată"
+                          key={index}
+                        >
+                          <img
+                            className="Accordion_image"
+                            src={s3_url}
+                          />
+                        </a>
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  ))}
+                </Accordion>
+              </div>
+            </>
+          )}
 
+        </div>
       </div>
     </div>
   );

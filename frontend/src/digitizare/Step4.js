@@ -14,6 +14,7 @@ import Popover from "react-bootstrap/Popover";
 import StepsInfo from "../components/StepsInfo";
 import Row from "react-bootstrap/esm/Row";
 import Col from "react-bootstrap/esm/Col";
+import { Spinner } from "react-bootstrap";
 
 class Step4 extends Component {
   constructor(props) {
@@ -48,9 +49,9 @@ class Step4 extends Component {
 
     this.step4Info = (
       <Popover id="popover-basic">
-        <Popover.Header as="h4">{StepsInfo.step4Info.title}</Popover.Header>
+        <Popover.Header as="h4">Informații referitoare la pasul 4</Popover.Header>
         <Popover.Body>
-          {StepsInfo.step3Info.body}
+          <Spinner />
 
         </Popover.Body>
       </Popover>
@@ -59,15 +60,23 @@ class Step4 extends Component {
 
   componentDidMount() { }
 
-  onChange(e) {
-    let newState = {};
-    newState[e.target.name] = e.target.value;
-    this.setState(newState);
-  }
+  onChange = input => {
 
-  onKeyPress(button) {
+    this.state.ocrResults[this.state.inputID] = input;
+    this.setState({ ocrResults: [...this.state.ocrResults] });
+
+    console.log("Input changed", input);
+  };
+
+  onKeyPress = button => {
+    console.log("Button pressed", button);
+
+    /**
+     * If you want to handle the shift and caps lock buttons
+     */
     if (button === "{shift}" || button === "{lock}") this.handleShift();
-  }
+  };
+
 
   handleShift() {
     const layoutName = this.state.layoutName;
@@ -81,22 +90,22 @@ class Step4 extends Component {
     /* console.log(event.target.id); */
   }
 
-  onChangeInput(event) {
+  // onChangeInput(event) {
+  //   const input = event.target.value;
+  //   this.state.ocrResults[this.state.inputID] = input;
+  //   this.setState({ ocrResults: [...this.state.ocrResults] });
+  //   console.log(this.state.ocrResults);
+  //   this.props.updateStore({ ocrResults: this.state.ocrResults });
+  //   // this.keyboard.setInput(input);
+  // }
+
+  onChangeInput = event => {
+    console.log(event.target.value, event.target.id);
     const input = event.target.value;
     this.state.ocrResults[this.state.inputID] = input;
     this.setState({ ocrResults: [...this.state.ocrResults] });
-    console.log(this.state.ocrResults);
-    this.props.updateStore({ ocrResults: this.state.ocrResults });
-    // this.keyboard.setInput(input);
-  }
-
-  onChangeKeyboardInput(input, a) {
-    console.log(input, a);
-    const inputID = this.state.inputID;
-    const ocrResults = this.state.ocrResults;
-    ocrResults[inputID] = input;
-    this.setState({ ocrResults: [...ocrResults] });
-  }
+    this.keyboard.setInput(input);
+  };
 
   handleKeyboardButton(showk) {
     const keyboardButton = document.querySelector("button#keyboard-button");
@@ -172,8 +181,14 @@ class Step4 extends Component {
                                   value={item}
                                   onChange={this.onChangeInput.bind(this)}
                                   className="form-control text"
-                                  rows="14"
+                                  rows="12"
                                 ></textarea>
+                                {/* <Keyboard
+                                  keyboardRef={r => (this.keyboard = r)}
+                                  layoutName={this.state.layoutName}
+                                  onChange={this.onChange}
+                                  onKeyPress={this.onKeyPress}
+                                /> */}
                               </Col>
 
                               <Col sm={3}>
@@ -187,9 +202,19 @@ class Step4 extends Component {
                                     {this.handleKeyboardButton(this.state.showk)}
                                   </button>
                                   <div className="mt-3">
-                                    Compară rezultatul OCR cu imaginea sursă preprocesată:
-                                    <img src={this.state.s3PreprocessedFiles[index]}
-                                    />
+                                    <a
+
+                                      className=""
+                                      data-fancybox="gallery_2"
+                                      data-src={this.state.s3PreprocessedFiles[index]}
+                                      data-caption='imagine procesată'
+                                      key={index}
+                                    >
+
+                                      Compară rezultatul OCR cu imaginea sursă preprocesată:
+                                      <img width="200" className="" src={this.state.s3PreprocessedFiles[index]}
+                                      />
+                                    </a>
                                   </div>
 
                                 </Col>
@@ -210,21 +235,18 @@ class Step4 extends Component {
 
                 {/* </label> */}
 
-                {this.state.showk && (
+                {/* {this.state.showk && (
                   <Keyboard
                     keyboardRef={(r) => (this.keyboard = r)}
                     layoutName={this.state.layoutName}
                     onChange={(inputs) =>
-                      this.onChangeKeyboardInput(
-                        inputs,
-                        this.state.ocrResults[this.state.inputID]
-                      )
+                      this.onChangeInput(inputs[0])
                       //.bind(this)
                     }
                     onKeyPress={this.onKeyPress.bind(this)}
                     layout={this.cyrillicRomanianLayout.layout}
                   />
-                )}
+                )} */}
               </div>
               {/* <div className="form-group col-md-3 content form-block-image">
                 

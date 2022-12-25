@@ -219,7 +219,7 @@ const ScanTailor = (props) => {
                 <Tab eventKey="desktop" title="Desktop">
                     <Form.Group>
                         <Form.Label className=" p-2">
-                            Modalitatea de preprocesare Desktop cu ScanTailor este disponibilă doar în versiunea desktop a platformei.
+                            Prelucrarea imaginii cu ScanTailor a fost dezvoltată pentru varianta desktop a plicației de digitizare.
                             <OverlayTrigger trigger="click" rootClose placement="right" overlay={desktopModeInfo}>
                                 <Button type="button" className="btn btn-info text-white mx-4">?</Button>
                             </OverlayTrigger>
@@ -239,9 +239,9 @@ const ScanTailor = (props) => {
                                 overlay={renderTooltip}
                             >
                                 <CopyToClipboard
-                                    text={props.getStore().uploadFolder}
+                                    text={`C:\\Users\\user\\Downloads`}
                                     onCopy={() => setCopied(true)}>
-                                    <Button variant="secondary mx-2">{props.getStore().uploadFolder}</Button>
+                                    <Button variant="secondary mx-2">{"C:\\Users\\user\\Downloads"}</Button>
                                 </CopyToClipboard>
                             </OverlayTrigger> în <code>Input Directory</code>
                             {/* {isCopied ? <span className="text-success text-center">Copiat!</span> : <span className="text-warning text-center">Apasă pentru a copia!</span>} */}
@@ -270,7 +270,7 @@ const ScanTailor = (props) => {
                 </Tab>
 
                 {/* web functionalities */}
-                <Tab eventKey="web" title="Web">
+                <Tab eventKey="web" title="Web" disabled>
                     <Form.Group as={Row} className="my-3 mx-2">
                         <Form.Label className="mb-4">
                             Setează rezoluția imaginii preprocesate:

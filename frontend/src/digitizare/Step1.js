@@ -15,25 +15,32 @@ export default class Step1 extends Component {
   constructor(props) {
     super(props);
     this.state = {};
+    this.step1Info = (<>
+    
+      {StepsInfo.step1Info.body}
+      <p>Se acceptă următoarele tipuri de fișiere la incarcare: <b>png, jpg si tiff</b>.</p>
+      <p>Fișierele PDF nu se pot prelucra in versiunea demo a aplicatiei.</p>
+      <p>Pot fi încărcate mai multe fișiere într-un singur ciclu de digitizare.</p>
 
-    this.step1Info = (
+      <p>Un singur fișier incărcat nu va trece limita de 100MB.
+      Toate fișierele incărcate la un singur ciclu de digitizare nu vor trece limita de 700MB.
+      </p>
+      <p>
+      Atunci când vor fi selectate două sau mai multe fișiere, trebuie de luat în considerare că toate aceste fișiere vor fi procesate cu aceleași opțiuni de procesare, respectiv, trebuie să vă asigurați că fișierele încărcate sunt din aceeași perioadă, au unul și același alfabet și necesită aceleași opțiuni de preprocesare a imaginii. Dacă aveți seturi de documente din mai multe perioade, atunci aceste seturi vor fi digitizate în diferite cicluri de digitizare.
+      </p>
+      <p>
+      Este posibilitatea de a șterge unele fișiere care au fost întamplator selectate in acest pas.
+      </p>
+</>);
+
+    this.Popover = (
       <Popover id="popover-basic">
         <Popover.Header as="h4">{StepsInfo.step1Info.title}</Popover.Header>
         <Popover.Body>
-          {StepsInfo.step1Info.body}
-          Se acceptă următoarele tipuri de fișiere: <b>png, jpg, tiff și pdf</b>.
-          <br /><br />
-          Pot fi încărcate mai multe fișiere într-un singur ciclu de digitizare.
-          <br /><br />
-          Un singur fișier incărcat nu va trece limita de 100MB.
-          Toate fișierele incărcate la un singur ciclu de digitizare nu vor trece limita de 700MB.
-          <br /><br />
-          Atunci când vor fi selectate două sau mai multe fișiere, trebuie de luat în considerare că toate aceste fișiere vor fi procesate cu aceleași opțiuni de procesare, respectiv, trebuie să vă asigurați că fișierele încărcate sunt din aceeași perioadă, au unul și același alfabet și necesită aceleași opțiuni de preprocesare a imaginii. Dacă aveți seturi de documente din mai multe perioade, atunci aceste seturi vor fi digitizate în diferite cicluri de digitizare.
-          <br /><br />
-          Este posibilitatea de a șterge unele fișiere care au fost întamplator selectate in acest pas.
+          {this.step1Info}
         </Popover.Body>
       </Popover>
-    );
+    )
   }
 
   componentDidMount() { }
@@ -53,7 +60,7 @@ export default class Step1 extends Component {
             <Form.Group className="form-group">
               <Form.Label className="col-md-12 control-label d-flex">
                 <h1>Pasul 1: Incarcă documentul tău</h1>
-                <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.step1Info}>
+                <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.Popover}>
                   <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
                 </OverlayTrigger>
               </Form.Label>
@@ -67,6 +74,10 @@ export default class Step1 extends Component {
             </Form.Group>
           </Form>
         </div>
+        <div className="row">
+          {this.step1Info}
+        </div>
+
       </div>
     );
   }

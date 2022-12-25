@@ -10,6 +10,7 @@ import Step5 from "./Step5";
 import Step6 from "./Step6";
 import Step7 from "./Step7";
 import Exceptions from "../components/ExceptionDict";
+import Form from "react-bootstrap/Form";
 
 import "../css/main.css";
 
@@ -21,11 +22,12 @@ export default class DigitizationSteps extends Component {
     this.sampleStore = {
       // email: "",
       // gender: "",
-      api: "https://a1ef-81-180-76-251.eu.ngrok.io/",
+      api: "https://a1ef-81-180-76-251.eu.ngrok.io/",   // ngrok: https://a1ef-81-180-76-251.eu.ngrok.io/
       period: "secolulXX", //default is 20th century
       ocrModel: "",
       typography: "",
       alphabet: "cyrillic", //default is cyrillic
+      saveToCloud: true,
       savedToCloud: false,
       // uploadFolder: "C:\\Users\\bumbu\\OneDrive\\Desktop\\Projects\\PlatformaDigitizare\\backend\\media",
       uploadFolder: "https://a1ef-81-180-76-251.eu.ngrok.io/media/",
@@ -79,7 +81,7 @@ export default class DigitizationSteps extends Component {
         removeHyphen: true,
         removeDiacritics: false,
         correctTextWithGPT3: false,
-        exceptions: Exceptions,
+        useExceptionDictionary: true,
 
 
       },
@@ -102,6 +104,7 @@ export default class DigitizationSteps extends Component {
   }
 
   render() {
+    console.log(this.sampleStore);
     const steps = [
       {
         name: "1. Încarcă fișierele",
@@ -184,6 +187,8 @@ export default class DigitizationSteps extends Component {
 
     return (
       <div className="example">
+        {/* check button saveToCloud */}
+
         <div className="step-progress">
           <StepZilla
             steps={steps}
@@ -196,7 +201,10 @@ export default class DigitizationSteps extends Component {
                 : 0
             }
             onStepChange={(step) => window.sessionStorage.setItem("step", step)}
+
           />
+
+
         </div>
       </div>
     );

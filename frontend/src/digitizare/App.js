@@ -5,8 +5,8 @@ import ReactDOM from "react-dom";
 
 // S: Base - vanilla example
 import DigitizationSteps from "./DigitizationSteps";
-
-ReactDOM.render(<DigitizationSteps />, document.getElementById("root"));
+import HomePage from "./Pages/HomePage";
+ReactDOM.render(<HomePage />, document.getElementById("root"));
 // E: Base - vanilla example
 
 // S: i18n - Internationalization and localization example

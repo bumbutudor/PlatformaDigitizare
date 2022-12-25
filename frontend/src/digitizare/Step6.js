@@ -12,6 +12,7 @@ import Row from "react-bootstrap/esm/Row";
 import Col from "react-bootstrap/esm/Col";
 import Accordion from "react-bootstrap/Accordion";
 import Button from "react-bootstrap/Button";
+import KeyboardIcon from "../components/KeyboardIcon";
 
 
 class Step6 extends Component {
@@ -27,6 +28,9 @@ class Step6 extends Component {
       sourceFiles: props.getStore().sourceFiles,
       preprocessedFiles: props.getStore().preprocessedFiles,
       layoutName: "default",
+      s3PreprocessedFiles: props.getStore().s3PreprocessedFiles,
+      s3SourceFiles: props.getStore().s3SourceFiles,
+
       show: false,
       showNextStep: false,
       // input: ""
@@ -105,70 +109,78 @@ class Step6 extends Component {
             <div className="row mt-3">
               <div className="form-group col-md-12 content form-block-holder">
                 <label className="control-label col-12">
-                  {this.state.transResults &&
-                    // use google translate to translate the transilterated  text
+                  <Accordion defaultActiveKey={0} alwaysOpen>
+                    {this.state.transResults &&
+                      // use google translate to translate the transilterated  text
 
-                    this.state.transResults.map((item, index) => {
-                      return (
-                        <div key={index}>
-                          <div className="row mb-3">
-                            <span className="ocrResultTitle text-info col-12">
-                              {`Rezultatul OCR pentru imaginea ${index + 1}:`}
-                              <button
-                                className="btn btn-keyboard col-1"
-                                type="button"
-                                title="Tastatura Virtuală"
-                                onClick={() =>
-                                  this.setState({ show: !this.state.show })
-                                }
-                              >
-                                <svg
-                                  className="svg_keyboard"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    fill="currentColor"
-                                    d="M19,10H17V8H19M19,13H17V11H19M16,10H14V8H16M16,13H14V11H16M16,17H8V15H16M7,10H5V8H7M7,13H5V11H7M8,11H10V13H8M8,8H10V10H8M11,11H13V13H11M11,8H13V10H11M20,5H4C2.89,5 2,5.89 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7C22,5.89 21.1,5 20,5Z"
-                                  />
-                                </svg>
-                              </button>
-                            </span>
-                          </div>
-                          <textarea
-                            key={index}
-                            id={index}
-                            onFocus={this.setActiveInput.bind(this)}
-                            value={item}
-                            onChange={this.onChangeInput.bind(this)}
-                            className="form-control mb-4 text"
-                            rows="10"
-                          ></textarea>
-                          <a
-                            className="image_ocr_a"
-                            data-fancybox="gallery_2"
-                            data-src={
-                              this.state.preprocessedFiles[index] != undefined
-                                ? handleFilePath(
-                                  this.state.preprocessedFiles[index]
-                                )
-                                : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
-                            }
-                            data-caption={"imagine preprocesată" + index}
-                          >
-                            <img
-                              className="image_ocr"
-                              src={
-                                this.state.preprocessedFiles[index] != undefined
-                                  ? handleFilePath(
-                                    this.state.preprocessedFiles[index]
-                                  )
-                                  : "https://prikolnye-kartinki.ru/img/picture/Sep/23/9d857169c84422fdaa28df62667a1467/5.jpg"
-                              }
-                            />
-                          </a>
-                        </div>
-                      );
-                    })}
+                      this.state.transResults.map((item, index) => {
+                        return (
+                          <Accordion.Item eventKey={index} key={index}>
+                            <Accordion.Header>
+                              {`Rezultatul transliterării documentului ${this.state.sourceFiles[index].name}`}
+                            </Accordion.Header>
+                            <Accordion.Body>
+
+                              <Row>
+
+                                <Col sm={9}>
+                                  <textarea
+                                    key={index}
+                                    id={index}
+                                    onFocus={this.setActiveInput.bind(this)}
+                                    value={item}
+                                    onChange={this.onChangeInput.bind(this)}
+                                    className="form-control text"
+                                    rows="14"
+                                  ></textarea>
+                                  {/* <Keyboard
+                                keyboardRef={r => (this.keyboard = r)}
+                                layoutName={this.state.layoutName}
+                                onChange={this.onChange}
+                                onKeyPress={this.onKeyPress}
+                              /> */}
+                                </Col>
+
+                                <Col sm={3}>
+                                  <Col sm={12}>
+                                    <button
+                                      id="keyboard-button"
+                                      className="btn btn-primary"
+                                      type="button"
+                                      title="Tastatura virtuală"
+                                    > <KeyboardIcon />
+                                      Tastatura virtuală
+                                    </button>
+                                    <div className="mt-3">
+                                      <a
+
+                                        className=""
+                                        data-fancybox="gallery_2"
+                                        data-src={this.state.s3PreprocessedFiles[index]}
+                                        data-caption='imagine procesată'
+                                        key={index}
+                                      >
+
+                                        Compară rezultatul OCR cu imaginea sursă preprocesată:
+                                        <img width="200" className="" src={this.state.s3PreprocessedFiles[index]}
+                                        />
+                                      </a>
+                                    </div>
+
+                                  </Col>
+
+
+                                </Col>
+
+
+
+                              </Row>
+                            </Accordion.Body>
+                          </Accordion.Item>
+
+                        );
+                      })}
+                  </Accordion>
                 </label>
 
                 {this.state.show && (

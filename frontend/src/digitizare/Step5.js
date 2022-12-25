@@ -28,19 +28,13 @@ export default class Step5 extends Component {
       ocrResults: props.getStore().ocrResults,
       transResults: props.getStore().transResults,
       transOptions: props.getStore().transOptions,
-      dictionaryInfo:
-        (
-          <Popover id="popover-basic">
-            <Popover.Header as="h4">Dicționar de excepții</Popover.Header>
-            <Popover.Body>
-              <p>Dictionarul include cuvinte care nu pot fi transliterate utilând reguli de transliterare. </p>
-              <p>De exemplu, cuvântul <em>амязэ</em> conform regulilor de transliterare trece in <em>amează</em>, iar varianta corectă <b><em>amiază</em></b> se află în dicționar.</p>
-              <Button variant="primary" onClick={() => this.setState({ showModal: true })}>
-                Gestionează dicționarul
-              </Button>
-            </Popover.Body>
-          </Popover>
-        ),
+      dictionaryInfo: (<>
+        <p>Dictionarul include cuvinte care nu pot fi transliterate corect utilând reguli de transliterare. </p>
+        <p>De exemplu, cuvântul <em>амязэ</em> conform regulilor de transliterare trece in <em>amează</em>, iar varianta corectă <b><em>amiază</em></b> se află în dicționar.</p>
+        <p>Moi jos poți adăuga excepții noi. Lista de exceptii se salvează și se actualizează automat.</p>
+      </>
+      ),
+
       exceptionDictionary: [],
       aboutOpenAI:
         (
@@ -61,7 +55,17 @@ export default class Step5 extends Component {
       showModal: false,
     };
 
-    this.alphabetOptions = props.getStore().alphabetOptions;
+    this.dictionaryPopover =
+      (
+        <Popover id="popover-basic">
+          <Popover.Header as="h4">Dicționar de excepții</Popover.Header>
+          <Popover.Body>
+            {this.state.dictionaryInfo}
+          </Popover.Body>
+        </Popover>
+      ),
+
+      this.alphabetOptions = props.getStore().alphabetOptions;
     this.periodOptions = props.getStore().periodOptions;
 
     this.API = new FetchWrapper(props.getStore().api); // localhost dev server url http://127.0.0.1:8000/
@@ -124,8 +128,8 @@ export default class Step5 extends Component {
               </label>
             </Form.Group>
 
-            <div className="row content">
-              <div className="mb-3 col-sm-3 border">
+            <div className="row content gap-2">
+              <div className="mb-3 col-sm-3 border rounded px-2 bg-light">
                 <Form.Group >
                   <Form.Label>5.1 Perioada documentului este:
                     <span className='text-primary mx-2'>{this.periodOptions[this.state.period]}</span>
@@ -139,7 +143,7 @@ export default class Step5 extends Component {
 
                 </Form.Group>
               </div>
-              <Form.Group className="col-sm">
+              <Form.Group className="col-sm border rounded px-2 bg-light">
                 <Form.Label>5.3 Setări de transliterare:</Form.Label>
                 <Form.Check
                   label="Actualizează ortografia (gînd => gând)"
@@ -154,24 +158,27 @@ export default class Step5 extends Component {
 
                 <div className='d-flex'>
                   <Form.Check
-                    disabled
                     label="Folosește dicționarul de excepții"
                     name="removeHyphen"
-                    id="checkboxTrans3"
+                    id="checkboxTrans2"
                     type="checkbox"
-                  // checked={this.state.transOptions.removeHyphen}
-                  // onChange={this.handleTransOptionsChange.bind(this)}
+                    checked={this.state.transOptions.useExceptionDictionary}
+                    onChange={this.handleTransOptionsChange.bind(this)}
                   />
-                  <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.state.dictionaryInfo}>
+                  <Button className='btn btn-info text-white mx-4' onClick={() => this.setState({ showModal: true })}>
+                    ?
+                  </Button>
+
+                  <DictionaryModal about={this.state.dictionaryInfo} period={this.state.period} api={this.API} show={this.state.showModal} onHide={() => this.setState({ showModal: false })} />
+
+                  {/* <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.dictionaryPopover}>
                     <Button type="button" className="btn btn-info text-white mx-4">?</Button>
-                  </OverlayTrigger>
-
-                  <DictionaryModal period={this.state.period} api={this.API} show={this.state.showModal} onHide={() => this.setState({ showModal: false })} />
-
+                  </OverlayTrigger> */}
                 </div>
                 <div className='d-flex'>
 
                   <Form.Check
+                    disabled
                     label="Corectează textul cu agentul inteligent de la OpenAI"
                     name="correctTextWithGPT3"
                     id="checkboxTrans4"
@@ -223,56 +230,54 @@ export default class Step5 extends Component {
         </div>
 
         {/* preprocessed image and reognized text */}
-        <Draggable>
-          <div className="row">
-            <div className="col-md-12 d-flex justify-content-around">
-              <div className="col-sm">
-                {this.state.ocrResults.length != 0 && <>
-                  <Accordion defaultActiveKey={['0']} alwaysOpen>
-                    <Accordion.Item eventKey="0">
-                      <Accordion.Header>Sursa - textul recunoscut și editat</Accordion.Header>
-                      <Accordion.Body>
-                        {
-                          this.state.ocrResults.map((text, index) => (
-                            <div className="ocrResult mb-4" key={index}>
-                              {/* <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
-                              {text.split('\n').map((item, key) => {
-                                return <span key={key}>{item}<br /></span>
-                              })}
+        <div className="row">
+          <div className="col-md-12 d-flex gap-2 justify-content-around">
+            <div className="col-sm">
+              {this.state.ocrResults.length != 0 && <>
+                <Accordion defaultActiveKey={['0']} alwaysOpen>
+                  <Accordion.Item eventKey="0">
+                    <Accordion.Header>Sursa - textul recunoscut și editat</Accordion.Header>
+                    <Accordion.Body>
+                      {
+                        this.state.ocrResults.map((text, index) => (
+                          <div className="ocrResult mb-4" key={index}>
+                            {/* <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
+                            {text.split('\n').map((item, key) => {
+                              return <span key={key}>{item}<br /></span>
+                            })}
 
-                            </div>
-                          ))
-                        }
-                      </Accordion.Body>
-                    </Accordion.Item>
-                  </Accordion>
-                </>}
-              </div>
+                          </div>
+                        ))
+                      }
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
+              </>}
+            </div>
 
-              <div className="col-sm">
-                {this.state.transResults != 0 && <>
-                  <Accordion defaultActiveKey={['0']} alwaysOpen>
-                    <Accordion.Item eventKey="0">
-                      <Accordion.Header>Ținta - textul transliterat </Accordion.Header>
-                      <Accordion.Body>
-                        {
-                          this.state.transResults.map((text, index) => (
-                            <div className="transResult mb-4" key={index}>
-                              {/* <span className="transResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
-                              {text.split('\n').map((item, key) => {
-                                return <span key={key}>{item}<br /></span>
-                              })}
-                            </div>
-                          ))
-                        }
-                      </Accordion.Body>
-                    </Accordion.Item>
-                  </Accordion>
-                </>}
-              </div>
+            <div className="col-sm">
+              {this.state.transResults != 0 && <>
+                <Accordion defaultActiveKey={['0']} alwaysOpen>
+                  <Accordion.Item eventKey="0">
+                    <Accordion.Header>Ținta - textul transliterat </Accordion.Header>
+                    <Accordion.Body>
+                      {
+                        this.state.transResults.map((text, index) => (
+                          <div className="transResult mb-4" key={index}>
+                            {/* <span className="transResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
+                            {text.split('\n').map((item, key) => {
+                              return <span key={key}>{item}<br /></span>
+                            })}
+                          </div>
+                        ))
+                      }
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
+              </>}
             </div>
           </div>
-        </Draggable>
+        </div>
 
       </div>
     )
