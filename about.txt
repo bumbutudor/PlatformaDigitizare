@@ -1,0 +1,18 @@
+exceptiondictionar crud
+   - exceptii de recunoastere
+   - exceptii de transiterare
+   - exceptii de punere a cratimelor
+
+
+ocrmodels curd
+  -name
+  -filepath
+  -nr of train examples
+  -trainedOn
+  -timestamps
+  -trainedBy
+  
+ 
+
+
+

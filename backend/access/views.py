@@ -60,6 +60,7 @@ def home(request):
 def upload(request):
     # print(request.FILES['uploadedFile'])
     myfile = request.FILES['uploadedFiles']
+    saveToCloud = False
     fs = FileSystemStorage()
     filename = fs.save(myfile.name, myfile)
     print(filename)
