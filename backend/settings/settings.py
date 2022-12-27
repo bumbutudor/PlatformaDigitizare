@@ -34,12 +34,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'corsheaders',
     'access',
+    'corsheaders',
 ]
 
-ALLOWED_HOSTS = ["*"]
-# CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = ["localhost", "digitizare.math.md",
+                 "ngrok.io", "a1ef-81-180-76-251.eu.ngrok.io"]
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
@@ -85,6 +86,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'access.custom_cors_middleware.CustomCorsMiddleware'
 ]
 
 ROOT_URLCONF = 'settings.urls'
