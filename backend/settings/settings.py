@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'access',
+    'multiselectfield',
 ]
 
 ALLOWED_HOSTS = ["*"]

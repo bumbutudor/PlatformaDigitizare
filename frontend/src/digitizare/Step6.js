@@ -13,7 +13,9 @@ import Col from "react-bootstrap/esm/Col";
 import Accordion from "react-bootstrap/Accordion";
 import Button from "react-bootstrap/Button";
 import KeyboardIcon from "../components/KeyboardIcon";
-
+import AddExceptionWidget from "../components/AddExceptionWidget";
+import LatestExceptionsWidget from "../components/LatestExeptionsWidget";
+import { getDictionary } from "../utils/ApiService";
 
 class Step6 extends Component {
   constructor(props) {
@@ -30,6 +32,7 @@ class Step6 extends Component {
       layoutName: "default",
       s3PreprocessedFiles: props.getStore().s3PreprocessedFiles,
       s3SourceFiles: props.getStore().s3SourceFiles,
+      period: props.getStore().period,
 
       show: false,
       showNextStep: false,
@@ -203,6 +206,12 @@ class Step6 extends Component {
           </form>
 
         </div>
+        <div className="exception-widget">
+          <AddExceptionWidget period={this.state.period} onGetDictionary={getDictionary} />
+          {/* <span className="text-muted">Ultimele excepții adăugate</span>
+          <LatestExceptionsWidget period={this.state.period} getDictionary={getDictionary} numberOfExceptionsToShow={7} /> */}
+        </div>
+
 
         <Row className="mt-2">
           <Col>

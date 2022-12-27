@@ -63,3 +63,5 @@ backend/media/*.tif
 
 # END OF BACKEND
 
+# new folder of frontend
+/new

@@ -136,7 +136,7 @@ export default class Step7 extends Component {
           <form id="Form" className="form-horizontal">
             <div className="form-group">
               <label className="col-md-12 control-label mb-3">
-                <h1>Step 7: Salvează rezultatele</h1>
+                <h1>Pasul 7: Salvează rezultatele</h1>
               </label>
             </div>
             {this.props.getStore().preprocessedFiles.length != 0 && (

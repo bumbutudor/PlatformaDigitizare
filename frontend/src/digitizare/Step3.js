@@ -181,6 +181,7 @@ export default class Step3 extends Component {
                   <Form.Group className="mb-3 col-sm">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check
+                      disabled
                       label="Model bazat alfabetul chirilic românesc (Legiuire de G. Caragea, anul 1818)"
                       name="secolulXIX"
                       type="radio"
@@ -190,6 +191,7 @@ export default class Step3 extends Component {
                       onChange={() => { this.setState({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian" }); }}
                     />
                     <Form.Check
+                      disabled
                       label="Model bazat pe alfabetul de tranziție (Epistolariul românesc, anul 1841)"
                       name="secolulXIX"
                       type="radio"
@@ -199,6 +201,7 @@ export default class Step3 extends Component {
                       onChange={() => { this.setState({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional" }); }}
                     />
                     <Form.Check
+                      disabled
                       label="Model bazat pe alfabetul de tranziție (Elemente de aritmetică de G. Asachi, anul 1836)"
                       name="secolulXIX"
                       type="radio"
@@ -217,6 +220,7 @@ export default class Step3 extends Component {
                   <Form.Group className="mb-3 col-sm">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check
+                      disabled
                       label="Model bazat pe alfabetul chirilic românesc&nbsp;&nbsp;&nbsp; (De Obște Geografie, anul 1795)"
                       name="secolulXVIII"
                       type="radio"
@@ -226,6 +230,7 @@ export default class Step3 extends Component {
                       onChange={() => { this.setState({ ocrModel: "secolulXVIII_1", show: true }); this.props.updateStore({ ocrModel: "secolulXVIII_1" }); }}
                     />
                     <Form.Check
+                      disabled
                       label="Model bazat pe alfabetul chirilic românesc (Fiziognomie de M. Strilbițchi, anul 1785)"
                       name="secolulXVIII"
                       type="radio"
@@ -235,6 +240,7 @@ export default class Step3 extends Component {
                       onChange={() => { this.setState({ ocrModel: "secolulXVIII_2", show: true }); this.props.updateStore({ ocrModel: "secolulXVIII_2" }); }}
                     />
                     <Form.Check
+                      disabled
                       label="Model bazat pe alfabetul chirilic românesc (Așezământ, anul 1786)"
                       name="secolulXVIII"
                       type="radio"
@@ -264,6 +270,7 @@ export default class Step3 extends Component {
                     />
                     <Form.Check
                       {...(this.state.typography === "typographyAuto" ? { disabled: true } : {})}
+                      disabled
                       label="Model bazat pe alfabetul chirilic românesc (antrenat cu fonturile de tip B)"
                       name="secolulXVII"
                       type="radio"
@@ -276,6 +283,7 @@ export default class Step3 extends Component {
                   </Form.Group>
                   <Form.Group className="mb-4">
                     <Form.Check
+                      disabled
                       label="Identifică automat modelul necesar pentru documentul tău"
                       name="typographyAuto"
                       type="checkbox"
@@ -288,7 +296,7 @@ export default class Step3 extends Component {
                   </Form.Group>
                   <Form.Group>
                     <Form.Label>Dacă cunoști la ce tipografie a fost tipărit documentul, selectează din lista de mai jos </Form.Label>
-                    <Form.Select value={this.state.typography} onChange={(e) => { this.setState({ typography: e.target.value, show: true }); this.props.updateStore({ typography: e.target.value }); }}>
+                    <Form.Select disabled value={this.state.typography} onChange={(e) => { this.setState({ typography: e.target.value, show: true }); this.props.updateStore({ typography: e.target.value }); }}>
 
                       <option value="">Lista tipografiilor:</option>
                       <option value="typography1">Tipariul cel Domnesc (Iași)</option>

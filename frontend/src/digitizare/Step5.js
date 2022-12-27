@@ -169,7 +169,7 @@ export default class Step5 extends Component {
                     ?
                   </Button>
 
-                  <DictionaryModal about={this.state.dictionaryInfo} period={this.state.period} api={this.API} show={this.state.showModal} onHide={() => this.setState({ showModal: false })} />
+                  <DictionaryModal about={this.state.dictionaryInfo} fullscreen={true} period={this.state.period} api={this.API} show={this.state.showModal} onHide={() => this.setState({ showModal: false })} />
 
                   {/* <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.dictionaryPopover}>
                     <Button type="button" className="btn btn-info text-white mx-4">?</Button>
@@ -264,7 +264,7 @@ export default class Step5 extends Component {
                       {
                         this.state.transResults.map((text, index) => (
                           <div className="transResult mb-4" key={index}>
-                            {/* <span className="transResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
+
                             {text.split('\n').map((item, key) => {
                               return <span key={key}>{item}<br /></span>
                             })}
