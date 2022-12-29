@@ -34,8 +34,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'access',
     'corsheaders',
+    'access',
+    # 'apps.digiapp',
 ]
 
 ALLOWED_HOSTS = ["localhost", "digitizare.math.md",

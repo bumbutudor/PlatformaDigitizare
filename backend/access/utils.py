@@ -11,6 +11,40 @@ import nltk
 import re
 import openai
 from django.conf import settings
+import os
+import time
+
+
+def replace_extension(file_path, new_extension):
+    return os.path.splitext(file_path)[0] + new_extension
+
+
+def wait_for_files(required_files, folder_path, file_ext, timeout=120, sleep_time=1):
+    all_files_found = False
+    # remove the extension from the files
+    required_files = [os.path.splitext(file["name"])[0]
+                      for file in required_files]
+    # add the extension to the files
+    required_files = [file + file_ext for file in required_files]
+
+    print("required files", required_files)
+    while not all_files_found:
+        # get all files in folder
+        files = os.listdir(folder_path)
+
+        # check if all files are found
+        # chech if starts with the same name
+
+        all_files_found = all([file in files for file in required_files])
+
+        # if not all files are found, wait for a while
+        if not all_files_found:
+            print("waiting for files", required_files)
+            time.sleep(sleep_time)
+            timeout -= sleep_time
+            if timeout <= 0:
+                raise Exception(
+                    "Timeout exceeded while waiting for files: " + str(required_files))
 
 
 IMAGE_SIZE = 1800

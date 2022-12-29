@@ -16,6 +16,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import ExceptionDictionaryEntrySerializer
 from .models import ExceptionDictionaryEntry
+from .ocr import local_ocr_finereader_hotfolder
 
 
 class ExceptionDictionaryEntryViewSet(viewsets.ModelViewSet):
@@ -30,6 +31,7 @@ def exception_dictionary(request):
     # entries = ExceptionDictionaryEntry.objects.all()
 
     entries = [entry.__dict__ for entry in entries]
+    # print(entries)
     for entry in entries:
         entry.pop('_state')
     return JsonResponse({"code": 200, "msg": "success", "entries": entries})
@@ -80,6 +82,7 @@ def preprocess(request):
         data = json.loads(request.body)
         preprocess_with = data['preprocessWith']
         files = data['sourceFiles']
+        number_of_files = len(files)
 
         preprocessedFiles = []
         s3PreprocessedFiles = []
@@ -120,12 +123,8 @@ def preprocess(request):
             preprocess_fr = data['preprocessFR']
             pre_path = '/pre/FR/'
 
-            first_file_path = settings.MEDIA_ROOT + pre_path + \
-                os.path.splitext(files[0]["name"])[0] + '.jpg'
-
-            while not os.path.exists(first_file_path):
-                print("waiting for file", first_file_path)
-                time.sleep(1)
+            output_folder = settings.MEDIA_ROOT + pre_path
+            wait_for_files(files, output_folder, file_ext='.jpg')
 
             for file in files:
                 pre_file_path = pre_path + \
@@ -142,14 +141,15 @@ def preprocess(request):
                 command = "scantailor.exe"
                 os.system(command)
                 pre_path = settings.MEDIA_ROOT + "/out/"
-                first_file_path = pre_path + \
-                    os.path.splitext(files[0]["name"])[0] + '.tif'
+                last_filepath = pre_path + \
+                    os.path.splitext(
+                        files[number_of_files-1]["name"])[0] + '.tif'
 
-                while not os.path.exists(first_file_path):
-                    print("waiting for file", first_file_path)
+                while not os.path.exists(last_filepath):
+                    print("waiting for file", last_filepath)
                     time.sleep(1)
 
-                if os.path.isfile(first_file_path):
+                if os.path.isfile(last_filepath):
                     for file in files:
                         # uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
                         # output_folder =  settings.MEDIA_ROOT + pre_path
@@ -194,53 +194,8 @@ def preprocess(request):
 def ocr(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        period = data['period']
-        alphabet = data['alphabet']
-        files = data['sourceFiles']
-        ocr_results = []
-
-        if period == 'secolulXX' and alphabet == 'cyrillic':
-            ocr_path = '/ocr/secolulXX/cyrillic/'
-            first_file_path = settings.MEDIA_ROOT + ocr_path + \
-                os.path.splitext(files[0]["name"])[0] + '.txt'
-
-            while not os.path.exists(first_file_path):
-                print("waiting for file", first_file_path)
-                time.sleep(1)
-
-            for file in files:
-
-                ocr_file_path = settings.MEDIA_ROOT + ocr_path + \
-                    '/' + os.path.splitext(file["name"])[0] + '.txt'
-                ocr_result = load_txt(ocr_file_path)
-                ocr_results.append(ocr_result)
-            return JsonResponse({"code": 200, "msg": "success", "ocrResults": ocr_results})
-        elif period == 'secolulXX' and alphabet == 'latin':
-            # TODO : Implement using F
-            pass
-        elif period == 'secolulXVII':
-            ocr_path = '/ocr/secolulXVII/'
-            first_file_path = settings.MEDIA_ROOT + ocr_path + \
-                os.path.splitext(files[0]["name"])[0] + '.txt'
-
-            while not os.path.exists(first_file_path):
-                print("waiting for file", first_file_path)
-                time.sleep(1)
-            # ocr_model_path = '/ocr/secolulXVII/models/FR15_secXVII_NT/batch.options.xml'
-            for file in files:
-                uploaded_file_path = settings.MEDIA_ROOT + '/' + file["name"]
-                ocr_file_path = settings.MEDIA_ROOT + ocr_path + \
-                    '/' + os.path.splitext(file["name"])[0] + '.txt'
-                # command = 'finecmd.exe ' + uploaded_file_path + ' /OptionsFile ' + ocr_model_path + ' /out ' + ocr_file_path
-                # os.system(command)
-                # print(os.system(command))
-                ocr_result = load_txt(ocr_file_path)
-                ocr_results.append(ocr_result)
-            return JsonResponse({"code": 200, "msg": "success", "ocrResults": ocr_results})
-        elif period == 'secolulXVII':
-            # TODO : Implement using Gimp
-            pass
-
+        ocr_results = local_ocr_finereader_hotfolder(data, settings.MEDIA_ROOT)
+        return JsonResponse({"code": 200, "msg": "success", "ocrResults": ocr_results})
     else:
         return JsonResponse({"code": 500, "msg": "server error"})
 
