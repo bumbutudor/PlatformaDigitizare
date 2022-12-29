@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'access',
+    'apps.access',
     # 'apps.digiapp',
 ]
 
@@ -87,7 +87,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'access.custom_cors_middleware.CustomCorsMiddleware'
+    'apps.access.custom_cors_middleware.CustomCorsMiddleware'
 ]
 
 ROOT_URLCONF = 'settings.urls'
