@@ -79,3 +79,7 @@ fiecărui pas în parte. Un pas completat este marcat de culoarea
 albastru închis a fundalului pasului, respectiv și o bifă într-un
 cerculeț verde. Fundalul albastru deschis al unui pas de digitizare
 indică starea curentă din ciclul de digitizare a documentului.
+
+
+## Resources
+https://stackoverflow.com/questions/8408046/how-to-change-the-name-of-a-django-app
