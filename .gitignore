@@ -59,6 +59,7 @@ backend/media/*.png
 backend/media/*.jpeg
 backend/media/*.tiff
 backend/media/*.tif
+backend/media/*.zip
 
 
 # END OF BACKEND
