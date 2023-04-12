@@ -94,6 +94,8 @@ export default class Step3 extends Component {
       .catch(error => {
         // console.log(error);
         this.setState({ showError: true });
+        this.setState({ showNextStep: false });
+        this.setState({ show: true });
       })
       .finally(() => {
         this.setState({ showLoader: false });
@@ -191,14 +193,14 @@ export default class Step3 extends Component {
                       onChange={() => { this.setState({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian" }); }}
                     />
                     <Form.Check
-                      disabled
-                      label="Model bazat pe alfabetul de tranziție (Epistolariul românesc, anul 1841)"
+                      // disabled
+                      label="Model bazat pe chirilic românesc (Epistolariul românesc, anul 1841)"
                       name="secolulXIX"
                       type="radio"
                       id="radio22"
                       value="secolulXIX_2"
                       checked={this.state.ocrModel === "secolulXIX_2"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_2", alphabet: "cyrillicTransitional" }); }}
+                      onChange={() => { this.setState({ ocrModel: "secolulXIX_2", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_2", alphabet: "cyrillicRomanian" }); }}
                     />
                     <Form.Check
                       disabled
@@ -220,8 +222,7 @@ export default class Step3 extends Component {
                   <Form.Group className="mb-3 col-sm">
                     <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
                     <Form.Check
-                      disabled
-                      label="Model bazat pe alfabetul chirilic românesc&nbsp;&nbsp;&nbsp; (De Obște Geografie, anul 1795)"
+                      label="Model bazat pe alfabetul chirilic românesc (De Obște Geografie, anul 1795)"
                       name="secolulXVIII"
                       type="radio"
                       id="radio31"
@@ -332,7 +333,7 @@ export default class Step3 extends Component {
                       (<>
                         <Spinner
                           animation="border" />
-                        Are loc procesul OCR...
+                        Are loc recunoașterea caracterelor...
                       </>) :
                       (<>
                         Start OCR
@@ -348,8 +349,8 @@ export default class Step3 extends Component {
                 </>)}
               </div>
               {this.state.showError && (
-                <Alert variant="danger">
-                  <Alert.Heading>Eroare la recunoașterea optică! Incearcă alt model OCR...</Alert.Heading>
+                < Alert variant="danger">
+                  <Alert.Heading>A apărut o eroare, incercati din nou...</Alert.Heading>
                 </Alert>
               )}
             </div>

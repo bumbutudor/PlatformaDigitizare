@@ -234,12 +234,12 @@ export default class Step5 extends Component {
           <div className="col-md-12 d-flex gap-2 justify-content-around">
             <div className="col-sm">
               {this.state.ocrResults.length != 0 && <>
-                <Accordion defaultActiveKey={['0']} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>Sursa - textul recunoscut și editat</Accordion.Header>
-                    <Accordion.Body>
-                      {
-                        this.state.ocrResults.map((text, index) => (
+                <Accordion defaultActiveKey={0} alwaysOpen>
+                  {
+                    this.state.ocrResults.map((text, index) => (
+                      <Accordion.Item eventKey={index} key={index}>
+                        <Accordion.Header>Sursa - textul recunoscut și editat</Accordion.Header>
+                        <Accordion.Body>
                           <div className="ocrResult mb-4" key={index}>
                             {/* <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${index + 1}:`}</span> */}
                             {text.split('\n').map((item, key) => {
@@ -247,32 +247,32 @@ export default class Step5 extends Component {
                             })}
 
                           </div>
-                        ))
-                      }
-                    </Accordion.Body>
-                  </Accordion.Item>
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    ))
+                  }
                 </Accordion>
               </>}
             </div>
 
             <div className="col-sm">
               {this.state.transResults != 0 && <>
-                <Accordion defaultActiveKey={['0']} alwaysOpen>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>Ținta - textul transliterat </Accordion.Header>
-                    <Accordion.Body>
-                      {
-                        this.state.transResults.map((text, index) => (
+                <Accordion defaultActiveKey={0} alwaysOpen>
+                  {
+                    this.state.transResults.map((text, index) => (
+                      <Accordion.Item eventKey={index} key={index}>
+                        <Accordion.Header>Ținta - textul transliterat </Accordion.Header>
+                        <Accordion.Body>
                           <div className="transResult mb-4" key={index}>
 
                             {text.split('\n').map((item, key) => {
                               return <span key={key}>{item}<br /></span>
                             })}
                           </div>
-                        ))
-                      }
-                    </Accordion.Body>
-                  </Accordion.Item>
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    ))
+                  }
                 </Accordion>
               </>}
             </div>

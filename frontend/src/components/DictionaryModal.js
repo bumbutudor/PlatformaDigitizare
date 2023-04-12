@@ -22,19 +22,20 @@ const DictionaryModal = (props) => {
 
 
 
-    const API = new FetchWrapper('https://a1ef-81-180-76-251.eu.ngrok.io/');
+    const API = new FetchWrapper('https://uuj2kn6s.ngrok.app/');
     const handleGetDictionary = async () => {
         // const proxy = "https://cors-anywhere.herokuapp.com/";
         const dictionaryEndpoint = 'exception-dictionary/';
         API.post(dictionaryEndpoint, {}).then(data => {
             setExceptions(data.entries);
+            // console.log(data.entries);
         })
 
     }
 
     // remove exception from the dictionary By name of the exception
     const handleRemoveExceptionById = async (id) => {
-        const response = await fetch('https://a1ef-81-180-76-251.eu.ngrok.io/api/exception-dictionary/' + id + '/', {
+        const response = await fetch('https://uuj2kn6s.ngrok.app/api/exception-dictionary/' + id + '/', {
             method: 'DELETE',
             body: JSON.stringify({
                 id: id

@@ -1,25 +1,25 @@
 const mapPeriod = (period) => {
     switch (period) {
         case "secolulXX":
-            return "1";
+            return "5";
         case "secolulXIX":
-            return "2";
+            return "4";
         case "secolulXVIII":
             return "3";
         case "secolulXVII":
-            return "4";
+            return "2";
     }
 }
 
 const mapPeriodBack = (period) => {
     switch (period) {
-        case "1":
+        case "5":
             return "secolulXX";
-        case "2":
+        case "4":
             return "secolulXIX";
         case "3":
             return "secolulXVIII";
-        case "4":
+        case "2":
             return "secolulXVII";
     }
 }

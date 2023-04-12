@@ -6,17 +6,18 @@ import Modal from "react-bootstrap/Modal";
 import FetchWrapper from "./FetchWrapper";
 import Alert from 'react-bootstrap/Alert';
 import { mapPeriod } from "../utils/Utills";
+import Form from 'react-bootstrap/Form';
 
 const ExceptionWidget = (props) => {
     const [exceptions, setExceptions] = useState([]);
     const [exception, setException] = useState("");
     const [correctWord, setCorrectWord] = useState("");
-    const [period, setPeriod] = useState(mapPeriod(props.period));
+    const [period, setPeriod] = useState([5]);
     const [addedBy, setAddedBy] = useState("");
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
-    const API = new FetchWrapper('https://a1ef-81-180-76-251.eu.ngrok.io/');
+    const API = new FetchWrapper('https://uuj2kn6s.ngrok.app/');
 
     const handleAddException = async (event) => {
         setLoading(true);
@@ -26,13 +27,16 @@ const ExceptionWidget = (props) => {
             "exception": exception,
             "correct_word": correctWord,
             "period": period,
+            "alphabet": [1],
             "added_by": addedBy,
+            "exception_dictionary": 1,
+
         }
         console.log(data);
         API.post(dictionaryEndpoint, data).then((data) => {
             setException("");
             setCorrectWord("");
-            setPeriod(mapPeriod(props.period));
+            setPeriod([5]);
             setAddedBy("");
             props.onGetDictionary();
             setLoading(false);
@@ -49,7 +53,7 @@ const ExceptionWidget = (props) => {
     }
     // close the success alert after 3 seconds
 
-
+    console.log(period);
 
     return (
         <div>
@@ -65,15 +69,24 @@ const ExceptionWidget = (props) => {
                             <label htmlFor="correctWord">Cuvânt corect</label>
                             <input type="text" className="form-control" id="correctWord" placeholder="Cuvânt corect" value={correctWord} onChange={(e) => setCorrectWord(e.target.value)} />
                         </div>
-                        <div className="form-group">
-                            <label htmlFor="period">Perioadă</label>
-                            <select className="form-control" id="period" value={period} onChange={(e) => setPeriod(e.target.value)}>
-                                <option value="1">Secolul XX</option>
-                                <option value="2">Secolul XIX</option>
-                                <option value="3">Secolul XVIII</option>
-                                <option value="4">Secolul XVII</option>
-                            </select>
-                        </div>
+
+                        {/* multiple selections from period */}
+                        <Form.Group>
+                            <Form.Label>Perioada</Form.Label>
+                            <Form.Control
+                                as="select"
+                                multiple
+                                value={period}
+                                onChange={e => setPeriod([].slice.call(e.target.selectedOptions).map(item => item.value))}>
+                                <option value="5">secolulXX</option>
+                                <option value="4">secolulXIX</option>
+                                <option value="3">secolulXVIII</option>
+                                <option value="2">secolulXVII</option>
+
+                            </Form.Control>
+                        </Form.Group>
+
+
                         <div className="form-group">
                             <label htmlFor="addedBy">Adăugat de</label>
                             <input type="text" className="form-control" id="addedBy" placeholder="Adăugat de" value={addedBy} onChange={(e) => setAddedBy(e.target.value)} />

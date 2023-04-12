@@ -10,8 +10,8 @@ const ExceptionListWidget = ({ exceptions, onRemove }) => {
                     <tr>
                         <th>Varianta greșită</th>
                         <th>Varianta corectă</th>
-                        <th>Perioada</th>
-                        <th>Adăugat de</th>
+                        {/* <th>Perioada</th> TODO */}
+                        {/* <th>Adăugat de</th> */}
                         <th>Acțiuni</th>
                     </tr>
                 </thead>
@@ -23,8 +23,8 @@ const ExceptionListWidget = ({ exceptions, onRemove }) => {
                                 <tr key={index}>
                                     <td>{item.exception}</td>
                                     <td>{item.correct_word}</td>
-                                    <td>{mapPeriodBack(item.period)}</td>
-                                    <td>{item.added_by}</td>
+                                    {/* <td>{item.period ? item.period : ""}</td> */}
+                                    {/* <td>{item.added_by}</td> */}
                                     <td>
                                         <Button variant="danger" onClick={() => onRemove(item.id)}>Șterge</Button>
                                     </td>
