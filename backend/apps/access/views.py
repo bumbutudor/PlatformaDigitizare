@@ -5,6 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from .models import File
 from django.core.files.storage import FileSystemStorage
 from .utils import *
+from .ocr import local_ocr_finereader_hotfolder
 import os
 from django.conf import settings
 import json
@@ -15,13 +16,33 @@ from datetime import datetime
 from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import ExceptionDictionaryEntrySerializer
+from .serializers import ExceptionDictionarySerializer
+from .serializers import PeriodSerializer
+from .serializers import AlphabetSerializer
 from .models import ExceptionDictionaryEntry
-from .ocr import local_ocr_finereader_hotfolder
+from .models import ExceptionDictionary
+from .models import Period
+from .models import Alphabet
 
 
 class ExceptionDictionaryEntryViewSet(viewsets.ModelViewSet):
     queryset = ExceptionDictionaryEntry.objects.all()
     serializer_class = ExceptionDictionaryEntrySerializer
+
+
+class ExceptionDictionaryViewSet(viewsets.ModelViewSet):
+    queryset = ExceptionDictionary.objects.all()
+    serializer_class = ExceptionDictionarySerializer
+
+
+class PeriodViewSet(viewsets.ModelViewSet):
+    queryset = Period.objects.all()
+    serializer_class = PeriodSerializer
+
+
+class AlphabetViewSet(viewsets.ModelViewSet):
+    queryset = Alphabet.objects.all()
+    serializer_class = AlphabetSerializer
 
 
 def exception_dictionary(request):
@@ -31,9 +52,9 @@ def exception_dictionary(request):
     # entries = ExceptionDictionaryEntry.objects.all()
 
     entries = [entry.__dict__ for entry in entries]
-    # print(entries)
     for entry in entries:
         entry.pop('_state')
+        # print(entry)
     return JsonResponse({"code": 200, "msg": "success", "entries": entries})
 
 
