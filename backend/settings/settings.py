@@ -39,22 +39,33 @@ INSTALLED_APPS = [
     # 'apps.digiapp',
 ]
 
-ALLOWED_HOSTS = ["localhost", "digitizare.math.md",
-                 "ngrok.io", "a1ef-81-180-76-251.eu.ngrok.io"]
-CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = ["localhost", "digitizare.math.md", "math.md",
+                 "ngrok.io", "uuj2kn6s.ngrok.app"]
+# CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8080",
+#     "http://127.0.0.1:8000",
+#     "http://127.0.0.1:3000",
+#     'http://localhost:3000',
+#     'http://localhost:8000',
+#     'http://localhost:8080',
+#     'https://ngrok.io',
+#     'https://a1ef-81-180-76-251.eu.ngrok.io',
+#     'https://digitizare.math.md'
+# ]
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
     'http://localhost:8000',
     'http://localhost:8080',
     'https://ngrok.io',
-    'https://a1ef-81-180-76-251.eu.ngrok.io',
+    'https://uuj2kn6s.ngrok.app',
     'https://digitizare.math.md'
 ]
 
-CSRF_TRUSTED_ORIGINS = ['https://a1ef-81-180-76-251.eu.ngrok.io', 'http://localhost:3000',
+CSRF_TRUSTED_ORIGINS = ['https://uuj2kn6s.ngrok.app', 'http://localhost:3000',
                         'http://localhost:8000', 'http://localhost:8080', 'https://ngrok.io']
 
 CORS_ALLOW_METHODS = (
@@ -79,10 +90,10 @@ CORS_ALLOW_HEADERS = (
 )
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
