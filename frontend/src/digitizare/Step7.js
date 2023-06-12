@@ -15,6 +15,7 @@ import "@fancyapps/ui/dist/fancybox.css";
 import { saveAs } from "file-saver";
 import { Rnd } from "react-rnd";
 import Draggable from "react-draggable";
+import FetchWrapper from '../components/FetchWrapper';
 
 export default class Step7 extends Component {
   constructor(props) {
@@ -22,7 +23,11 @@ export default class Step7 extends Component {
 
     this.state = {
       ocrResults: props.getStore().ocrResults,
+      period: props.getStore().period,
+      typography: props.getStore().typography,
+      alphabet: props.getStore().alphabet,
       transResults: props.getStore().transResults,
+      transOptions: props.getStore().transOptions,
       sourceFiles: props.getStore().sourceFiles,
       preprocessedFiles: props.getStore().preprocessedFiles,
       s3SourceFiles: props.getStore().s3SourceFiles,
@@ -34,7 +39,7 @@ export default class Step7 extends Component {
       saving: false,
     };
     this.isValidated = this.isValidated.bind(this);
-    this.API = props.getStore().api;
+    this.API = new FetchWrapper(props.getStore().api);
   }
 
   componentDidMount() { }
@@ -119,6 +124,26 @@ export default class Step7 extends Component {
     saveAs(blob, "Transliterat" + ".doc");
   }
 
+  async handlePublishRequest() {
+    const transEndpoint = 'publish/';
+    const postData = this.state;
+    this.API.post(transEndpoint, postData)
+      .then((data) => {
+        console.log(data.msg);
+        // If the request is successful, open the URL in a new tab.
+        if (data.code == 200) {
+          window.open('https://digi.emoldova.org/', '_blank');
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        //this.setState({ showLoader: false });
+      });
+  }
+
+
   render() {
     // Fisierele sursa
 
@@ -166,7 +191,7 @@ export default class Step7 extends Component {
                               />
                             </a>
                               <button
-                                key={index}
+
                                 type="button"
                                 className="btn btn-link col-12"
                                 onClick={() => saveAs(src)}
@@ -267,18 +292,12 @@ export default class Step7 extends Component {
             )}
             <div className="d-flex flex-row justify-content-center p-4 m-2 border gap-3 bg-light rounded">
               <button className="btn btn-primary" onClick={() => {
-                this.props.jumpToStep(0); Object.getOwnPropertyNames(this.props.getStore()).forEach(function (prop) {
-                  delete obj[prop];
-                });
+                this.props.jumpToStep(0); this.props.resetStore();
               }}>
                 Digitizează un document nou
               </button>
               {this.props.getStore().sourceFiles.length > 0 &&
-                <button className="btn btn-success" onClick={() => {
-                  this.props.jumpToStep(0); Object.getOwnPropertyNames(this.props.getStore()).forEach(function (prop) {
-                    delete obj[prop];
-                  });
-                }}>
+                <button className="btn btn-success" onClick={this.handlePublishRequest.bind(this)}>
                   Publică documentul digitizat
                 </button>
               }
