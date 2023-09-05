@@ -336,9 +336,9 @@ function StepZilla(props) {
     onKeyDown: function onKeyDown(evt) {
       handleKeyDown(evt);
     }
-  }, props.showSteps ? /*#__PURE__*/_react.default.createElement("ol", {
+  }, props.showSteps ? /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("ol", {
     className: "progtrckr"
-  }, " ", renderSteps(), " ") : /*#__PURE__*/_react.default.createElement("span", null, " "), compToRender, " "));
+  }, " ", renderSteps(), " ")) : /*#__PURE__*/_react.default.createElement("span", null, " "), compToRender, " "));
 }
 StepZilla.defaultProps = {
   showSteps: true,

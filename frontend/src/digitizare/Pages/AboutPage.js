@@ -38,12 +38,15 @@ const AboutPage = () => {
 
     return (
         <div className="tab-content-body">
-            <p className="announcement">25 Decembrie 2022 — a fost lansată  <a href="#aplicatie" onClick={() => setModalShow(true)}>DigiApp v0.1.0-beta.14</a></p>
+            <p className="announcement">25 Decembrie 2022 — a fost lansată  <a href="https://github.com/bumbutudor/PlatformaDigitizare/tree/ngrok-server" target="_blank">DigiApp v0.1.0-beta.14</a></p>
             <p>
                 Platforma de digitizare oferă instrumente și resurse informaționale pentru digitizarea documentelor românești scrise în alfabete chirilice, tipărite între secolele XVII și XX.
             </p>
             <p>
-                Cel mai recent instrument dezvoltat este o <a href="#aplicatie" onClick={() => setModalShow(true)}>aplicație de digitizare</a> (DigiApp) care înglobează majoritatea instrumentelor folosite în procesul de digitizare, precum, motoare și module de prelucrare a imaginilor, modele de recunoaștere optică a caraterelor (modele OCR), dicționare folosite la recunoaștere, aplicație de transliterare din chirilică în latină și viceversa, dicționare de excepții folosite la corectarea textului tranliterat. Acest instrumente pot fi accesate din pagina "Instrumente și Resurse".
+                Cel mai recent dezvoltat instrument este o aplicație de digitizare (DigiApp) care înglobează majoritatea instrumentelor folosite în procesul de digitizare, precum, motoare și module de prelucrare a imaginilor, modele de recunoaștere optică a caracterelor (modele OCR), dicționare folosite la recunoaștere, aplicație de transliterare din chirilică în latină și viceversa, dicționare de excepții folosite la corectarea textului transliterat. Aceste instrumente pot fi accesate din pagina "Instrumente și Resurse".
+            </p>
+            <p>
+                Pentru a digitiza un document, accesați "Aplicație de digitizare" din menu-ul de mai sus.
             </p>
             <div className="" >
                 <a

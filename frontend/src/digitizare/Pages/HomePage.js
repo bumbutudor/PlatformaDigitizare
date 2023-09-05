@@ -25,7 +25,7 @@ function HomePage() {
 
 
                         <p className='tagline'>
-                            instumente și resurse pentru prelucrarea
+                            instrumente și resurse pentru prelucrarea
                             <br></br>documentelor chirilice românești
                         </p>
                     </Col>

@@ -22,7 +22,7 @@ export default class DigitizationSteps extends Component {
     this.sampleStore = {
       // email: "",
       // gender: "",
-      api: "https://a1ef-81-180-76-251.eu.ngrok.io/",   // ngrok: https://a1ef-81-180-76-251.eu.ngrok.io/
+      api: "https://uuj2kn6s.ngrok.app/",   // ngrok: https://a1ef-81-180-76-251.eu.ngrok.io/
       period: "secolulXX", //default is 20th century
       ocrModel: "",
       typography: "",
@@ -30,7 +30,7 @@ export default class DigitizationSteps extends Component {
       saveToCloud: true,
       savedToCloud: false,
       // uploadFolder: "C:\\Users\\bumbu\\OneDrive\\Desktop\\Projects\\PlatformaDigitizare\\backend\\media",
-      uploadFolder: "https://a1ef-81-180-76-251.eu.ngrok.io/media/",
+      uploadFolder: "https://uuj2kn6s.ngrok.app/media/",
       sourceFiles: [{ "name": "5.jpg", "size": 1535454, "type": "image/jpeg", "lastModifiedDate": "2021-05-27T15:49:52.594Z", "uploadedDate": "2022-05-17T19:15:44.681Z", "percent": 100, "id": "1652814944681-0", "status": "removed", "previewUrl": "blob:http://localhost:8080/3a701ff3-27a9-47ff-9ca3-fc2ce6554e10", "width": 1305, "height": 1333 }],
       s3SourceFiles: [],
       preprocessedFiles: [],
@@ -102,6 +102,75 @@ export default class DigitizationSteps extends Component {
       ...update,
     };
   }
+
+  resetStore() {
+    this.sampleStore = {
+      api: "https://uuj2kn6s.ngrok.app/",   // ngrok: https://a1ef-81-180-76-251.eu.ngrok.io/
+      period: "secolulXX", //default is 20th century
+      ocrModel: "",
+      typography: "",
+      alphabet: "cyrillic", //default is cyrillic
+      saveToCloud: true,
+      savedToCloud: false,
+      // uploadFolder: "C:\\Users\\bumbu\\OneDrive\\Desktop\\Projects\\PlatformaDigitizare\\backend\\media",
+      uploadFolder: "https://uuj2kn6s.ngrok.app/media/",
+      sourceFiles: [{ "name": "5.jpg", "size": 1535454, "type": "image/jpeg", "lastModifiedDate": "2021-05-27T15:49:52.594Z", "uploadedDate": "2022-05-17T19:15:44.681Z", "percent": 100, "id": "1652814944681-0", "status": "removed", "previewUrl": "blob:http://localhost:8080/3a701ff3-27a9-47ff-9ca3-fc2ce6554e10", "width": 1305, "height": 1333 }],
+      s3SourceFiles: [],
+      preprocessedFiles: [],
+      s3PreprocessedFiles: [],
+      preprocessWith: "",
+      preprocessMode: "desktop",
+      ocrResults: [],
+      transResults: [],
+      preprocessFR: {
+        divideIntoPages: false,
+        correctResolution: true,
+        convertToBlackAndWhite: true,
+        straightenTextLines: true,
+        reduceNoise: true,
+        correctPageOrientation: true,
+      },
+      preprocessOpenCV: {
+        setResolution: true,
+        resolution: 300,
+        removeNoise: true,
+      },
+      preprocessScanTailor: {
+        resolution: 600, //default is 600 --dpi=<number>  -- sets x and y dpi. default: 600 --dpi-x=<number> --dpi-y=<number> --output-dpi=<number>  -- sets x and y output dpi. default: 600 --output-dpi-x=<number> --output-dpi-y=<number>
+        colorMode: "black_and_white", //default is black_and_white <black_and_white|color_grayscale|mixed>
+        whiteMargins: false, //default is false
+        despeckle: "normal", //default is normal <off|cautious|normal|aggressive>
+        orientation: "none", //default is portrait <left|right|upsidedown|none>
+        contentDetection: "normal", //default is normal <cautious|normal|aggressive>
+        normalizeIllumination: false, //default: false
+        threshold: 0, //n<0 thinner, n>0 thicker; default: 0
+      },
+      alphabetOptions: {
+        cyrillic: "alfabetul chirilic sovietic",
+        latin: "alfabetul românesc modern",
+        cyrillicRomanian: "alfabetul chirilic românesc",
+        transitionalRomanian: "alfabetul românesc de tranziție",
+      },
+      periodOptions: {
+        secolulXX: "secolul XX",
+        secolulXIX: "secolul XIX",
+        secolulXVIII: "secolul XVIII",
+        secolulXVII: "secolul XVII",
+      },
+
+      transOptions: {
+        actualizeWordForm: true,
+        replaceApostrophe: true,
+        removeHyphen: true,
+        removeDiacritics: false,
+        correctTextWithGPT3: false,
+        useExceptionDictionary: true,
+
+
+      },
+    };
+  }
+
 
   render() {
     console.log(this.sampleStore);
@@ -177,6 +246,7 @@ export default class DigitizationSteps extends Component {
         component: (
           <Step7
             getStore={() => this.getStore()}
+            resetStore={() => this.resetStore()}
             updateStore={(u) => {
               this.updateStore(u);
             }}

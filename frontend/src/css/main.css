@@ -1,5 +1,5 @@
 .table-fixed {
-  height: 40vh;
+  height: 80vh;
   overflow-y: auto;
 }
 
@@ -709,4 +709,15 @@ html h3 {
 
 html h4 {
   font-size: 16px;
+}
+
+.exception-widget {
+  width: 250px;
+  position: fixed;
+  float: right;
+  right: 27px;
+  top: 75px;
+  background: antiquewhite;
+  padding-top: 7px;
+  border-radius: 3px;
 }

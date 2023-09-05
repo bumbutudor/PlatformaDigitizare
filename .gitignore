@@ -64,3 +64,5 @@ backend/media/*.zip
 
 # END OF BACKEND
 
+# new folder of frontend
+/new
