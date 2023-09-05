@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 ]
 
 ALLOWED_HOSTS = ["localhost", "digitizare.math.md", "math.md",
-                 "ngrok.io", "uuj2kn6s.ngrok.app"]
+                 "ngrok.io", "uuj2kn6s.ngrok.app", "127.0.0.1"]
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
