@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import validation from 'react-validation-mixin';
 import strategy from 'joi-validation-strategy';
 import Joi from 'joi';
+import StepsInfo from "../components/StepsInfo";
 
 class Step4 extends Component {
   constructor(props) {
@@ -50,61 +51,61 @@ class Step4 extends Component {
   };
 
   onChange(e) {
-      let newState = {};
-      newState[e.target.name] = e.target.value;
-      this.setState(newState);
+    let newState = {};
+    newState[e.target.name] = e.target.value;
+    this.setState(newState);
   }
 
   renderHelpText(message, id) {
-      return (<div className="val-err-tooltip" key={id}><span>{message}</span></div>);
+    return (<div className="val-err-tooltip" key={id}><span>{message}</span></div>);
   };
 
   render() {
     // explicit class assigning based on validation
     let notValidClasses = {};
     notValidClasses.emailEmergencyCls = this.props.isValid('emailEmergency') ?
-        'no-error col-md-8' : 'has-error col-md-8';
+      'no-error col-md-8' : 'has-error col-md-8';
 
     return (
-        <div className="step step4">
-            <div className="row">
-                <form id="Form" className="form-horizontal">
-                  <div className="form-group">
-                    <label className="control-label col-md-12 ">
-                        <h1>{this.props.t("step4Head")}</h1>
-                    </label>
-                  </div>
-                  <div className="form-group col-md-12 content form-block-holder">
-                    <label className="control-label col-md-4">
-                      {this.props.t("step4EmergencyMail")}
-                    </label>
-                    <div className={notValidClasses.emailEmergencyCls}>
-                        <input
-                            ref="emailEmergency"
-                            name="emailEmergency"
-                            autoComplete="off"
-                            type="email"
-                            className="form-control"
-                            placeholder="john.smith@example.com"
-                            required
-                            defaultValue={this.state.emailEmergency}
-                            onBlur={this.props.handleValidation('emailEmergency')}
-                            onChange={this.onChange.bind(this)}
-                        />
-
-                        {this.props.getValidationMessages('emailEmergency').map(this.renderHelpText)}
-                    </div>
-                  </div>
-                  <div className="form-group hoc-alert col-md-12 form-block-holder">
-                    <label className="col-md-12 control-label">
-                      <h4>{this.props.t("step4ShownExample")} <a href="https://github.com/jurassix/react-validation-mixin" target="_blank">react-validation-mixin</a> {this.props.t("step4HandleValidations")}</h4>
-                    </label>
-                    <br />
-                    <div className="green">{this.props.t("step4StepZillaSteps")}</div>
-                  </div>
-                </form>
+      <div className="step step4">
+        <div className="row">
+          <form id="Form" className="form-horizontal">
+            <div className="form-group">
+              <label className="control-label col-md-12 ">
+                <h1>{this.props.t("step4Head")}</h1>
+              </label>
             </div>
+            <div className="form-group col-md-12 content form-block-holder">
+              <label className="control-label col-md-4">
+                {this.props.t("step4EmergencyMail")}
+              </label>
+              <div className={notValidClasses.emailEmergencyCls}>
+                <input
+                  ref="emailEmergency"
+                  name="emailEmergency"
+                  autoComplete="off"
+                  type="email"
+                  className="form-control"
+                  placeholder="john.smith@example.com"
+                  required
+                  defaultValue={this.state.emailEmergency}
+                  onBlur={this.props.handleValidation('emailEmergency')}
+                  onChange={this.onChange.bind(this)}
+                />
+
+                {this.props.getValidationMessages('emailEmergency').map(this.renderHelpText)}
+              </div>
+            </div>
+            <div className="form-group hoc-alert col-md-12 form-block-holder">
+              <label className="col-md-12 control-label">
+                <h4>{this.props.t("step4ShownExample")} <a href="https://github.com/jurassix/react-validation-mixin" target="_blank">react-validation-mixin</a> {this.props.t("step4HandleValidations")}</h4>
+              </label>
+              <br />
+              <div className="green">{this.props.t("step4StepZillaSteps")}</div>
+            </div>
+          </form>
         </div>
+      </div>
     )
   }
 }

@@ -10,9 +10,7 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import FetchWrapper from '../components/FetchWrapper';
 import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert';
-import { Fancybox } from "@fancyapps/ui/src/Fancybox/Fancybox.js";
-import "@fancyapps/ui/dist/fancybox.css";
-import Draggable from 'react-draggable'; // The default
+
 
 
 // OCR
@@ -38,9 +36,9 @@ export default class Step3 extends Component {
 
     this.step3Info = (
       <Popover id="popover-basic">
-        <Popover.Header as="h4">Informații referitoare la pasul 3</Popover.Header>
+        <Popover.Header as="h4">{StepsInfo.step3Info.title}</Popover.Header>
         <Popover.Body>
-          <Spinner />
+          <div dangerouslySetInnerHTML={{ __html: StepsInfo.step3Info.body }} />
         </Popover.Body>
       </Popover>
 

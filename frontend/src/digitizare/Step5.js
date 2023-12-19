@@ -12,6 +12,7 @@ import Alert from 'react-bootstrap/Alert';
 import Popover from "react-bootstrap/Popover";
 import Draggable from 'react-draggable'; // The default
 import DictionaryModal from '../components/DictionaryModal';
+import StepsInfo from '../components/StepsInfo';
 
 
 // Transliteraion
@@ -39,11 +40,10 @@ export default class Step5 extends Component {
       aboutOpenAI:
         (
           <Popover id="popover-basic">
-            <Popover.Header as="h4">OpenAI și GPT-3</Popover.Header>
+            <Popover.Header as="h4">{StepsInfo.step5Info2.title}</Popover.Header>
             <Popover.Body>
-              <p>OpenAI este o companie de cercetare în inteligență artificială (IA) care se concentrează pe dezvoltarea tehnologiilor de învățare automată (machine learning) avansate și pe aplicarea lor în domenii precum jocuri, limbaj și robotică. OpenAI a fost fondată în 2015 de Elon Musk, Sam Altman, Greg Brockman și Ilya Sutskever cu scopul de a promova și proteja IA prin dezvoltarea unor tehnologii responsabile și sigure.</p>
-              <p>GPT-3 (Generative Pre-training Transformer 3) este un model de învățare automată dezvoltat de OpenAI care poate fi utilizat pentru a genera text, răspunde la întrebări și îndeplini diverse sarcini de procesare a limbajului natural. GPT-3 este unul dintre cele mai mari modele de învățare automată disponibile public, cu 175 miliarde de parametri, și este considerat un pas important în direcția dezvoltării modelelor de învățare automată capabile să îndeplinească diverse sarcini de procesare a limbajului natural.</p>
-              <p>Pentru mai multe informații despre GPT-3, puteți vizita site-ul oficial al OpenAI la adresa <a href="https://openai.com/blog/gpt-3-apps/">https://openai.com/blog/gpt-3-apps/</a>. Acolo veți găsi detalii despre funcționarea și utilizarea GPT-3, precum și exemple de aplicații care au fost construite utilizând acest model. De asemenea, puteți găsi mai multe informații despre GPT-3 pe Wikipedia la adresa <a href="https://en.wikipedia.org/wiki/GPT-3">https://en.wikipedia.org/wiki/GPT-3</a>.</p>
+              <div dangerouslySetInnerHTML={{ __html: StepsInfo.step5Info2.body }} />
+
 
             </Popover.Body>
           </Popover>
@@ -54,6 +54,16 @@ export default class Step5 extends Component {
       showErrors: false,
       showModal: false,
     };
+
+    this.step5Info = (
+      <Popover id="popover-basic">
+        <Popover.Header as="h4">{StepsInfo.step5Info.title}</Popover.Header>
+        <Popover.Body>
+          <div dangerouslySetInnerHTML={{ __html: StepsInfo.step5Info.body }} />
+
+        </Popover.Body>
+      </Popover>
+    );
 
     this.dictionaryPopover =
       (
@@ -123,8 +133,21 @@ export default class Step5 extends Component {
         <div className="row">
           <Form className="form-horizontal">
             <Form.Group>
-              <label className="col-md-12 control-label">
+              <label className="col-md-12 control-label d-flex form-label">
                 <h1>Pasul 5: Transliterarea textului recunoscut </h1>
+                <OverlayTrigger
+                  trigger="click"
+                  rootClose
+                  placement="right"
+                  overlay={this.step5Info}
+                >
+                  <Button
+                    type="button"
+                    className="btn btn-info text-white mx-4"
+                  >
+                    Info
+                  </Button>
+                </OverlayTrigger>
               </label>
             </Form.Group>
 

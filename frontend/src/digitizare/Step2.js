@@ -16,7 +16,8 @@ import OpenCV from "../components/OpenCV";
 import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert'
 import FetchWrapper from "../components/FetchWrapper";
-import Draggable from 'react-draggable'; // The default
+import StepsInfo from "../components/StepsInfo";
+
 
 // Step 2 - preprocess the images
 const Step2 = (props) => {
@@ -24,9 +25,9 @@ const Step2 = (props) => {
   const step2Info =
     (
       <Popover id="popover-basic">
-        <Popover.Header as="h4">Informații referitoare la pasul 2</Popover.Header>
+        <Popover.Header as="h4">{StepsInfo.step2Info.title}</Popover.Header>
         <Popover.Body>
-          <Spinner />
+          <div dangerouslySetInnerHTML={{ __html: StepsInfo.step2Info.body }} />
         </Popover.Body>
       </Popover>
     );

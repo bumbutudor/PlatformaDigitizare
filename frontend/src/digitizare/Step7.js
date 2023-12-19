@@ -10,12 +10,12 @@ import RangeSlider from "react-bootstrap-range-slider";
 import "react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css";
 import { mdiSourceCommitStartNextLocal } from "@mdi/js";
 import ImgsViewer from "react-images-viewer";
-import { Fancybox } from "@fancyapps/ui/src/Fancybox/Fancybox.js";
 import "@fancyapps/ui/dist/fancybox.css";
 import { saveAs } from "file-saver";
-import { Rnd } from "react-rnd";
-import Draggable from "react-draggable";
 import FetchWrapper from '../components/FetchWrapper';
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Popover from "react-bootstrap/Popover";
+import StepsInfo from "../components/StepsInfo";
 
 export default class Step7 extends Component {
   constructor(props) {
@@ -40,6 +40,16 @@ export default class Step7 extends Component {
     };
     this.isValidated = this.isValidated.bind(this);
     this.API = new FetchWrapper(props.getStore().api);
+
+    this.step7Info = (
+      <Popover id="popover-basic">
+        <Popover.Header as="h4">{StepsInfo.step7Info.title}</Popover.Header>
+        <Popover.Body>
+          <div dangerouslySetInnerHTML={{ __html: StepsInfo.step7Info.body }} />
+
+        </Popover.Body>
+      </Popover>
+    );
   }
 
   componentDidMount() { }
@@ -161,8 +171,11 @@ export default class Step7 extends Component {
         <div className="row">
           <form id="Form" className="form-horizontal">
             <div className="form-group">
-              <label className="col-md-12 control-label mb-3">
+              <label className="col-md-12 control-label d-flex form-label">
                 <h1>Pasul 7: Salvează rezultatele</h1>
+                <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.step7Info}>
+                  <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
+                </OverlayTrigger>
               </label>
             </div>
 
