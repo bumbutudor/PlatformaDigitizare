@@ -114,23 +114,24 @@ def preprocess(request):
                 resolution = int(preprocess_opencv['resolution'])
                 for file in files:
                     uploaded_file_path = settings.MEDIA_ROOT + \
-                        '/' + file["name"]
+                                         '/' + file["name"]
                     processed_file_path = settings.MEDIA_ROOT + \
-                        pre_path + file["name"]
+                                          pre_path + file["name"]
                     process_image_for_ocr(
                         uploaded_file_path, processed_file_path, resolution)
                     s3_url = s3_uploader.upload_file(
                         processed_file_path, 'pre/OpenCV/' + file["name"])
                     preprocessedFiles.append('pre/OpenCV/' + file["name"])
                     s3PreprocessedFiles.append(s3_url)
-                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFiles, "s3PreprocessedFiles": s3PreprocessedFiles})
+                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFiles,
+                                     "s3PreprocessedFiles": s3PreprocessedFiles})
 
             else:
                 for file in files:
                     uploaded_file_path = settings.MEDIA_ROOT + \
-                        '/' + file["name"]
+                                         '/' + file["name"]
                     processed_file_path = settings.MEDIA_ROOT + \
-                        pre_path + file["name"]
+                                          pre_path + file["name"]
                     process_image_for_ocr(
                         uploaded_file_path, processed_file_path)
 
@@ -138,7 +139,8 @@ def preprocess(request):
                         processed_file_path, 'pre/OpenCV/' + file["name"])
                     s3PreprocessedFiles.append(s3_url)
                     preprocessedFiles.append('pre/OpenCV/' + file["name"])
-                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles, "preprocessedFiles": preprocessedFiles})
+                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
+                                     "preprocessedFiles": preprocessedFiles})
 
         elif preprocess_with == 'FR':
             preprocess_fr = data['preprocessFR']
@@ -149,13 +151,14 @@ def preprocess(request):
 
             for file in files:
                 pre_file_path = pre_path + \
-                    os.path.splitext(file["name"])[0] + '.jpg'
+                                os.path.splitext(file["name"])[0] + '.jpg'
                 processed_file_path = settings.MEDIA_ROOT + pre_file_path
                 s3_url = s3_uploader.upload_file(
                     processed_file_path, 'pre/FR/' + os.path.splitext(file["name"])[0] + '.jpg')
                 s3PreprocessedFiles.append(s3_url)
                 preprocessedFiles.append(pre_file_path)
-            return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles, "preprocessedFiles": preprocessedFiles})
+            return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
+                                 "preprocessedFiles": preprocessedFiles})
 
         elif preprocess_with == 'ScanTailor':
             if data["preprocessMode"] == 'desktop':
@@ -163,8 +166,8 @@ def preprocess(request):
                 os.system(command)
                 pre_path = settings.MEDIA_ROOT + "/out/"
                 last_filepath = pre_path + \
-                    os.path.splitext(
-                        files[number_of_files-1]["name"])[0] + '.tif'
+                                os.path.splitext(
+                                    files[number_of_files - 1]["name"])[0] + '.tif'
 
                 while not os.path.exists(last_filepath):
                     print("waiting for file", last_filepath)
@@ -184,13 +187,14 @@ def preprocess(request):
                             pre_path + jpg_file, 'pre/ScanTailorDesktop/' + jpg_file)
                         s3PreprocessedFiles.append(s3_url)
                         preprocessedFiles.append('out/' + jpg_file)
-                    return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles, "preprocessedFiles": preprocessedFiles})
+                    return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
+                                         "preprocessedFiles": preprocessedFiles})
             elif data["preprocessMode"] == 'web':
                 pre_path = '/pre/ScanTailor/'
                 preprocess_scantailor = data['preprocessScanTailor']
                 for file in files:
                     uploaded_file_path = settings.MEDIA_ROOT + \
-                        '/' + file["name"]
+                                         '/' + file["name"]
                     output_folder = settings.MEDIA_ROOT + pre_path
                     command = preprocess_scantailor_cli(
                         uploaded_file_path, preprocess_scantailor, output_folder)
@@ -203,7 +207,8 @@ def preprocess(request):
                     s3_url = s3_uploader.upload_file(
                         output_folder + jpg_file, 'pre/ScanTailor/' + jpg_file)
                     preprocessedFiles.append('pre/ScanTailor/' + jpg_file)
-                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles, "preprocessedFiles": preprocessedFiles})
+                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
+                                     "preprocessedFiles": preprocessedFiles})
         elif preprocess_with == 'Gimp':
             # TODO : Implement using Gimp
             pass
@@ -262,5 +267,90 @@ def transliterate(request):
             #     trans_results.append(trans_result)
         return JsonResponse({"code": 200, "msg": "success", "transResults": trans_results})
 
+    else:
+        return JsonResponse({"code": 500, "msg": "server error"})
+
+
+def publish(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        s3_source_files = data['s3SourceFiles']
+        s3_preprocessed_files = data['s3PreprocessedFiles']
+        period = data['period']
+        alphabet = data['alphabet']
+        trans_options = data['transOptions']
+        ocr_results = data['ocrResults']
+        trans_results = data['transResults']
+
+        # Check if s3_source_files is a list and concatenate into a single string
+        if isinstance(s3_source_files, list):
+            url_content = '\n'.join(f'[upl-image-preview url={url["url"]}]' for url in s3_source_files)
+        else:
+            url_content = f'[upl-image-preview url={s3_source_files}]'
+
+        # Check if s3_preprocessed_files is a list and concatenate into a single string
+        if isinstance(s3_preprocessed_files, list):
+            preprocessed_files_content = '\n'.join(f'[upl-image-preview url={url}]' for url in s3_preprocessed_files)
+        else:
+            preprocessed_files_content = s3_preprocessed_files
+
+        # Join ocr_results and trans_results with newline character
+        ocr_results_content = '\n'.join(ocr_results)
+        trans_results_content = '\n'.join(trans_results)
+
+        content = f'''{url_content}\n\n[chirilic]
+        {ocr_results_content}
+        [/chirilic]\n\n[transliterat]
+        {trans_results_content}[/transliterat]
+        
+        Informații adiționale:
+        Perioadă: {period}
+        Alfabet: {alphabet}
+        Opțiuni de transliterare: Object
+        Fișiere preprocesate: \n{preprocessed_files_content}
+        
+        '''
+
+        draft_data = {
+            "data": {
+                "type": "drafts",
+                "attributes": {
+                    "title": "Un document din secolul " + period,
+                    "content": content
+                },
+                "relationships": {
+                    "tags": {
+                        "data": []
+                    }
+                }
+            }
+        }
+
+        draft_endpoint = "https://digi.emoldova.org/api/drafts"
+
+        headers = {
+            'Host': 'digi.emoldova.org',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Content-Type': 'application/json; charset=utf-8',
+            'X-CSRF-Token': 'Y9kVHTyzihubcV3DHVxfbQlZZJijTAY3Rc9DWQhY',
+            'Connection': 'keep-alive',
+            'Referer': 'https://digi.emoldova.org/',
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-cache',
+            'TE': 'Trailers',
+            'Authorization': 'Token Eik9DFwbyxkZMptuFzfPdKHG2REm5syrzgDrcYGD',
+        }
+
+        response = requests.post(draft_endpoint, headers=headers, json=draft_data)
+
+        # Check the response
+        if response.status_code == 200 or response.status_code == 201:
+            print("Successfully created the article.")
+            print(response.json())
+            return JsonResponse({"code": 200, "msg": "Successfully created the article."})
+        else:
+            print(f"Failed to create the article. Status code: {response.status_code}.")
+            print(response.json())
+            return JsonResponse({"code": 500, "msg": "server error"})
     else:
         return JsonResponse({"code": 500, "msg": "server error"})
