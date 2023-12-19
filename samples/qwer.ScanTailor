@@ -1,0 +1,291 @@
+<project layoutDirection="LTR" outputDirectory="C:\Users\bumbu\OneDrive\Desktop\Book\out">
+  <directories>
+    <directory path="C:/Users/bumbu/OneDrive/Desktop/Book" id="1"/>
+  </directories>
+  <files>
+    <file id="2" name="albina1938_2.jpg" dirId="1"/>
+    <file id="5" name="alauta_rom_1938_2.png" dirId="1"/>
+    <file id="8" name="alauta_rom_1938_3.png" dirId="1"/>
+  </files>
+  <images>
+    <image fileId="2" fileImage="0" subPages="1" id="3">
+      <size height="807" width="480"/>
+    </image>
+    <image fileId="5" fileImage="0" subPages="1" id="6">
+      <size height="809" width="547"/>
+    </image>
+    <image fileId="8" fileImage="0" subPages="1" id="9">
+      <size height="540" width="484"/>
+    </image>
+  </images>
+  <pages>
+    <page imageId="3" id="4" subPage="single"/>
+    <page imageId="6" id="7" subPage="single"/>
+    <page imageId="9" id="10" subPage="single" selected="selected"/>
+  </pages>
+  <file-name-disambiguation>
+    <mapping label="0" file="2"/>
+    <mapping label="0" file="5"/>
+    <mapping label="0" file="8"/>
+  </file-name-disambiguation>
+  <filters>
+    <fix-orientation/>
+    <page-split defaultLayoutType="auto-detect">
+      <image id="3">
+        <params mode="auto">
+          <pages type="single-cut">
+            <outline>
+              <point x="0" y="0"/>
+              <point x="480" y="0"/>
+              <point x="480" y="807"/>
+              <point x="0" y="807"/>
+              <point x="0" y="0"/>
+            </outline>
+            <cutter1>
+              <p1 x="21.10214700548596" y="807.0000000000001"/>
+              <p2 x="21.10214700548596" y="0"/>
+            </cutter1>
+            <cutter2>
+              <p1 x="461.589647005486" y="807.0000000000001"/>
+              <p2 x="461.589647005486" y="0"/>
+            </cutter2>
+          </pages>
+          <dependencies>
+            <rotation degrees="0"/>
+            <size height="807" width="480"/>
+            <layoutType>auto-detect</layoutType>
+          </dependencies>
+        </params>
+      </image>
+      <image id="6">
+        <params mode="auto">
+          <pages type="single-uncut">
+            <outline>
+              <point x="0" y="0"/>
+              <point x="547" y="0"/>
+              <point x="547" y="809"/>
+              <point x="0" y="809"/>
+              <point x="0" y="0"/>
+            </outline>
+          </pages>
+          <dependencies>
+            <rotation degrees="0"/>
+            <size height="809" width="547"/>
+            <layoutType>auto-detect</layoutType>
+          </dependencies>
+        </params>
+      </image>
+      <image id="9">
+        <params mode="auto">
+          <pages type="single-uncut">
+            <outline>
+              <point x="0" y="0"/>
+              <point x="484" y="0"/>
+              <point x="484" y="540"/>
+              <point x="0" y="540"/>
+              <point x="0" y="0"/>
+            </outline>
+          </pages>
+          <dependencies>
+            <rotation degrees="0"/>
+            <size height="540" width="484"/>
+            <layoutType>auto-detect</layoutType>
+          </dependencies>
+        </params>
+      </image>
+    </page-split>
+    <deskew>
+      <page id="4">
+        <params distortionType="rotation">
+          <rotation angle="-0.25" mode="auto"/>
+          <dependencies>
+            <rotation degrees="0"/>
+            <page-outline>
+              <point x="21.10205078125" y="807"/>
+              <point x="461.589599609375" y="807"/>
+              <point x="461.589599609375" y="0"/>
+              <point x="21.10205078125" y="0"/>
+              <point x="21.10205078125" y="807"/>
+            </page-outline>
+          </dependencies>
+        </params>
+      </page>
+      <page id="7">
+        <params distortionType="rotation">
+          <rotation angle="-0.625" mode="auto"/>
+          <dependencies>
+            <rotation degrees="0"/>
+            <page-outline>
+              <point x="0" y="0"/>
+              <point x="547" y="0"/>
+              <point x="547" y="809"/>
+              <point x="0" y="809"/>
+              <point x="0" y="0"/>
+            </page-outline>
+          </dependencies>
+        </params>
+      </page>
+      <page id="10">
+        <params distortionType="rotation">
+          <rotation angle="-0.5" mode="auto"/>
+          <dependencies>
+            <rotation degrees="0"/>
+            <page-outline>
+              <point x="0" y="0"/>
+              <point x="484" y="0"/>
+              <point x="484" y="540"/>
+              <point x="0" y="540"/>
+              <point x="0" y="0"/>
+            </page-outline>
+          </dependencies>
+        </params>
+      </page>
+    </deskew>
+    <select-content>
+      <page id="4">
+        <params mode="auto">
+          <content-box>
+            <top x="242.5684470520387" y="24.78678994927966"/>
+            <bottom x="239.2718536269693" y="780.3055553506333"/>
+            <left x="23.05463911741476" y="401.595548992763"/>
+            <right x="458.7856615615931" y="403.49679630715"/>
+          </content-box>
+          <content-size-px height="755.5259574639351" width="435.7351703289505"/>
+          <dependencies>
+            <transform-fingerprint>7c3d354bdad7d6bf980049ddddff5bcc0e74a33d</transform-fingerprint>
+          </dependencies>
+        </params>
+      </page>
+      <page id="7">
+        <params mode="auto">
+          <content-box>
+            <top x="241.9986445570201" y="4.269834579288629"/>
+            <bottom x="233.68427332639" y="766.4450117447009"/>
+            <left x="3.973737081612458" y="382.8062208706289"/>
+            <right x="471.7091808017976" y="387.9086254533605"/>
+          </content-box>
+          <content-size-px height="762.2205254754613" width="467.7632732960599"/>
+          <dependencies>
+            <transform-fingerprint>555a3b829f9fa82370bde2afad54ea26f6b050bc</transform-fingerprint>
+          </dependencies>
+        </params>
+      </page>
+      <page id="10">
+        <params mode="auto">
+          <content-box>
+            <top x="250.4546236629299" y="7.990738297738395"/>
+            <bottom x="245.9715605732823" y="521.698886184984"/>
+            <left x="16.21001261676885" y="262.8201520395041"/>
+            <right x="480.2161716194433" y="266.8694724432182"/>
+          </content-box>
+          <content-size-px height="513.7277090642571" width="464.0238276081813"/>
+          <dependencies>
+            <transform-fingerprint>6929dbb26d43bf76f4e24c5ca59ef6c60e47a57a</transform-fingerprint>
+          </dependencies>
+        </params>
+      </page>
+    </select-content>
+    <page-layout>
+      <page id="4">
+        <params>
+          <hardMargins right="0.05" top="0.05" left="0.05" bottom="0.05"/>
+          <contentSize height="755.525957463935" width="435.7351703289505"/>
+          <matchSizeMode mode="margins"/>
+          <alignment hor="hcenter" vert="top"/>
+        </params>
+      </page>
+      <page id="7">
+        <params>
+          <hardMargins right="0.05" top="0.05" left="0.05" bottom="0.05"/>
+          <contentSize height="762.2205254754613" width="467.7632732960598"/>
+          <matchSizeMode mode="margins"/>
+          <alignment hor="hcenter" vert="top"/>
+        </params>
+      </page>
+      <page id="10">
+        <params>
+          <hardMargins right="0.05" top="0.05" left="0.05" bottom="0.05"/>
+          <contentSize height="513.7277090642571" width="464.0238276081813"/>
+          <matchSizeMode mode="margins"/>
+          <alignment hor="hcenter" vert="top"/>
+        </params>
+      </page>
+    </page-layout>
+    <output scalingFactor="2">
+      <page id="4">
+        <zones/>
+        <fill-zones/>
+        <params despeckleLevel="cautious">
+          <color-params colorMode="bw">
+            <color-or-grayscale normalizeIllumination="0" whiteMargins="0"/>
+            <bw thresholdAdj="4"/>
+          </color-params>
+        </params>
+        <output-params>
+          <image despeckleLevel="cautious">
+            <transform-fingerprint>34ec8c4b2c90ee8031cfa50743362d00aa9a0307</transform-fingerprint>
+            <output-image-rect x="-29" height="1618" y="4" width="1029"/>
+            <content-rect x="79" height="1511" y="43" width="871"/>
+            <color-params colorMode="bw">
+              <color-or-grayscale normalizeIllumination="0" whiteMargins="0"/>
+              <bw thresholdAdj="4"/>
+            </color-params>
+          </image>
+          <file size="35606" mtime="1702355232"/>
+          <speckles size="924" mtime="1702355232"/>
+          <zones/>
+          <fill-zones/>
+        </output-params>
+      </page>
+      <page id="7">
+        <zones/>
+        <fill-zones/>
+        <params despeckleLevel="off">
+          <color-params colorMode="bw">
+            <color-or-grayscale normalizeIllumination="0" whiteMargins="0"/>
+            <bw thresholdAdj="0"/>
+          </color-params>
+        </params>
+        <output-params>
+          <image despeckleLevel="off">
+            <transform-fingerprint>b758197882dca100da1823c192b597d158002a5e</transform-fingerprint>
+            <output-image-rect x="-30" height="1618" y="-44" width="1029"/>
+            <content-rect x="46" height="1524" y="47" width="936"/>
+            <color-params colorMode="bw">
+              <color-or-grayscale normalizeIllumination="0" whiteMargins="0"/>
+              <bw thresholdAdj="0"/>
+            </color-params>
+          </image>
+          <file size="31942" mtime="1702355249"/>
+          <zones/>
+          <fill-zones/>
+        </output-params>
+      </page>
+      <page id="10">
+        <zones/>
+        <fill-zones/>
+        <params despeckleLevel="cautious">
+          <color-params colorMode="bw">
+            <color-or-grayscale normalizeIllumination="0" whiteMargins="0"/>
+            <bw thresholdAdj="0"/>
+          </color-params>
+        </params>
+        <output-params>
+          <image despeckleLevel="cautious">
+            <transform-fingerprint>b38e09c8016751aedf4b6ac6df806bcd94814457</transform-fingerprint>
+            <output-image-rect x="-14" height="1618" y="-35" width="1029"/>
+            <content-rect x="51" height="1027" y="47" width="928"/>
+            <color-params colorMode="bw">
+              <color-or-grayscale normalizeIllumination="0" whiteMargins="0"/>
+              <bw thresholdAdj="0"/>
+            </color-params>
+          </image>
+          <file size="25126" mtime="1702355253"/>
+          <speckles size="914" mtime="1702355253"/>
+          <zones/>
+          <fill-zones/>
+        </output-params>
+      </page>
+    </output>
+  </filters>
+</project>

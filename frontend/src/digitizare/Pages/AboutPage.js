@@ -48,15 +48,19 @@ const AboutPage = () => {
             <p>
                 Pentru a digitiza un document, accesați "Aplicație de digitizare" din menu-ul de mai sus.
             </p>
-            <div className="" >
+
+            <p>
+                Apasă pe imaginea de mai jos pentru a o mări.
+            </p>
+            <div className="oldPages" >
                 <a
                     className=""
                     data-fancybox="Platformă de digitizare"
-                    data-src={"https://s3.eu-west-2.amazonaws.com/emoldova.bucket/platforma-digi/2022-12-25/Digital_Tree2.png"}
+                    data-src={"https://s3.eu-west-2.amazonaws.com/emoldova.bucket/platforma-digi/2023-08-25/old_pages.svg"}
                 >
                     <img width={650}
                         className="logo-image"
-                        src={"https://s3.eu-west-2.amazonaws.com/emoldova.bucket/platforma-digi/2022-12-25/Digital_Tree2.png"}
+                        src={"https://s3.eu-west-2.amazonaws.com/emoldova.bucket/platforma-digi/2023-08-25/old_pages.svg"}
                     />
                 </a>
             </div>

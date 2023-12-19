@@ -125,6 +125,7 @@ export default class Step7 extends Component {
   }
 
   async handlePublishRequest() {
+    event.preventDefault();
     const transEndpoint = 'publish/';
     const postData = this.state;
     this.API.post(transEndpoint, postData)
