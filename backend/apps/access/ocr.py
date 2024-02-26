@@ -1,6 +1,8 @@
 import os
 import time
 from .utils import load_txt, wait_for_files, replace_extension
+import pytesseract
+from PIL import Image
 
 
 """
@@ -16,7 +18,7 @@ from .utils import load_txt, wait_for_files, replace_extension
 """
 
 
-def local_ocr_finereader_hotfolder(data, media_root):
+def local_ocr(data, media_root):
     period = data['period']
     alphabet = data['alphabet']
     files = data['sourceFiles']
@@ -87,6 +89,30 @@ def local_ocr_finereader_hotfolder(data, media_root):
     elif period == 'secolulXVII':
         # TODO : Implement using Gimp
         pass
+
+    # Condiție nouă pentru Tesseract
+    use_tesseract = data.get('useTesseract', False)  # Presupunem că această valoare este trimisă prin data
+    if use_tesseract:
+        for file in files:
+            file_path = os.path.join(media_root, file["name"])
+            ocr_result = tesseract_ocr(file_path)
+            ocr_results.append(ocr_result)
+        return ocr_results
+
+    # Dacă niciuna din condițiile anterioare nu este îndeplinită, se va returna  o listă goală
+    return ocr_results
+def tesseract_ocr(file_path):
+    """
+    Procesează o imagine folosind Tesseract OCR și returnează textul recunoscut.
+
+    :param file_path: Calea către fișierul imagine care va fi procesat
+    :type file_path: str
+    :return: Textul recunoscut din imagine
+    :rtype: str
+    """
+    image = Image.open(file_path)
+    text = pytesseract.image_to_string(image, lang='RTS_from_Cyrillic')
+    return text
 
 
 def local_ocr_finereader_cmd(data, media_root):

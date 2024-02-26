@@ -9,3 +9,5 @@ openai
 boto3
 djangorestframework
 django-multiselectfield
+pytesseract
+pillow

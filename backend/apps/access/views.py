@@ -5,7 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from .models import File
 from django.core.files.storage import FileSystemStorage
 from .utils import *
-from .ocr import local_ocr_finereader_hotfolder
+from .ocr import local_ocr
 import os
 from django.conf import settings
 import json
@@ -220,7 +220,7 @@ def preprocess(request):
 def ocr(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        ocr_results = local_ocr_finereader_hotfolder(data, settings.MEDIA_ROOT)
+        ocr_results = local_ocr(data, settings.MEDIA_ROOT)
         return JsonResponse({"code": 200, "msg": "success", "ocrResults": ocr_results})
     else:
         return JsonResponse({"code": 500, "msg": "server error"})
