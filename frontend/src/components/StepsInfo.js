@@ -332,11 +332,18 @@ ilustrațiile din documentul original.<o:p></o:p></span></p>
 mso-fareast-font-family:&quot;Times New Roman&quot;">O opțiune importantă este publicarea documentului digitizat. Publicarea se face în portalul <a style="mso-footnote-id:ftn25" href="https://emoldova.org/" name="_ftnref25" title=""><span class="MsoFootnoteReference"><span style="mso-special-character:footnote"><!--[if !supportFootnotes]--><span class="MsoFootnoteReference"><span lang="ro" style="font-size:12.0pt;line-height:
 115%;font-family:&quot;Times New Roman&quot;,serif;mso-fareast-font-family:&quot;Times New Roman&quot;;
 mso-font-kerning:0pt;mso-ligatures:none;mso-ansi-language:#0018;mso-fareast-language:
-EN-US;mso-bidi-language:AR-SA">eMoldova</span></span><!--[endif]--></span></span></a>, în <span class="SpellE">portletul</span>
+EN-US;mso-bidi-language:AR-SA">eMoldova</span></span><!--[endif]--></span></span></a>, în particular în <span class="SpellE">portletul</span>
 <a style="mso-footnote-id:ftn27" href="https://digi.emoldova.org/" name="_ftnref27" title=""><span class="MsoFootnoteReference"><span style="mso-special-character:footnote"><!--[if !supportFootnotes]--><span class="MsoFootnoteReference"><span lang="ro" style="font-size:12.0pt;line-height:
 115%;font-family:&quot;Times New Roman&quot;,serif;mso-fareast-font-family:&quot;Times New Roman&quot;;
 mso-font-kerning:0pt;mso-ligatures:none;mso-ansi-language:#0018;mso-fareast-language:
-EN-US;mso-bidi-language:AR-SA">Tezaurul Național Digital</span></span><!--[endif]--></span></span></a>. </p>
+EN-US;mso-bidi-language:AR-SA">Tezaurul Național Digital</span></span><!--[endif]--></span></span></a>. 
+<br>
+<br>
+<b>Important!</b> Când apeși pe "Publică documentul digitizat", acesta nu se publică instantaneu! Publicarea acestuia urmează a fi aprobată de către administratorul portalului.
+
+</p>
+
+
         `
 
     },

@@ -233,7 +233,7 @@ class Step4 extends Component {
 
                 {/* </label> */}
 
-                {/* {this.state.showk && (
+                {this.state.showk && (
                   <Keyboard
                     keyboardRef={(r) => (this.keyboard = r)}
                     layoutName={this.state.layoutName}
@@ -244,7 +244,7 @@ class Step4 extends Component {
                     onKeyPress={this.onKeyPress.bind(this)}
                     layout={this.cyrillicRomanianLayout.layout}
                   />
-                )} */}
+                )}
               </div>
               {/* <div className="form-group col-md-3 content form-block-image">
                 

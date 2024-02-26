@@ -101,6 +101,20 @@ class Step6 extends Component {
     this.setState({ showNextStep: true });
   }
 
+
+  handleKeyboardButton(showk) {
+    const keyboardButton = document.querySelector("button#keyboard-button");
+    if (keyboardButton) {
+      if (showk) {
+        keyboardButton.classList.remove("btn-primary");
+        keyboardButton.classList.add("btn-keyboard");
+        return "Închide tastatura virtuală";
+      }
+      keyboardButton.classList.remove("btn-keyboard");
+      keyboardButton.classList.add("btn-primary");
+    }
+    return "Deschide tastatura virtuală";
+  }
   render() {
     // Fisierele sursa
     const handleFilePath = (filePath) => {
@@ -175,8 +189,9 @@ class Step6 extends Component {
                                       className="btn btn-primary"
                                       type="button"
                                       title="Tastatura virtuală"
-                                    > <KeyboardIcon />
-                                      Tastatura virtuală
+                                      onClick={() => this.setState({ show: !this.state.show })}>
+                                      {this.handleKeyboardButton(this.state.show)}
+
                                     </button>
                                     <div className="mt-3">
                                       <a
@@ -215,10 +230,8 @@ class Step6 extends Component {
                     keyboardRef={(r) => (this.keyboard = r)}
                     layoutName={this.state.layoutName}
                     onChange={(inputs) =>
-                      this.onChangeKeyboardInput(
-                        inputs,
-                        this.state.transResults[this.state.inputID]
-                      ).bind(this)
+                      this.onChangeInput(inputs[0])
+                      //.bind(this)
                     }
                     onKeyPress={this.onKeyPress.bind(this)}
                     layout={this.romanian.layout}
