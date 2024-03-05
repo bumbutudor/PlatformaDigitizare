@@ -158,6 +158,10 @@ export default class DigitizationSteps extends Component {
         secolulXVII: "secolul XVII",
       },
 
+      ocrOptions: {
+        useTesseract: false,
+      },
+
       transOptions: {
         actualizeWordForm: true,
         replaceApostrophe: true,
@@ -168,6 +172,7 @@ export default class DigitizationSteps extends Component {
 
 
       },
+
     };
   }
 

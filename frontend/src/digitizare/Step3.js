@@ -192,7 +192,7 @@ export default class Step3 extends Component {
                     />
                     <Form.Check
                       // disabled
-                      label="Model bazat pe chirilic românesc (Epistolariul românesc, anul 1841)"
+                      label="Model bazat pe alfabetul chirilic românesc (Epistolariul românesc, anul 1841)"
                       name="secolulXIX"
                       type="radio"
                       id="radio22"
@@ -200,6 +200,32 @@ export default class Step3 extends Component {
                       checked={this.state.ocrModel === "secolulXIX_2"}
                       onChange={() => { this.setState({ ocrModel: "secolulXIX_2", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_2", alphabet: "cyrillicRomanian" }); }}
                     />
+                    <Form.Check
+                      // disabled
+                      label="Model bazat pe alfabete de tranziție (https://transitional-romanian-transliteration.azurewebsites.net/)"
+                      name="secolulXIX"
+                      type="radio"
+                      id="radio24"
+                      value="secolulXIX_4"
+                      checked={this.state.ocrModel === "secolulXIX_24"}
+                      onChange={() => {
+                        this.setState(
+                          {
+                            ocrModel: "secolulXIX_24",
+                            alphabet: "transitionalRomanian",
+                            show: true,
+                            ocrOptions: { useTesseract: true }
+                          });
+
+                        this.props.updateStore(
+                          {
+                            ocrModel: "secolulXIX_2",
+                            alphabet: "transitionalRomanian",
+                            ocrOptions: { useTesseract: true }
+                          });
+                      }}
+                    />
+
                     <Form.Check
                       disabled
                       label="Model bazat pe alfabetul de tranziție (Elemente de aritmetică de G. Asachi, anul 1836)"
