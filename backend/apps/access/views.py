@@ -23,6 +23,7 @@ from .models import ExceptionDictionaryEntry
 from .models import ExceptionDictionary
 from .models import Period
 from .models import Alphabet
+from PIL import Image
 
 
 class ExceptionDictionaryEntryViewSet(viewsets.ModelViewSet):
@@ -81,7 +82,6 @@ def home(request):
 
 
 def upload(request):
-    # print(request.FILES['uploadedFile'])
     myfile = request.FILES['uploadedFiles']
     saveToCloud = False
     fs = FileSystemStorage()
@@ -89,6 +89,15 @@ def upload(request):
     print(filename)
     uploaded_file_url = fs.url(filename)
     uploaded_file_path = settings.MEDIA_ROOT + '/' + filename
+
+    # Convert TIFF to PNG if required
+    img = Image.open(uploaded_file_path)
+    if img.format == 'TIFF':
+        filename = filename.replace('.tiff', '.png')
+        uploaded_file_path = uploaded_file_path.replace('.tiff', '.png')
+        img.save(uploaded_file_path, 'PNG')
+        uploaded_file_url = uploaded_file_url.replace('.tiff', '.png')
+
     obj = File.objects.create(image=uploaded_file_url)
     if obj:
         s3_file_url = s3_uploader.upload_file(uploaded_file_path, filename)
@@ -226,6 +235,46 @@ def ocr(request):
         return JsonResponse({"code": 500, "msg": "server error"})
 
 
+transliteration_map = {
+    'ї': 'i',
+    'і': 'i',
+    'ԁ': 'd',
+    'ѕ': 's',
+    'ꚏ': 'ț',
+    'Ꚏ': 'Ț',
+    '꙼': '',  # Remove this character
+    'ꚗ': 'șt',
+    'Ꚗ': 'Șt',
+    'є': 'e',
+    # Add more mappings as needed
+}
+
+def replace_k(text):
+    result = []
+    i = 0
+    while i < len(text):
+        char = text[i]
+        if char.lower() == 'k':
+            next_char = text[i + 1] if i + 1 < len(text) else ''
+            if next_char.lower() in ('e', 'i'):
+                replacement = 'ch' if char.islower() else 'Ch'
+            else:
+                replacement = 'c' if char.islower() else 'C'
+            result.append(replacement)
+            i += 1
+        else:
+            result.append(char)
+            i += 1
+    return ''.join(result)
+
+def apply_additional_transliteration(text, translit_map):
+    # Replace each character in the mapping
+    for cyrillic_char, latin_char in translit_map.items():
+        text = text.replace(cyrillic_char, latin_char)
+
+    text = replace_k(text)
+    return text
+
 def transliterate(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -234,41 +283,40 @@ def transliterate(request):
         trans_options = data['transOptions']
         ocr_results = data['ocrResults']
         trans_results = []
+
         for ocr_result in ocr_results:
-            data = {'cyrillicText': ocr_result,
-                    'period': periodOptions[period], 'actualize': trans_options['actualizeWordForm']}
-            response = requests.post(
-                "https://translitera.cc/ProcessServlet", data=data)
+            payload = {
+                'cyrillicText': ocr_result,
+                'period': periodOptions[period],
+                'actualize': trans_options['actualizeWordForm']
+            }
+            try:
+                response = requests.post("https://translitera.cc/ProcessServlet", data=payload)
+                response.raise_for_status()  # Raise an error for bad status codes
+            except requests.RequestException as e:
+                return JsonResponse({"code": 500, "msg": f"Transliteration service error: {e}"})
+
             trans_result = response.text
-            if trans_options['removeHyphen']:
-                text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(
-                    trans_result, vocabulary)
-                clean_text = replace_all_exceptions(text_no_hyphenation)
-                # text_without_appostrophe = text_no_hyphenation.replace(
-                #     "’", "-").replace('\'', "-").replace('^ ', "").replace('^', "")
-                trans_results.append(clean_text)
-            if trans_options['correctTextWithGPT3']:
-                corrected_text = correct_text(trans_result)
-                trans_results.append(corrected_text)
-            # if trans_options['replaceApostrophe'] and trans_options["removeHyphen"]:
-            #     text_no_hyphenation = remove_hyphen(trans_result)
-            #     text_no_apostrophe = text_no_hyphenation.replace(
-            #         "’", "-").replace('\'', "-")
-            #     clean_text = replace_all_exceptions(text_no_apostrophe)
-            #     trans_results.append(clean_text)
-            # elif trans_options['replaceApostrophe'] and not trans_options["removeHyphen"]:
-            #     clean_text = trans_result.replace("’", "-").replace('\'', "-")
-            #     trans_results.append(clean_text)
-            # elif not trans_options['replaceApostrophe'] and trans_options["removeHyphen"]:
-            #     text_no_hyphenation = remove_hyphen(trans_result)
+
+            # Apply additional transliteration rules
+            trans_result = apply_additional_transliteration(trans_result, transliteration_map)
+
+            # Continue with existing processing
+            # if trans_options.get('removeHyphen', False):
+            #     text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(trans_result, vocabulary)
             #     clean_text = replace_all_exceptions(text_no_hyphenation)
-            #     trans_results.append(clean_text)
-            # elif not trans_options['replaceApostrophe'] and not trans_options["removeHyphen"]:
-            #     trans_results.append(trans_result)
+            #     trans_result = clean_text  # Update trans_result for further processing
+            #
+            # if trans_options.get('correctTextWithGPT3', False):
+            # corrected_text = correct_text_with_OpenAI(ocr_result, trans_result)
+            # trans_result = corrected_text
+
+            trans_results.append(trans_result)
+
         return JsonResponse({"code": 200, "msg": "success", "transResults": trans_results})
 
     else:
-        return JsonResponse({"code": 500, "msg": "server error"})
+        return JsonResponse({"code": 405, "msg": "Method not allowed"}, status=405)
 
 
 def publish(request):

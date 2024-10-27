@@ -2,9 +2,6 @@
 
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import validation from "react-validation-mixin";
-import strategy from "joi-validation-strategy";
-import Joi from "joi";
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
 import layouts from "../components/KeyboardLayouts";
@@ -12,14 +9,13 @@ import Row from "react-bootstrap/esm/Row";
 import Col from "react-bootstrap/esm/Col";
 import Accordion from "react-bootstrap/Accordion";
 import Button from "react-bootstrap/Button";
-import KeyboardIcon from "../components/KeyboardIcon";
 import AddExceptionWidget from "../components/AddExceptionWidget";
-import LatestExceptionsWidget from "../components/LatestExeptionsWidget";
 import { getDictionary } from "../utils/ApiService";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import StepsInfo from "../components/StepsInfo";
-
+import ReactImageLightbox from "react-image-lightbox";
+import "react-image-lightbox/style.css"; // This only needs to be imported once in your app
 
 class Step6 extends Component {
   constructor(props) {
@@ -36,10 +32,15 @@ class Step6 extends Component {
 
       show: false,
       showNextStep: false,
-      // input: ""
       inputID: 0,
+      caretPositions: {}, // Keep track of caret positions for each textarea
+
+      isLightboxOpen: false,
+      lightboxImageSrc: "",
     };
-    // this.keyboard = React.createRef();
+
+    this.textareaRefs = {}; // References to textareas
+    this.keyboard = null; // Reference to the virtual keyboard
     this.romanian = layouts["latin"];
     this.cyrillicRomanianLayout = layouts[props.getStore().alphabet];
     this.API = props.getStore().api;
@@ -48,61 +49,128 @@ class Step6 extends Component {
         <Popover.Header as="h4">{StepsInfo.step6Info.title}</Popover.Header>
         <Popover.Body>
           <div dangerouslySetInnerHTML={{ __html: StepsInfo.step6Info.body }} />
-
         </Popover.Body>
       </Popover>
     );
   }
 
+  onChangeInput = (event) => {
+    const index = parseInt(event.target.id);
+    const textarea = event.target;
+    const input = textarea.value;
+    const caretPosition = textarea.selectionStart;
 
+    this.state.transResults[index] = input;
+    this.setState(
+      (prevState) => ({
+        transResults: [...prevState.transResults],
+        caretPositions: {
+          ...prevState.caretPositions,
+          [index]: caretPosition,
+        },
+      }),
+      () => {
+        // After state is updated, update the parent store
+        this.props.updateStore({ transResults: this.state.transResults });
 
-  componentDidMount() { }
+        // Update the keyboard input
+        if (this.keyboard) {
+          this.keyboard.setInput(input);
+        }
+      }
+    );
+  };
 
-  onChange(e) {
-    let newState = {};
-    newState[e.target.name] = e.target.value;
-    this.setState(newState);
-  }
+  onKeyPress = (button) => {
+    console.log("Button pressed", button);
 
-  onKeyPress(button) {
-    if (button === "{shift}" || button === "{lock}") this.handleShift();
-  }
+    if (button === "{shift}" || button === "{lock}") {
+      this.handleShift();
+    } else {
+      this.handleVirtualKeyboardInput(button);
+    }
+  };
 
-  handleShift() {
+  handleVirtualKeyboardInput = (button) => {
+    const index = this.state.inputID;
+    const textarea = this.textareaRefs[index];
+    if (!textarea) return;
+
+    let value = textarea.value;
+    let caretPosition = this.state.caretPositions[index] || 0;
+
+    // Handle special keys
+    if (button === "{bksp}") {
+      // Remove character before caret
+      if (caretPosition > 0) {
+        value = value.slice(0, caretPosition - 1) + value.slice(caretPosition);
+        caretPosition -= 1;
+      }
+    } else if (button === "{enter}") {
+      // Insert newline at caret position
+      value = value.slice(0, caretPosition) + "\n" + value.slice(caretPosition);
+      caretPosition += 1;
+    } else if (button === "{space}") {
+      // Insert space at caret position
+      value = value.slice(0, caretPosition) + " " + value.slice(caretPosition);
+      caretPosition += 1;
+    } else if (button.startsWith("{") && button.endsWith("}")) {
+      // Do nothing for other special keys
+    } else {
+      // Insert the character at caret position
+      value = value.slice(0, caretPosition) + button + value.slice(caretPosition);
+      caretPosition += button.length;
+    }
+
+    // Update the textarea value
+    textarea.value = value;
+    this.state.transResults[index] = value;
+
+    // Update the state and parent store
+    this.setState(
+      (prevState) => ({
+        transResults: [...prevState.transResults],
+        caretPositions: {
+          ...prevState.caretPositions,
+          [index]: caretPosition,
+        },
+      }),
+      () => {
+        // After state is updated, update the parent store
+        this.props.updateStore({ transResults: this.state.transResults });
+
+        // Defer focus and caret position updates
+        requestAnimationFrame(() => {
+          textarea.focus();
+          textarea.setSelectionRange(caretPosition, caretPosition);
+        });
+      }
+    );
+  };
+
+  handleShift = () => {
     const layoutName = this.state.layoutName;
     this.setState({
       layoutName: layoutName === "default" ? "shift" : "default",
     });
-  }
+  };
 
-  setActiveInput(event) {
-    this.setState({ inputID: event.target.id });
-    console.log(event.target.id);
-  }
+  setActiveInput = (event) => {
+    const index = parseInt(event.target.id);
+    this.setState({ inputID: index });
+  };
 
-  onChangeInput(event) {
-    const input = event.target.value;
-    this.state.transResults[this.state.inputID] = input;
-    this.setState({ transResults: [...this.state.transResults] });
-    console.log(this.state.transResults);
-    this.props.updateStore({ transResults: this.state.transResults });
-    // this.keyboard.setInput(input);
-  }
+  onInputChanged = (event, index) => {
+    const caretPosition = event.target.selectionStart;
+    this.setState((prevState) => ({
+      caretPositions: {
+        ...prevState.caretPositions,
+        [index]: caretPosition,
+      },
+    }));
+  };
 
-  onChangeKeyboardInput(input, a) {
-    console.log(input, a);
-    const inputID = this.state.inputID;
-    const transResults = this.state.transResults;
-    transResults[inputID] = input;
-    this.setState({ transResults: [...transResults] });
-  }
-
-  handleSubmit() {
-    this.setState({ showNextStep: true });
-  }
-
-
-  handleKeyboardButton(showk) {
+  handleKeyboardButton = (showk) => {
     const keyboardButton = document.querySelector("button#keyboard-button");
     if (keyboardButton) {
       if (showk) {
@@ -114,13 +182,30 @@ class Step6 extends Component {
       keyboardButton.classList.add("btn-primary");
     }
     return "Deschide tastatura virtuală";
-  }
+  };
+
+  handleSubmit = () => {
+    this.setState({ showNextStep: true });
+  };
+
+  // Lightbox methods
+  openLightbox = (imageSrc) => {
+    this.setState({
+      isLightboxOpen: true,
+      lightboxImageSrc: imageSrc,
+    });
+  };
+
+  closeLightbox = () => {
+    this.setState({
+      isLightboxOpen: false,
+      lightboxImageSrc: "",
+    });
+  };
+
   render() {
-    // Fisierele sursa
     const handleFilePath = (filePath) => {
       if (filePath.length > 0) return this.API + filePath;
-      //https://httpbin.org/post
-      //http://127.0.0.1:8000/media/
       return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
     };
     return (
@@ -138,10 +223,7 @@ class Step6 extends Component {
                   placement="right"
                   overlay={this.step6Info}
                 >
-                  <Button
-                    type="button"
-                    className="btn btn-info text-white mx-4"
-                  >
+                  <Button type="button" className="btn btn-info text-white mx-4">
                     Info
                   </Button>
                 </OverlayTrigger>
@@ -149,125 +231,115 @@ class Step6 extends Component {
             </div>
             <div className="row mt-3">
               <div className="form-group col-md-12 content form-block-holder">
-                <label className="control-label col-12">
-                  <Accordion defaultActiveKey={0} alwaysOpen>
-                    {this.state.transResults &&
-                      // use google translate to translate the transilterated  text
-
-                      this.state.transResults.map((item, index) => {
-                        return (
-                          <Accordion.Item eventKey={index} key={index}>
-                            <Accordion.Header>
-                              {`Rezultatul transliterării documentului ${this.state.sourceFiles[index].name}`}
-                            </Accordion.Header>
-                            <Accordion.Body>
-
-                              <Row>
-
-                                <Col sm={9}>
-                                  <textarea
-                                    key={index}
-                                    id={index}
-                                    onFocus={this.setActiveInput.bind(this)}
-                                    value={item}
-                                    onChange={this.onChangeInput.bind(this)}
-                                    className="form-control text"
-                                    rows="14"
-                                  ></textarea>
-                                  {/* <Keyboard
-                                keyboardRef={r => (this.keyboard = r)}
-                                layoutName={this.state.layoutName}
-                                onChange={this.onChange}
-                                onKeyPress={this.onKeyPress}
-                              /> */}
+                <Accordion defaultActiveKey={0} alwaysOpen>
+                  {this.state.transResults &&
+                    this.state.transResults.map((item, index) => {
+                      return (
+                        <Accordion.Item eventKey={index} key={index}>
+                          <Accordion.Header>
+                            {`Rezultatul transliterării documentului ${this.state.sourceFiles[index].name}`}
+                          </Accordion.Header>
+                          <Accordion.Body>
+                            <Row>
+                              <Col sm={9}>
+                                <textarea
+                                  ref={(ref) => (this.textareaRefs[index] = ref)}
+                                  key={index}
+                                  id={index}
+                                  onFocus={this.setActiveInput}
+                                  onClick={(e) => this.onInputChanged(e, index)}
+                                  onKeyUp={(e) => this.onInputChanged(e, index)}
+                                  onSelect={(e) => this.onInputChanged(e, index)}
+                                  value={item}
+                                  onChange={this.onChangeInput}
+                                  className={`form-control text ${
+                                    this.state.show ? "textarea-reduced" : "textarea-normal"
+                                  }`}
+                                  rows="14"
+                                ></textarea>
+                              </Col>
+                              <Col sm={3}>
+                                <Col sm={12}>
+                                  <button
+                                    id="keyboard-button"
+                                    className="btn btn-primary"
+                                    type="button"
+                                    title="Tastatura virtuală"
+                                    onClick={() =>
+                                      this.setState({ show: !this.state.show })
+                                    }
+                                  >
+                                    {this.handleKeyboardButton(this.state.show)}
+                                  </button>
+                                  <div className="mt-3">
+                                    <span
+                                      className="image-link"
+                                      onClick={() =>
+                                        this.openLightbox(this.state.s3SourceFiles[index].url)
+                                      }
+                                    >
+                                      Compară rezultatul cu imaginea sursă originală:
+                                      <img
+                                        width="100"
+                                        src={this.state.s3SourceFiles[index].url}
+                                        alt="Original Source"
+                                      />
+                                    </span>
+                                  </div>
                                 </Col>
-
-                                <Col sm={3}>
-                                  <Col sm={12}>
-                                    <button
-                                      id="keyboard-button"
-                                      className="btn btn-primary"
-                                      type="button"
-                                      title="Tastatura virtuală"
-                                      onClick={() => this.setState({ show: !this.state.show })}>
-                                      {this.handleKeyboardButton(this.state.show)}
-
-                                    </button>
-                                    <div className="mt-3">
-                                      <a
-
-                                        className=""
-                                        data-fancybox="gallery_2"
-                                        data-src={this.state.s3PreprocessedFiles[index]}
-                                        data-caption='imagine procesată'
-                                        key={index}
-                                      >
-
-                                        Compară rezultatul OCR cu imaginea sursă preprocesată:
-                                        <img width="200" className="" src={this.state.s3PreprocessedFiles[index]}
-                                        />
-                                      </a>
-                                    </div>
-
-                                  </Col>
-
-
-                                </Col>
-
-
-
-                              </Row>
-                            </Accordion.Body>
-                          </Accordion.Item>
-
-                        );
-                      })}
-                  </Accordion>
-                </label>
-
+                              </Col>
+                            </Row>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      );
+                    })}
+                </Accordion>
                 {this.state.show && (
                   <Keyboard
                     keyboardRef={(r) => (this.keyboard = r)}
                     layoutName={this.state.layoutName}
-                    onChange={(inputs) =>
-                      this.onChangeInput(inputs[0])
-                      //.bind(this)
-                    }
-                    onKeyPress={this.onKeyPress.bind(this)}
+                    onKeyPress={this.onKeyPress}
                     layout={this.romanian.layout}
                   />
                 )}
               </div>
-
             </div>
           </form>
-
         </div>
         <div className="exception-widget">
-          <AddExceptionWidget period={this.state.period} onGetDictionary={getDictionary} />
-          {/* <span className="text-muted">Ultimele excepții adăugate</span>
-          <LatestExceptionsWidget period={this.state.period} getDictionary={getDictionary} numberOfExceptionsToShow={7} /> */}
+          <AddExceptionWidget
+            period={this.state.period}
+            onGetDictionary={getDictionary}
+          />
         </div>
-
-
         <Row className="mt-2">
           <Col>
-            <Button className="save-trans float-end" onClick={this.handleSubmit.bind(this)}>
+            <Button className="save-trans float-end" onClick={this.handleSubmit}>
               Salvează modificările
             </Button>
           </Col>
           <Col>
-            {this.state.showNextStep && (<>
-              {document.querySelector(".save-trans").disabled = true}
-              {" "}
-              <Button
-                variant="primary mx-4"
-                onClick={() => this.props.jumpToStep(6)}>
-                Mergi la pasul următor - salvează rezultatele finale
-              </Button>
-            </>)}
+            {this.state.showNextStep && (
+              <>
+                {(document.querySelector(".save-trans").disabled = true)}
+                <Button
+                  variant="primary mx-4"
+                  onClick={() => this.props.jumpToStep(6)}
+                >
+                  Mergi la pasul următor - salvează rezultatele finale
+                </Button>
+              </>
+            )}
           </Col>
         </Row>
+
+        {/* Lightbox Component */}
+        {this.state.isLightboxOpen && (
+          <ReactImageLightbox
+            mainSrc={this.state.lightboxImageSrc}
+            onCloseRequest={this.closeLightbox}
+          />
+        )}
       </div>
     );
   }

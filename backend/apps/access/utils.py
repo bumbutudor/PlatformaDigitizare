@@ -6,10 +6,10 @@ from cv2 import threshold
 from cv2 import normalize
 import numpy as np
 from PIL import Image
-import spacy
+# import spacy
 import nltk
 import re
-import openai
+from openai import OpenAI
 from django.conf import settings
 import os
 import time
@@ -59,6 +59,15 @@ def process_image_for_ocr(file_path, out_path, resolution=300):
     cv2.imwrite(out_path, im_new)
     return im_new
 
+def do_not_preprocess(file_path, out_path, resolution=300):
+    # Open the image using PIL
+    img = Image.open(file_path)
+
+    if img.format == 'TIFF':
+        img.save(out_path, 'PNG')
+
+    # Save the image to the out_path without changing anything
+    img.save(out_path)
 
 def set_image_dpi(file_path, dpi=300):
     im = Image.open(file_path)
@@ -155,7 +164,7 @@ def obtine_vocabular(nume_fisier):
     return cuvinte
 
 
-nlp = spacy.load("ro_core_news_lg")
+# nlp = spacy.load("ro_core_news_lg")
 
 
 def remove_cratima_with_spacy_and_vocabulary(text, vocabulary):
@@ -214,18 +223,38 @@ def replace_all_exceptions(text):
     return text
 
 
-def correct_text_with_OpenAI(text):
-    openai.api_key = settings.OPENAI_API_KEY
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt="corecteaza textul :" + text,
-        temperature=0,
-        top_p=1.0,
-        max_tokens=100,
-        frequency_penalty=0.0,
-        presence_penalty=0.0
+def correct_text_with_OpenAI(ocerized_text, transliterated_text):
+    client = OpenAI(
+        api_key=settings.OPENAI_API_KEY
     )
-    return response["choices"][0]["text"]
+
+    system_prompt = '''Luând în considerare aceste texte: text ocerizat (în chirilică) și text transliterat (cu alfabet latin).
+Fa modificări în textul transliterat acolo unde algoritmul de transliterare
+nu a reușit să rezolve ambiguitatea de transliterare sau nu a făcut corect. Exemplu 'bucuriеa' ar trebui sa fie 'bucuria', 'trebue' -> 'trebuie' si altele
+Să nu faci modificări  de sens.
+Dacă sunt spații între caracterele unui cuvânt, atunci se poate elimina.
+Dacă sunt două sau mai multe cuvinte care îți par că stau lipite, atunci pune un spațiu între ele.
+În rezultat, aștept doar textul transliterat (cu alfabet latin) ajustat, fără nimic altceva.'''
+
+    # Combine the OCR text and transliterated text into the user message
+    user_message = f'''Text ocerizat (în chirilică):
+{ocerized_text}
+
+Text transliterat (cu alfabet latin):
+{transliterated_text}'''
+
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message},
+        ],
+        temperature=0,
+        max_tokens=1500,
+    )
+
+    corrected_text = response.choices[0].message.content.strip()
+    return corrected_text
 
 
 def correct_text(text):

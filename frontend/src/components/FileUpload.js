@@ -66,7 +66,7 @@ const FileUpload = (props) => {
         InputComponent={selectFileInput}
         getUploadParams={fileParams}
         getFilesFromEvent={getFilesFromEvent}
-        accept=".jpg,.jpeg,.png, .tiff, .tif" // .pdf, docx
+        accept=".jpg,.jpeg,.png, .tiff, .tif, .pdf" // .pdf, docx
         maxFiles={5}
         inputContent="Trage sau click pentru a selecta fișiere"
         submitButtonContent="Continuă cu procesarea imaginii"

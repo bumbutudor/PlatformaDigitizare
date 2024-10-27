@@ -11,8 +11,6 @@ import FetchWrapper from '../components/FetchWrapper';
 import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert';
 
-
-
 // OCR
 export default class Step3 extends Component {
   constructor(props) {
@@ -41,11 +39,10 @@ export default class Step3 extends Component {
           <div dangerouslySetInnerHTML={{ __html: StepsInfo.step3Info.body }} />
         </Popover.Body>
       </Popover>
-
     );
+
     // Post request
     this.API = new FetchWrapper(props.getStore().api); // localhost dev server url http://127.0.0.1:8000/
-
   }
 
   handleFilePath(filePath) {
@@ -53,21 +50,24 @@ export default class Step3 extends Component {
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   }
 
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
-  componentWillUnmount() { }
+  componentWillUnmount() {}
 
   validationCheck() {
-    if (!this._validateOnDemand)
-      return;
+    if (!this._validateOnDemand) return;
 
     const userInput = this._grabUserInput(); // grab user entered vals
     const validateNewInput = this._validateData(userInput); // run the new input against the validator
 
-    this.setState(Object.assign(userInput, validateNewInput, this._validationErrors(validateNewInput)));
+    this.setState(
+      Object.assign(
+        userInput,
+        validateNewInput,
+        this._validationErrors(validateNewInput)
+      )
+    );
   }
-
 
   async handleOCRRequest() {
     this.setState({ show: false });
@@ -79,7 +79,7 @@ export default class Step3 extends Component {
     // console.log(postData);
 
     this.API.post(ocrEndpoint, postData)
-      .then(data => {
+      .then((data) => {
         console.log(data);
         if (data.ocrResults.length > 0) {
           this.setState({ ocrResults: data.ocrResults });
@@ -89,7 +89,7 @@ export default class Step3 extends Component {
           this.setState({ showError: true });
         }
       })
-      .catch(error => {
+      .catch((error) => {
         // console.log(error);
         this.setState({ showError: true });
         this.setState({ showNextStep: false });
@@ -100,7 +100,6 @@ export default class Step3 extends Component {
       });
   }
 
-
   render() {
     return (
       <div className="step step3">
@@ -109,8 +108,18 @@ export default class Step3 extends Component {
             <Form.Group>
               <Form.Label className="col-md-12 control-label d-flex">
                 <h1>Pasul 3: Recunoașterea optică a caracterelor - OCR </h1>
-                <OverlayTrigger trigger="click" rootClose placement="right" overlay={this.step3Info}>
-                  <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
+                <OverlayTrigger
+                  trigger="click"
+                  rootClose
+                  placement="right"
+                  overlay={this.step3Info}
+                >
+                  <Button
+                    type="button"
+                    className="btn btn-info text-white mx-4"
+                  >
+                    Info
+                  </Button>
                 </OverlayTrigger>
               </Form.Label>
             </Form.Group>
@@ -125,7 +134,10 @@ export default class Step3 extends Component {
                   id="radio1"
                   value="secolulXX"
                   checked={this.state.period === "secolulXX"}
-                  onChange={() => { this.setState({ period: "secolulXX", show: true }); this.props.updateStore({ period: "secolulXX" }); }}
+                  onChange={() => {
+                    this.setState({ period: "secolulXX", show: true });
+                    this.props.updateStore({ period: "secolulXX" });
+                  }}
                 />
                 <Form.Check
                   label="Secolul XIX"
@@ -134,7 +146,17 @@ export default class Step3 extends Component {
                   id="radio2"
                   value="secolulXIX"
                   checked={this.state.period === "secolulXIX"}
-                  onChange={() => { this.setState({ period: "secolulXIX", show: true }); this.props.updateStore({ period: "secolulXIX" }); }}
+                  onChange={() => {
+                    this.setState({
+                      period: "secolulXIX",
+                      alphabet: "cyrillicTransitional",
+                      show: true,
+                    });
+                    this.props.updateStore({
+                      period: "secolulXIX",
+                      alphabet: "cyrillicTransitional",
+                    });
+                  }}
                 />
                 <Form.Check
                   label="Secolul XVIII"
@@ -143,8 +165,17 @@ export default class Step3 extends Component {
                   id="radio3"
                   value="secolulXVIII"
                   checked={this.state.period === "secolulXVIII"}
-                  onChange={() => { this.setState({ period: "secolulXVIII", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ period: "secolulXVIII", alphabet: "cyrillicRomanian" }); }}
-
+                  onChange={() => {
+                    this.setState({
+                      period: "secolulXVIII",
+                      alphabet: "cyrillicRomanian",
+                      show: true,
+                    });
+                    this.props.updateStore({
+                      period: "secolulXVIII",
+                      alphabet: "cyrillicRomanian",
+                    });
+                  }}
                 />
                 <Form.Check
                   label="Secolul XVII"
@@ -153,304 +184,467 @@ export default class Step3 extends Component {
                   id="radio4"
                   value="secolulXVII"
                   checked={this.state.period === "secolulXVII"}
-                  onChange={() => { this.setState({ period: "secolulXVII", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ period: "secolulXVII", alphabet: "cyrillicRomanian" }); }}
+                  onChange={() => {
+                    this.setState({
+                      period: "secolulXVII",
+                      alphabet: "cyrillicRomanian",
+                      show: true,
+                    });
+                    this.props.updateStore({
+                      period: "secolulXVII",
+                      alphabet: "cyrillicRomanian",
+                    });
+                  }}
                 />
               </Form.Group>
 
-              {this.state.period === "secolulXX" && <>
-                <div className="col-sm mb-3 border rounded px-2 bg-light">
-                  <Form.Group className="mb-3">
-                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documentul tău:</Form.Label>
-                    <Form.Check
-                      label="Model bazat pe alfabetul chirilic sovietic"
-                      name="secolulXX"
-                      // type="checkbox"
-                      type='radio'
-                      id="radio11"
-                      value="cyrillic"
-                      checked={this.state.ocrModel === "cyrillic"}
-                      onChange={() => { this.setState({ ocrModel: "cyrillic", alphabet: "cyrillic", show: true }); this.props.updateStore({ ocrModel: "cyrillic", alphabet: "cyrillic" }); }}
-                    />
-
-                  </Form.Group>
-                </div>
-              </>}
-
-              {this.state.period === "secolulXIX" && <>
-                <div className="col-sm mb-3 border rounded px-2 bg-light">
-                  <Form.Group className="mb-3 col-sm">
-                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
-                    <Form.Check
-                      disabled
-                      label="Model bazat alfabetul chirilic românesc (Legiuire de G. Caragea, anul 1818)"
-                      name="secolulXIX"
-                      type="radio"
-                      id="radio21"
-                      value="secolulXIX_1"
-                      checked={this.state.ocrModel === "secolulXIX_1"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_1", alphabet: "cyrillicRomanian" }); }}
-                    />
-                    <Form.Check
-                      // disabled
-                      label="Model bazat pe alfabetul chirilic românesc (Epistolariul românesc, anul 1841)"
-                      name="secolulXIX"
-                      type="radio"
-                      id="radio22"
-                      value="secolulXIX_2"
-                      checked={this.state.ocrModel === "secolulXIX_2"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXIX_2", alphabet: "cyrillicRomanian", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_2", alphabet: "cyrillicRomanian" }); }}
-                    />
-                    <Form.Check
-                      // disabled
-                      label="Model bazat pe alfabete de tranziție (https://transitional-romanian-transliteration.azurewebsites.net/)"
-                      name="secolulXIX"
-                      type="radio"
-                      id="radio24"
-                      value="secolulXIX_4"
-                      checked={this.state.ocrModel === "secolulXIX_24"}
-                      onChange={() => {
-                        this.setState(
-                          {
-                            ocrModel: "secolulXIX_24",
-                            alphabet: "transitionalRomanian",
+              {this.state.period === "secolulXX" && (
+                <>
+                  <div className="col-sm mb-3 border rounded px-2 bg-light">
+                    <Form.Group className="mb-3">
+                      <Form.Label>
+                        3.2 Selectează modelul OCR cel mai apropriat de
+                        documentul tău:
+                      </Form.Label>
+                      <Form.Check
+                        label="Model bazat pe alfabetul chirilic sovietic"
+                        name="secolulXX"
+                        type="radio"
+                        id="radio11"
+                        value="cyrillic"
+                        checked={this.state.ocrModel === "cyrillic"}
+                        onChange={() => {
+                          this.setState({
+                            ocrModel: "cyrillic",
+                            alphabet: "cyrillic",
                             show: true,
-                            ocrOptions: { useTesseract: true }
                           });
+                          this.props.updateStore({
+                            ocrModel: "cyrillic",
+                            alphabet: "cyrillic",
+                          });
+                        }}
+                      />
+                    </Form.Group>
+                  </div>
+                </>
+              )}
 
-                        this.props.updateStore(
-                          {
+              {this.state.period === "secolulXIX" && (
+                <>
+                  <div className="col-sm mb-3 border rounded px-2 bg-light">
+                    <Form.Group className="mb-3 col-sm">
+                      <Form.Label>
+                        3.2 Selectează modelul OCR cel mai apropriat de
+                        documentul tău:
+                      </Form.Label>
+                      <Form.Check
+                        disabled
+                        label="Model bazat alfabetul chirilic românesc (Legiuire de G. Caragea, anul 1818)"
+                        name="secolulXIX"
+                        type="radio"
+                        id="radio21"
+                        value="secolulXIX_1"
+                        checked={this.state.ocrModel === "secolulXIX_1"}
+                        onChange={() => {
+                          this.setState({
+                            ocrModel: "secolulXIX_1",
+                            alphabet: "cyrillicTransitional",
+                            show: true,
+                          });
+                          this.props.updateStore({
+                            ocrModel: "secolulXIX_1",
+                            alphabet: "cyrillicTransitional",
+                          });
+                        }}
+                      />
+                      <Form.Check
+                        label="Model bazat pe alfabetul chirilic românesc (Epistolariul românesc, anul 1841)"
+                        name="secolulXIX"
+                        type="radio"
+                        id="radio22"
+                        value="secolulXIX_2"
+                        checked={this.state.ocrModel === "secolulXIX_2"}
+                        onChange={() => {
+                          this.setState({
                             ocrModel: "secolulXIX_2",
-                            alphabet: "transitionalRomanian",
-                            ocrOptions: { useTesseract: true }
+                            alphabet: "cyrillicTransitional",
+                            show: true,
                           });
-                      }}
-                    />
+                          this.props.updateStore({
+                            ocrModel: "secolulXIX_2",
+                            alphabet: "cyrillicTransitional",
+                          });
+                        }}
+                      />
+                      <Form.Check
+                        label="Model bazat pe alfabete de tranziție (https://transitional-romanian-transliteration.azurewebsites.net/)"
+                        name="secolulXIX"
+                        type="radio"
+                        id="radio24"
+                        value="secolulXIX_4"
+                        checked={this.state.ocrModel === "secolulXIX_4"}
+                        onChange={() => {
+                          this.setState({
+                            ocrModel: "secolulXIX_4",
+                            alphabet: "cyrillicTransitional",
+                            show: true,
+                            ocrOptions: { useTesseract: true },
+                          });
+                          this.props.updateStore({
+                            ocrModel: "secolulXIX_4",
+                            alphabet: "cyrillicTransitional",
+                            ocrOptions: { useTesseract: true },
+                          });
+                        }}
+                      />
+                      <Form.Check
+                        disabled
+                        label="Model bazat pe alfabetul de tranziție (Elemente de aritmetică de G. Asachi, anul 1836)"
+                        name="secolulXIX"
+                        type="radio"
+                        id="radio23"
+                        value="secolulXIX_3"
+                        checked={this.state.ocrModel === "secolulXIX_3"}
+                        onChange={() => {
+                          this.setState({
+                            ocrModel: "secolulXIX_3",
+                            alphabet: "cyrillicTransitional",
+                            show: true,
+                          });
+                          this.props.updateStore({
+                            ocrModel: "secolulXIX_3",
+                            alphabet: "cyrillicTransitional",
+                          });
+                        }}
+                      />
+                    </Form.Group>
+                  </div>
+                </>
+              )}
 
-                    <Form.Check
-                      disabled
-                      label="Model bazat pe alfabetul de tranziție (Elemente de aritmetică de G. Asachi, anul 1836)"
-                      name="secolulXIX"
-                      type="radio"
-                      id="radio23"
-                      value="secolulXIX_3"
-                      checked={this.state.ocrModel === "secolulXIX_3"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXIX_3", alphabet: "cyrillicTransitional", show: true }); this.props.updateStore({ ocrModel: "secolulXIX_3", alphabet: "cyrillicTransitional" }); }}
+              {this.state.period === "secolulXVIII" && (
+                <>
+                  <div className="col-sm mb-3 border rounded px-2 bg-light">
+                    <Form.Group className="mb-3 col-sm">
+                      <Form.Label>
+                        3.2 Selectează modelul OCR cel mai apropriat de
+                        documentul tău:
+                      </Form.Label>
+                      <Form.Check
+                        label="Model bazat pe alfabetul chirilic românesc (De Obște Geografie, anul 1795)"
+                        name="secolulXVIII"
+                        type="radio"
+                        id="radio31"
+                        value="secolulXVIII_1"
+                        checked={this.state.ocrModel === "secolulXVIII_1"}
+                        onChange={() => {
+                          this.setState({
+                            ocrModel: "secolulXVIII_1",
+                            alphabet: "cyrillicRomanian",
+                            show: true,
+                          });
+                          this.props.updateStore({
+                            ocrModel: "secolulXVIII_1",
+                            alphabet: "cyrillicRomanian",
+                          });
+                        }}
+                      />
+                      <Form.Check
+                        disabled
+                        label="Model bazat pe alfabetul chirilic românesc (Fiziognomie de M. Strilbițchi, anul 1785)"
+                        name="secolulXVIII"
+                        type="radio"
+                        id="radio32"
+                        value="secolulXVIII_2"
+                        checked={this.state.ocrModel === "secolulXVIII_2"}
+                        onChange={() => {
+                          this.setState({
+                            ocrModel: "secolulXVIII_2",
+                            alphabet: "cyrillicRomanian",
+                            show: true,
+                          });
+                          this.props.updateStore({
+                            ocrModel: "secolulXVIII_2",
+                            alphabet: "cyrillicRomanian",
+                          });
+                        }}
+                      />
+                      <Form.Check
+                        disabled
+                        label="Model bazat pe alfabetul chirilic românesc (Așezământ, anul 1786)"
+                        name="secolulXVIII"
+                        type="radio"
+                        id="radio33"
+                        value="secolulXVIII_3"
+                        checked={this.state.ocrModel === "secolulXVIII_3"}
+                        onChange={() => {
+                          this.setState({
+                            ocrModel: "secolulXVIII_3",
+                            alphabet: "cyrillicRomanian",
+                            show: true,
+                          });
+                          this.props.updateStore({
+                            ocrModel: "secolulXVIII_3",
+                            alphabet: "cyrillicRomanian",
+                          });
+                        }}
+                      />
+                    </Form.Group>
+                  </div>
+                </>
+              )}
 
-                    />
-                  </Form.Group>
-                </div>
-              </>}
-
-              {this.state.period === "secolulXVIII" && <>
-                <div className="col-sm mb-3 border rounded px-2 bg-light">
-                  <Form.Group className="mb-3 col-sm">
-                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
-                    <Form.Check
-                      label="Model bazat pe alfabetul chirilic românesc (De Obște Geografie, anul 1795)"
-                      name="secolulXVIII"
-                      type="radio"
-                      id="radio31"
-                      value="secolulXVIII_1"
-                      checked={this.state.ocrModel === "secolulXVIII_1"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_1", show: true }); this.props.updateStore({ ocrModel: "secolulXVIII_1" }); }}
-                    />
-                    <Form.Check
-                      disabled
-                      label="Model bazat pe alfabetul chirilic românesc (Fiziognomie de M. Strilbițchi, anul 1785)"
-                      name="secolulXVIII"
-                      type="radio"
-                      id="radio32"
-                      value="secolulXVIII_2"
-                      checked={this.state.ocrModel === "secolulXVIII_2"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_2", show: true }); this.props.updateStore({ ocrModel: "secolulXVIII_2" }); }}
-                    />
-                    <Form.Check
-                      disabled
-                      label="Model bazat pe alfabetul chirilic românesc (Așezământ, anul 1786)"
-                      name="secolulXVIII"
-                      type="radio"
-                      id="radio33"
-                      value="secolulXVIII_3"
-                      checked={this.state.ocrModel === "secolulXVIII_3"}
-                      onChange={() => { this.setState({ ocrModel: "secolulXVIII_3", show: true }); this.props.updateStore({ ocrModel: "secolulXVIII_3" }); }}
-
-                    />
-                  </Form.Group>
-                </div>
-              </>}
-
-              {this.state.period === "secolulXVII" && <>
-                <div className="col-sm mb-3 border rounded px-2 bg-light">
-                  <Form.Group className="mb-4">
-                    <Form.Label>3.2 Selectează modelul OCR cel mai apropriat de documetul tău:</Form.Label>
-                    <Form.Check
-                      {...(this.state.typography === "typographyAuto" ? { disabled: true } : {})}
-                      label="Model bazat pe alfabetul chirilic românesc (Noul Testament, 1646, clasa A de fonturi)"
-                      name="secolulXVII"
-                      type="radio"
-                      id="radio41"
-                      value="secolulXVII_1"
-                      checked={this.state.ocrModel === "secolulXVII_1"}
-                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_1", show: true }); this.props.updateStore({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_1" }); }}
-                    />
-                    <Form.Check
-                      {...(this.state.typography === "typographyAuto" ? { disabled: true } : {})}
-                      disabled
-                      label="Model bazat pe alfabetul chirilic românesc (antrenat cu fonturile de tip B)"
-                      name="secolulXVII"
-                      type="radio"
-                      id="radio42"
-                      value="secolulXVII_2"
-                      checked={this.state.ocrModel === "secolulXVII_2"}
-                      onChange={() => { this.setState({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_2", show: true }); this.props.updateStore({ alphabet: "cyrillicRomanian", ocrModel: "secolulXVII_2" }); }}
-                    />
-
-                  </Form.Group>
-                  <Form.Group className="mb-4">
-                    <Form.Check
-                      disabled
-                      label="Identifică automat modelul necesar pentru documentul tău"
-                      name="typographyAuto"
-                      type="checkbox"
-                      id="radio43"
-                      value="typographyAuto"
-                      checked={this.state.typography === "typographyAuto"}
-                      onChange={() => { this.setState({ typography: "typographyAuto", show: true }); this.props.updateStore({ typography: "typographyAuto" }); }}
-
-                    />
-                  </Form.Group>
-                  <Form.Group>
-                    <Form.Label>Dacă cunoști la ce tipografie a fost tipărit documentul, selectează din lista de mai jos </Form.Label>
-                    <Form.Select disabled value={this.state.typography} onChange={(e) => { this.setState({ typography: e.target.value, show: true }); this.props.updateStore({ typography: e.target.value }); }}>
-
-                      <option value="">Lista tipografiilor:</option>
-                      <option value="typography1">Tipariul cel Domnesc (Iași)</option>
-                      <option value="typography2">Casa Sfintei Mitropolii (Iași)</option>
-                      <option value="typography3">Tiparnița Tărâi (Iași)</option>
-                      <option value="typography4">Scaunul Mitropolii Bucureștilor (București)</option>
-                      <option value="typography5">Tipografia Domnească (Belgrad)</option>
-                      <option value="typography6">Mitropolia Belgradului (Belgrad)</option>
-                      <option value="typography7">Sfânta Mitropolie a Târgoviştii (Târgoviște)</option>
-                      <option value="typography8">Sfînta Mănăstire Uniev (Uniev)</option>
-                      <option value="typography9">Tipograf[ia] Noao (Sas Sebeș)</option>
-                      <option value="typography10">Tipografiia Domnească în Sfânta Mănăstire în Snagov (Snagov )</option>
-                      <option value="typography11">Tipografiia Domnească, la Episcupiia dela Buzău (Buzău)</option>
-
-                    </Form.Select>
-                    <span className='m-2' />
-                  </Form.Group>
-                </div>
-              </>}
-
+              {this.state.period === "secolulXVII" && (
+                <>
+                  <div className="col-sm mb-3 border rounded px-2 bg-light">
+                    <Form.Group className="mb-4">
+                      <Form.Label>
+                        3.2 Selectează modelul OCR cel mai apropriat de
+                        documentul tău:
+                      </Form.Label>
+                      <Form.Check
+                        {...(this.state.typography === "typographyAuto"
+                          ? { disabled: true }
+                          : {})}
+                        label="Model bazat pe alfabetul chirilic românesc (Noul Testament, 1646, clasa A de fonturi)"
+                        name="secolulXVII"
+                        type="radio"
+                        id="radio41"
+                        value="secolulXVII_1"
+                        checked={this.state.ocrModel === "secolulXVII_1"}
+                        onChange={() => {
+                          this.setState({
+                            alphabet: "cyrillicRomanian",
+                            ocrModel: "secolulXVII_1",
+                            show: true,
+                          });
+                          this.props.updateStore({
+                            alphabet: "cyrillicRomanian",
+                            ocrModel: "secolulXVII_1",
+                          });
+                        }}
+                      />
+                      <Form.Check
+                        {...(this.state.typography === "typographyAuto"
+                          ? { disabled: true }
+                          : {})}
+                        disabled
+                        label="Model bazat pe alfabetul chirilic românesc (antrenat cu fonturile de tip B)"
+                        name="secolulXVII"
+                        type="radio"
+                        id="radio42"
+                        value="secolulXVII_2"
+                        checked={this.state.ocrModel === "secolulXVII_2"}
+                        onChange={() => {
+                          this.setState({
+                            alphabet: "cyrillicRomanian",
+                            ocrModel: "secolulXVII_2",
+                            show: true,
+                          });
+                          this.props.updateStore({
+                            alphabet: "cyrillicRomanian",
+                            ocrModel: "secolulXVII_2",
+                          });
+                        }}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-4">
+                      <Form.Check
+                        disabled
+                        label="Identifică automat modelul necesar pentru documentul tău"
+                        name="typographyAuto"
+                        type="checkbox"
+                        id="radio43"
+                        value="typographyAuto"
+                        checked={this.state.typography === "typographyAuto"}
+                        onChange={() => {
+                          this.setState({
+                            typography: "typographyAuto",
+                            show: true,
+                          });
+                          this.props.updateStore({
+                            typography: "typographyAuto",
+                          });
+                        }}
+                      />
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>
+                        Dacă cunoști la ce tipografie a fost tipărit
+                        documentul, selectează din lista de mai jos{" "}
+                      </Form.Label>
+                      <Form.Select
+                        disabled
+                        value={this.state.typography}
+                        onChange={(e) => {
+                          this.setState({
+                            typography: e.target.value,
+                            show: true,
+                          });
+                          this.props.updateStore({
+                            typography: e.target.value,
+                          });
+                        }}
+                      >
+                        <option value="">Lista tipografiilor:</option>
+                        <option value="typography1">
+                          Tipariul cel Domnesc (Iași)
+                        </option>
+                        <option value="typography2">
+                          Casa Sfintei Mitropolii (Iași)
+                        </option>
+                        <option value="typography3">
+                          Tiparnița Tărâi (Iași)
+                        </option>
+                        <option value="typography4">
+                          Scaunul Mitropolii Bucureștilor (București)
+                        </option>
+                        <option value="typography5">
+                          Tipografia Domnească (Belgrad)
+                        </option>
+                        <option value="typography6">
+                          Mitropolia Belgradului (Belgrad)
+                        </option>
+                        <option value="typography7">
+                          Sfânta Mitropolie a Târgoviştii (Târgoviște)
+                        </option>
+                        <option value="typography8">
+                          Sfînta Mănăstire Uniev (Uniev)
+                        </option>
+                        <option value="typography9">
+                          Tipograf[ia] Noao (Sas Sebeș)
+                        </option>
+                        <option value="typography10">
+                          Tipografiia Domnească în Sfânta Mănăstire în Snagov
+                          (Snagov )
+                        </option>
+                        <option value="typography11">
+                          Tipografiia Domnească, la Episcupiia dela Buzău
+                          (Buzău)
+                        </option>
+                      </Form.Select>
+                      <span className="m-2" />
+                    </Form.Group>
+                  </div>
+                </>
+              )}
 
               <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
-                {this.state.period && this.state.show ?
+                {this.state.period && this.state.show ? (
                   <Button
                     variant="primary"
-                    onClick={this.handleOCRRequest.bind(this)}>
+                    onClick={this.handleOCRRequest.bind(this)}
+                  >
                     Start OCR
-                  </Button> :
-                  <Button
-                    variant="primary"
-                    disabled>
-                    {this.state.showLoader ?
-                      (<>
-                        <Spinner
-                          animation="border" />
-                        Are loc recunoașterea caracterelor...
-                      </>) :
-                      (<>
-                        Start OCR
-                      </>)}</Button>}
-
-                {this.state.showNextStep && (<>
-                  {" "}
-                  <Button
-                    variant="primary mx-4"
-                    onClick={() => this.props.jumpToStep(3)}>
-                    Mergi la pasul următor - verificarea textului recunoscut
                   </Button>
-                </>)}
+                ) : (
+                  <Button variant="primary" disabled>
+                    {this.state.showLoader ? (
+                      <>
+                        <Spinner animation="border" />
+                        Are loc recunoașterea caracterelor...
+                      </>
+                    ) : (
+                      <>Start OCR</>
+                    )}
+                  </Button>
+                )}
+
+                {this.state.showNextStep && (
+                  <>
+                    {" "}
+                    <Button
+                      variant="primary mx-4"
+                      onClick={() => this.props.jumpToStep(3)}
+                    >
+                      Mergi la pasul următor - verificarea textului recunoscut
+                    </Button>
+                  </>
+                )}
               </div>
               {this.state.showError && (
-                < Alert variant="danger">
-                  <Alert.Heading>A apărut o eroare, incercati din nou...</Alert.Heading>
+                <Alert variant="danger">
+                  <Alert.Heading>
+                    A apărut o eroare, incercati din nou...
+                  </Alert.Heading>
                 </Alert>
               )}
             </div>
           </Form>
-        </div >
+        </div>
 
-        {/* preprocessed image and reognized text */}
+        {/* preprocessed image and recognized text */}
 
-
-        < div className="row" >
-          {/* <span className='text-right'>Drag me</span> */}
-          < div className="container-for-results col-md-12 d-flex p-2 border gap-2 bg-light rounded" >
-
+        <div className="row">
+          <div className="container-for-results col-md-12 d-flex p-2 border gap-2 bg-light rounded">
             <div className="col-sm">
-              {this.state.sourceFiles.length != 0 && <>
-
-                <Accordion defaultActiveKey={0} alwaysOpen>
-                  {
-                    this.state.s3PreprocessedFiles.map((s3_url, index) => (
-                      console.log(index),
+              {this.state.sourceFiles.length !== 0 && (
+                <>
+                  <Accordion defaultActiveKey={0} alwaysOpen>
+                    {this.state.s3PreprocessedFiles.map((s3_url, index) => (
                       <Accordion.Item eventKey={index} key={index}>
-                        <Accordion.Header>Sursa - imagine preprocesată {index + 1}</Accordion.Header>
+                        <Accordion.Header>
+                          Sursa - imagine preprocesată {index + 1}
+                        </Accordion.Header>
                         <Accordion.Body>
-                          <div key={index} className="preprocessedFile mb-2">
+                          <div
+                            key={index}
+                            className="preprocessedFile mb-2"
+                          >
                             <a
                               className=""
                               data-fancybox="gallery_2"
                               data-src={s3_url}
-                              data-caption='imagine procesată'
+                              data-caption="imagine procesată"
                               key={index}
                             >
-                              {/* <span className="ocrResultTitle text-info">{`Imaginea ${index + 1}:`}</span> */}
                               <img
                                 src={s3_url}
-                                // onClick={() => openImageViewer(index)}
                                 className="Accordion_image"
                                 width="90%"
-                                alt="" />
+                                alt=""
+                              />
                             </a>
                           </div>
                         </Accordion.Body>
                       </Accordion.Item>
-                    ))
-                  }
-
-                </Accordion>
-              </>}
+                    ))}
+                  </Accordion>
+                </>
+              )}
             </div>
 
             <div className="col-sm">
-              {this.state.ocrResults != 0 && <>
-                <Accordion defaultActiveKey={0} alwaysOpen>
-                  {
-                    this.state.ocrResults.map((text, index) => (
+              {this.state.ocrResults.length !== 0 && (
+                <>
+                  <Accordion defaultActiveKey={0} alwaysOpen>
+                    {this.state.ocrResults.map((text, index) => (
                       <Accordion.Item eventKey={index} key={index}>
-                        <Accordion.Header>Ținta - textul recunoscut {index + 1}</Accordion.Header>
+                        <Accordion.Header>
+                          Ținta - textul recunoscut {index + 1}
+                        </Accordion.Header>
                         <Accordion.Body>
-                          <div className="ocrResult mb-4"  >
-                            {/* <span className="ocrResultTitle text-info">{`Rezultatul OCR pentru imaginea ${this.state.preprocessedFiles[index]}:`}</span> */}
+                          <div className="ocrResult mb-4">
                             {text.split('\n').map((item, key) => {
-                              return <span key={key}>{item}<br /></span>
+                              return (
+                                <span key={key}>
+                                  {item}
+                                  <br />
+                                </span>
+                              );
                             })}
                           </div>
                         </Accordion.Body>
                       </Accordion.Item>
-                    ))
-                  }
-
-                </Accordion>
-              </>}
+                    ))}
+                  </Accordion>
+                </>
+              )}
             </div>
-          </div >
-        </div >
-
-
-      </div >
-    )
+          </div>
+        </div>
+      </div>
+    );
   }
 }

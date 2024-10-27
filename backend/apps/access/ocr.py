@@ -137,11 +137,12 @@ def tesseract_ocr_postprocess(text):
     :rtype: str
     """
     # Înlocuiește secvențele de caractere specificate
-    modified_text = text.replace('ꙇ꙼', 'i')\
-        .replace('ꙋ꙼', 'ꙋ')\
+    modified_text = text.replace('ꙇ꙼', 'ĭ')\
+        .replace('ꙋ꙼', 'ꙋ꙼')\
         .replace('ꙇ', 'i')\
-        .replace('ꚏ', 'ц')\
-        .replace('є', 'e')\
+        .replace('ꚏ', 'ꚏ')\
+        .replace('є', 'є')\
+        # .replace('k', 'к')\
 
     return modified_text
 

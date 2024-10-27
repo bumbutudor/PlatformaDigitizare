@@ -14,7 +14,7 @@ const ToolsAndResourcesPage = (props) => {
             </p>
             <ul>
                 <li>
-                    <a href="#aplicatie" onClick={() => setModalShow(true)}>Dicționar de excepții</a>
+                    <a href="#dictionar" onClick={() => setModalShow(true)}>Dicționar de excepții</a>
                 </li>
             </ul>
             <DictionaryModal about={''} period={'secolulXX'} api={"sf"} fullscreen={true} show={modalShow} onHide={() => setModalShow(false)} />
