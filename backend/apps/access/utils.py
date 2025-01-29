@@ -224,37 +224,43 @@ def replace_all_exceptions(text):
 
 
 def correct_text_with_OpenAI(ocerized_text, transliterated_text):
+    print(settings.OPENAI_API_KEY)
     client = OpenAI(
         api_key=settings.OPENAI_API_KEY
     )
 
-    system_prompt = '''Luând în considerare aceste texte: text ocerizat (în chirilică) și text transliterat (cu alfabet latin).
-Fa modificări în textul transliterat acolo unde algoritmul de transliterare
-nu a reușit să rezolve ambiguitatea de transliterare sau nu a făcut corect. Exemplu 'bucuriеa' ar trebui sa fie 'bucuria', 'trebue' -> 'trebuie' si altele
-Să nu faci modificări  de sens.
-Dacă sunt spații între caracterele unui cuvânt, atunci se poate elimina.
-Dacă sunt două sau mai multe cuvinte care îți par că stau lipite, atunci pune un spațiu între ele.
-În rezultat, aștept doar textul transliterat (cu alfabet latin) ajustat, fără nimic altceva.'''
+    # Mesajul care conține instrucțiunile + textele
+    messages = [
+        {
+            "role": "user",
+            "content": f"""
+    Luind in considerare aceste text: text ocerizat (in chirilica) si text transliterat (cu alfabet latin).
+    Fa modificari in textul transliterat acolo unde algoritmul de trasliterare
+    nu a reusit sa rezolve ambiguitatea de transliterare sau nu a facut corect.
+    Sa nu faci modificari structurale sau de sens.
+    Daca sunt spatii intre caracterele unui cuvant, atunci se poate de eliminat.
+    Daca sunt doua sau mai multe cuvinte care iti par ca stau lipite, atunci pune un spatiu intre ele.
+    Textul transliterat trebuie sa ramana aliniat la original.
+    In rezultat astept doar textul transliterat (cu alfabet latin) ajustat, fara nimic altceva.
 
-    # Combine the OCR text and transliterated text into the user message
-    user_message = f'''Text ocerizat (în chirilică):
-{ocerized_text}
+    Text ocerizat (in chirilica):
+    {ocerized_text}
 
-Text transliterat (cu alfabet latin):
-{transliterated_text}'''
+    Text transliterat (cu alfabet latin):
+    {transliterated_text}
+    """
+        }
+    ]
 
+    # Apelează API-ul ChatCompletion
     response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message},
-        ],
-        temperature=0,
-        max_tokens=1500,
+        model="o1-preview",
+        messages=messages
     )
 
     corrected_text = response.choices[0].message.content.strip()
     return corrected_text
+
 
 
 def correct_text(text):

@@ -11,20 +11,24 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Calea către fișierul .env
+dotenv_path = os.path.join(BASE_DIR, '.env')
+load_dotenv(dotenv_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'vz^_2dqml_x3)m6^slx5(f3pr8(qulstvh@km0c!y-qt_g-i4)'
-
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', default='unsafe-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', default='')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -176,4 +180,3 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-OPENAI_API_KEY = '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'

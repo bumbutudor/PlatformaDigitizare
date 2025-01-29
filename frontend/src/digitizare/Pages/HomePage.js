@@ -50,9 +50,20 @@ const [key, setKey] = useState(window.location.hash ? window.location.hash : '#d
                             <Tab eventKey="#despre" title="Despre platformă">
                                 <AboutPage />
                             </Tab>
-                            {/*<Tab eventKey="#resurse" title="Instrumente și Resurse" >*/}
-                            {/*    <ToolsAndResourcesPage />*/}
-                            {/*</Tab>*/}
+                            <Tab
+
+                              title={
+                                <a
+                                  href="https://drive.google.com/drive/folders/1KFgvysCu24nBKDxMP13EJjznBzLQuT_V?usp=drive_link"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="no-underline"
+                                >
+                                  Instrumente și Resurse
+                                </a>
+                              }
+                            />
+
                             <Tab eventKey="#aplicatie" title="Aplicație de digitizare">
                                 <DigitizationSteps />
                             </Tab>

@@ -61,7 +61,7 @@ backend/media/*.tiff
 backend/media/*.tif
 backend/media/*.zip
 
-
+backend/.env
 # END OF BACKEND
 
 # new folder of frontend

@@ -307,9 +307,9 @@ def transliterate(request):
             #     clean_text = replace_all_exceptions(text_no_hyphenation)
             #     trans_result = clean_text  # Update trans_result for further processing
             #
-            # if trans_options.get('correctTextWithGPT3', False):
-            # corrected_text = correct_text_with_OpenAI(ocr_result, trans_result)
-            # trans_result = corrected_text
+            if trans_options.get('correctTextWithGPT3', False):
+                corrected_text = correct_text_with_OpenAI(ocr_result, trans_result)
+                trans_result = corrected_text
 
             trans_results.append(trans_result)
 

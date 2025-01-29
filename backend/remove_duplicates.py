@@ -90,8 +90,7 @@ def find_and_delete_duplicates(root_dir, dry_run=True):
                         os.remove(file_path)
                         print(f"Deleted: {file_path}")
                         total_deleted += 1
-                    e
-                    xcept Exception as e:
+                    except Exception as e:
                         print(f"Error deleting {file_path}: {e}")
 
     # Summary
