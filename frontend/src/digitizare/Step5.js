@@ -152,7 +152,7 @@ export default class Step5 extends Component {
             </Form.Group>
 
             <div className="row content gap-2">
-              <div className="mb-3 col-sm-3 border rounded px-2 bg-light">
+              <div className="mb-3 col-sm-4 border rounded px-2 bg-light">
                 <Form.Group >
                   <Form.Label>5.1 Perioada documentului este:
                     <span className='text-primary mx-2'>{this.periodOptions[this.state.period]}</span>
@@ -168,18 +168,18 @@ export default class Step5 extends Component {
               </div>
               <Form.Group className="col-sm border rounded px-2 bg-light">
                 <Form.Label>5.3 Setări de transliterare:</Form.Label>
-                <Form.Check
-                  label="Actualizează ortografia (gînd => gând)"
-                  name="actualizeWordForm"
-                  id="checkboxTrans1"
-                  type="checkbox"
-                  checked={this.state.transOptions.actualizeWordForm}
-                  onChange={this.handleTransOptionsChange.bind(this)}
-                />
+                {/*<Form.Check*/}
+                {/*  label="Actualizează ortografia (gînd => gând)"*/}
+                {/*  name="actualizeWordForm"*/}
+                {/*  id="checkboxTrans1"*/}
+                {/*  type="checkbox"*/}
+                {/*  checked={this.state.transOptions.actualizeWordForm}*/}
+                {/*  onChange={this.handleTransOptionsChange.bind(this)}*/}
+                {/*/>*/}
 
 
 
-                <div className='d-flex'>
+                <div className='d-flex my-2'>
                   <Form.Check
                     label="Folosește dicționarul de excepții"
                     name="removeHyphen"
@@ -188,7 +188,7 @@ export default class Step5 extends Component {
                     checked={this.state.transOptions.useExceptionDictionary}
                     onChange={this.handleTransOptionsChange.bind(this)}
                   />
-                  <Button className='btn btn-info text-white mx-4' onClick={() => this.setState({ showModal: true })}>
+                  <Button className='btn btn-info text-white mx-2' onClick={() => this.setState({ showModal: true })}>
                     ?
                   </Button>
 
@@ -201,17 +201,17 @@ export default class Step5 extends Component {
                 <div className='d-flex'>
 
                   <Form.Check
-                    disabled
-                    label="Corectează textul cu agentul inteligent de la OpenAI"
-                    name="correctTextWithGPT3"
+                    // disabled
+                    label="Corectează textul cu OpenAI o1 (experimental)"
+                    name="correctTextWithOpenAIModels"
                     id="checkboxTrans4"
                     type="checkbox"
-                    checked={this.state.transOptions.correctTextWithGPT3}
+                    checked={this.state.transOptions.correctTextWithOpenAIModels}
                     onChange={this.handleTransOptionsChange.bind(this)}
                   />
 
                   <OverlayTrigger trigger="click" rootClose placement="left" overlay={this.state.aboutOpenAI}>
-                    <Button type="button" className="btn btn-info text-white mx-4">?</Button>
+                    <Button type="button" className="btn btn-info text-white mx-2">?</Button>
                   </OverlayTrigger>
 
                 </div>

@@ -212,19 +212,27 @@ def remove_hyphen(trans_text):
     return trans_text
 
 
-def replace_all_exceptions(text):
-    for i, j in vocabula.items():
-        text = text.replace(i, j)
+def replace_all_exceptions(text: str) -> str:
+    # Merge your two sources into one mapping
+    mapping = dict(vocabula)  # assuming vocabula is a dict {bad: good}
 
-    queryset = ExceptionDictionaryEntry.objects.all()
-    for entry in queryset:
-        text = text.replace(entry.exception, entry.correct_word)
-        # print(entry.exception, entry.correct_word, type(entry.period))
-    return text
+    # Load just the needed fields from DB
+    for exc, corr in ExceptionDictionaryEntry.objects.values_list("exception", "correct_word"):
+        mapping[exc] = corr
+
+    if not mapping:
+        return text
+
+    # Build one regex that matches any key as a WHOLE TOKEN
+    # \b creates word boundaries so "cat" won't hit "concatenate"
+    # re.escape handles punctuation in keys
+    pattern = re.compile(r'\b(?:' + '|'.join(map(re.escape, sorted(mapping, key=len, reverse=True))) + r')\b')
+
+    # Replace via lookup
+    return pattern.sub(lambda m: mapping[m.group(0)], text)
 
 
 def correct_text_with_OpenAI(ocerized_text, transliterated_text):
-    print(settings.OPENAI_API_KEY)
     client = OpenAI(
         api_key=settings.OPENAI_API_KEY
     )

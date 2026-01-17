@@ -262,11 +262,23 @@ mai mult timp pentru a putea face concluzii mai generale.<o:p></o:p></span></p>
    * Pasul 5: Transliterare
    */
     step5Info2: {
-        title: "OpenAI și GPT-3",
-        body: `<p>OpenAI este o companie de cercetare în inteligență artificială (IA) care se concentrează pe dezvoltarea tehnologiilor de învățare automată (machine learning) avansate și pe aplicarea lor în domenii precum jocuri, limbaj și robotică. OpenAI a fost fondată în 2015 de Elon Musk, Sam Altman, Greg Brockman și Ilya Sutskever cu scopul de a promova și proteja IA prin dezvoltarea unor tehnologii responsabile și sigure.</p>
-        <p>GPT-3 (Generative Pre-training Transformer 3) este un model de învățare automată dezvoltat de OpenAI care poate fi utilizat pentru a genera text, răspunde la întrebări și îndeplini diverse sarcini de procesare a limbajului natural. GPT-3 este unul dintre cele mai mari modele de învățare automată disponibile public, cu 175 miliarde de parametri, și este considerat un pas important în direcția dezvoltării modelelor de învățare automată capabile să îndeplinească diverse sarcini de procesare a limbajului natural.</p>
-        <p>Pentru mai multe informații despre GPT-3, puteți vizita site-ul oficial al OpenAI la adresa <a href="https://openai.com/blog/gpt-3-apps/">https://openai.com/blog/gpt-3-apps/</a>. Acolo veți găsi detalii despre funcționarea și utilizarea GPT-3, precum și exemple de aplicații care au fost construite utilizând acest model. De asemenea, puteți găsi mai multe informații despre GPT-3 pe Wikipedia la adresa <a href="https://en.wikipedia.org/wiki/GPT-3">https://en.wikipedia.org/wiki/GPT-3</a>.</p>`
-    },
+  title: "OpenAI o1",
+  body: `
+    <p>
+      <strong>OpenAI o1</strong> este un model GPT (Generative Pre-trained Transformer) de nouă generație, bazat pe inteligență artificială generativă.
+    </p>
+    <p>
+      o1 își ia timp să „gândească” înainte să răspundă, ceea ce îl face mai performant decât GPT-4o în sarcini complexe de raționament, știință și programare.
+    </p>
+    <p>
+      Website oficial: 
+      <a rel="nofollow" href="https://openai.com/o1/">
+        openai.com/o1/
+      </a>
+    </p>
+  `
+},
+
 
     /**
     * Pasul 6: Verificare Transliterare

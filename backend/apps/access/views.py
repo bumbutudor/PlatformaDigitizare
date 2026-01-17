@@ -300,14 +300,14 @@ def transliterate(request):
 
             # Apply additional transliteration rules
             trans_result = apply_additional_transliteration(trans_result, transliteration_map)
-
+            trans_result = replace_all_exceptions(trans_result)
             # Continue with existing processing
             # if trans_options.get('removeHyphen', False):
             #     text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(trans_result, vocabulary)
             #     clean_text = replace_all_exceptions(text_no_hyphenation)
             #     trans_result = clean_text  # Update trans_result for further processing
             #
-            if trans_options.get('correctTextWithGPT3', False):
+            if trans_options.get('correctTextWithOpenAIModels', False):
                 corrected_text = correct_text_with_OpenAI(ocr_result, trans_result)
                 trans_result = corrected_text
 

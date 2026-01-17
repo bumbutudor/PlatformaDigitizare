@@ -47,7 +47,7 @@ const [key, setKey] = useState(window.location.hash ? window.location.hash : '#d
             {/*       <AboutPage />*/}
             {/*    </Tab>*/}
             {/*)}*/}
-                            <Tab eventKey="#despre" title="Despre platformă">
+                            <Tab eventKey="#despre" title="HeDy">
                                 <AboutPage />
                             </Tab>
                             <Tab
@@ -69,7 +69,7 @@ const [key, setKey] = useState(window.location.hash ? window.location.hash : '#d
                             </Tab>
                         </Tabs>
                     </Col>
-                </Row>
+
             </main>
         </div>
     );
