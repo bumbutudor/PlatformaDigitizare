@@ -90,36 +90,27 @@ def upload(request):
     uploaded_file_url = fs.url(filename)
     uploaded_file_path = settings.MEDIA_ROOT + '/' + filename
 
-    # Check if file is PDF and convert to images
+    # Check if file is PDF - upload directly without conversion
     if filename.lower().endswith('.pdf'):
-        from pdf2image import convert_from_path
+        # Create pdfs folder if not exists
+        pdf_folder = os.path.join(settings.MEDIA_ROOT, 'pdfs')
+        os.makedirs(pdf_folder, exist_ok=True)
         
-        # Convert PDF pages to images
-        images = convert_from_path(uploaded_file_path)
+        # Move PDF to pdfs folder
+        pdf_path = os.path.join(pdf_folder, filename)
+        os.rename(uploaded_file_path, pdf_path)
         
-        s3_files = []
-        for i, image in enumerate(images):
-            # Save each page as PNG
-            image_filename = f"{os.path.splitext(filename)[0]}_page_{i+1}.png"
-            image_path = os.path.join(settings.MEDIA_ROOT, image_filename)
-            image.save(image_path, 'PNG')
-            
-            # Upload to S3
-            s3_url = s3_uploader.upload_file(image_path, image_filename)
-            s3_files.append({"name": image_filename, "url": s3_url})
-            
-            # Create DB record
-            File.objects.create(image=fs.url(image_filename))
+        # Upload PDF to S3
+        s3_url = s3_uploader.upload_file(pdf_path, 'pdfs/' + filename)
         
-        # Remove original PDF
-        os.remove(uploaded_file_path)
+        # Create DB record
+        File.objects.create(image=fs.url('pdfs/' + filename))
         
         return JsonResponse({
             "code": 200, 
             "msg": "success", 
             "isPdf": True,
-            "s3Files": s3_files,
-            "s3File": s3_files[0] if s3_files else None  # For backwards compatibility
+            "s3File": {"name": filename, "url": s3_url, "isPdf": True}
         })
 
     # Convert TIFF to PNG if required

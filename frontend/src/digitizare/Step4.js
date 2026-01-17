@@ -15,6 +15,19 @@ import Col from "react-bootstrap/Col";
 import ReactImageLightbox from "react-image-lightbox";
 import "react-image-lightbox/style.css";
 
+// PDF Viewer Component
+const PdfViewer = ({ url, title }) => (
+  <div className="pdf-viewer-container" style={{ height: '500px', width: '100%' }}>
+    <iframe 
+      src={url} 
+      title={title}
+      width="100%" 
+      height="100%" 
+      style={{ border: '1px solid #ccc' }}
+    />
+  </div>
+);
+
 class Step4 extends Component {
   constructor(props) {
     super(props);
@@ -402,24 +415,34 @@ class Step4 extends Component {
                                     )}
                                   </button>
                                   <div className="mt-3">
-                                    <span
-                                      className="image-link"
-                                      onClick={() =>
-                                        this.openLightbox(
-                                          this.state.s3SourceFiles[index].url
-                                        )
-                                      }
-                                    >
-                                      Compară rezultatul OCR cu imaginea sursă
-                                      originală:
-                                      <img
-                                        width="100"
-                                        src={
-                                          this.state.s3SourceFiles[index].url
+                                    {this.state.s3SourceFiles[index]?.isPdf ? (
+                                      <div>
+                                        <span>Compară rezultatul OCR cu documentul PDF:</span>
+                                        <PdfViewer 
+                                          url={this.state.s3SourceFiles[index].url} 
+                                          title={`PDF Document ${index + 1}`}
+                                        />
+                                      </div>
+                                    ) : (
+                                      <span
+                                        className="image-link"
+                                        onClick={() =>
+                                          this.openLightbox(
+                                            this.state.s3SourceFiles[index].url
+                                          )
                                         }
-                                        alt="Original Source"
-                                      />
-                                    </span>
+                                      >
+                                        Compară rezultatul OCR cu imaginea sursă
+                                        originală:
+                                        <img
+                                          width="100"
+                                          src={
+                                            this.state.s3SourceFiles[index].url
+                                          }
+                                          alt="Original Source"
+                                        />
+                                      </span>
+                                    )}
                                   </div>
                                 </Col>
                               </Col>

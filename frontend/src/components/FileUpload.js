@@ -17,44 +17,44 @@ const FileUpload = (props) => {
     };
     
     const getS3Files = (files) => {
-        let allS3Files = [];
-        files.forEach((f) => {
+        return files.map((f) => {
             const response = JSON.parse(f.xhr.response);
-            // Check if it's a PDF response with multiple images
-            if (response.isPdf && response.s3Files) {
-                allS3Files = allS3Files.concat(response.s3Files);
-            } else {
-                allS3Files.push(response.s3File);
-            }
+            return response.s3File;
         });
-        return allS3Files;
-    }
-
-    const getSourceFileMetas = (files) => {
-        let allMetas = [];
-        files.forEach((f) => {
-            const response = JSON.parse(f.xhr.response);
-            // Check if it's a PDF response with multiple images
-            if (response.isPdf && response.s3Files) {
-                response.s3Files.forEach((s3File) => {
-                    allMetas.push({
-                        ...f.meta,
-                        name: s3File.name,
-                        isPdfPage: true
-                    });
-                });
-            } else {
-                allMetas.push(f.meta);
-            }
-        });
-        return allMetas;
     }
 
     const handleSubmit = (files, allFiles) => {
-        props.updateStore({ s3SourceFiles: getS3Files(files) });
-        props.updateStore({ sourceFiles: getSourceFileMetas(files) });
-        allFiles.forEach(f => f.remove())
-        props.jumpToStep(1);
+        const s3Files = getS3Files(files);
+        const sourceFileMetas = files.map(f => {
+            const response = JSON.parse(f.xhr.response);
+            return {
+                ...f.meta,
+                isPdf: response.isPdf || false
+            };
+        });
+        
+        props.updateStore({ s3SourceFiles: s3Files });
+        props.updateStore({ sourceFiles: sourceFileMetas });
+        
+        // Check if any file is a PDF - if so, skip preprocessing
+        const hasPdf = s3Files.some(f => f.isPdf);
+        if (hasPdf) {
+            props.updateStore({ preprocessWith: 'None', hasPdfFiles: true });
+        }
+        
+        allFiles.forEach(f => f.remove());
+        
+        // If PDF, skip to step 3 (OCR), otherwise go to step 2 (preprocessing)
+        if (hasPdf) {
+            // Set preprocessed files same as source for PDFs
+            props.updateStore({ 
+                preprocessedFiles: sourceFileMetas, 
+                s3PreprocessedFiles: s3Files.map(f => f.url) 
+            });
+            props.jumpToStep(2); // Go directly to OCR step
+        } else {
+            props.jumpToStep(1); // Go to preprocessing step
+        }
     }
 
 
