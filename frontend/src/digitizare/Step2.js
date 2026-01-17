@@ -60,6 +60,23 @@ const Step2 = (props) => {
     setShow(true);
   };
 
+  // Handle "None" option - use original images as preprocessed
+  const handleSkipPreprocessing = () => {
+    const originalFiles = props.getStore().sourceFiles;
+    const s3OriginalFiles = props.getStore().s3SourceFiles;
+    
+    // Use original files as preprocessed files
+    setpreprocessedFiles(originalFiles);
+    setS3PreprocessedFiles(s3OriginalFiles.map(f => f.url));
+    props.updateStore({ 
+      preprocessedFiles: originalFiles, 
+      s3PreprocessedFiles: s3OriginalFiles.map(f => f.url) 
+    });
+    
+    // Go directly to next step
+    props.jumpToStep(2);
+  };
+
   // Post request
   const API = new FetchWrapper(props.getStore().api); // localhost dev server url http://127.0.0.1:8000/
 
@@ -134,7 +151,7 @@ const Step2 = (props) => {
                 checked={selectedOption === "OpenCV"}
                 onChange={handleOptionChange}
               />
-              <Form.Check
+              {/* <Form.Check
                 disabled
                 label="ScanTailor (disponibil în versiunea desktop)"
                 name="group1"
@@ -142,6 +159,15 @@ const Step2 = (props) => {
                 id="radio3"
                 value="ScanTailor"
                 checked={selectedOption === "ScanTailor"}
+                onChange={handleOptionChange}
+              /> */}
+              <Form.Check
+                label="Fără preprocesare"
+                name="group1"
+                type="radio"
+                id="radio0"
+                value="None"
+                checked={selectedOption === "None"}
                 onChange={handleOptionChange}
               />
               {/* <Form.Check
@@ -188,9 +214,13 @@ const Step2 = (props) => {
 
             <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
 
-              {selectedOption && show ? (<>
+              {selectedOption && selectedOption !== "None" && show ? (<>
                 <Button variant="primary" onClick={handlePreprocessRequest}>
                   Start preprocesare
+                </Button> </>
+              ) : selectedOption === "None" && show ? (<>
+                <Button variant="primary" onClick={handleSkipPreprocessing}>
+                  Sari peste preprocesare (folosește imaginile originale la OCR)
                 </Button> </>
               ) : (
                 <Button disabled variant="primary">

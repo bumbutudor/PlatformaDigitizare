@@ -90,6 +90,38 @@ def upload(request):
     uploaded_file_url = fs.url(filename)
     uploaded_file_path = settings.MEDIA_ROOT + '/' + filename
 
+    # Check if file is PDF and convert to images
+    if filename.lower().endswith('.pdf'):
+        from pdf2image import convert_from_path
+        
+        # Convert PDF pages to images
+        images = convert_from_path(uploaded_file_path)
+        
+        s3_files = []
+        for i, image in enumerate(images):
+            # Save each page as PNG
+            image_filename = f"{os.path.splitext(filename)[0]}_page_{i+1}.png"
+            image_path = os.path.join(settings.MEDIA_ROOT, image_filename)
+            image.save(image_path, 'PNG')
+            
+            # Upload to S3
+            s3_url = s3_uploader.upload_file(image_path, image_filename)
+            s3_files.append({"name": image_filename, "url": s3_url})
+            
+            # Create DB record
+            File.objects.create(image=fs.url(image_filename))
+        
+        # Remove original PDF
+        os.remove(uploaded_file_path)
+        
+        return JsonResponse({
+            "code": 200, 
+            "msg": "success", 
+            "isPdf": True,
+            "s3Files": s3_files,
+            "s3File": s3_files[0] if s3_files else None  # For backwards compatibility
+        })
+
     # Convert TIFF to PNG if required
     img = Image.open(uploaded_file_path)
     if img.format == 'TIFF':

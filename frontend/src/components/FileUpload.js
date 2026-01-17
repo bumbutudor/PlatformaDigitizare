@@ -15,17 +15,44 @@ const FileUpload = (props) => {
     const onFileChange = ({ meta, file }, status) => {
         // console.log(file, meta, status);
     };
+    
     const getS3Files = (files) => {
-        return files.map((f) => {
+        let allS3Files = [];
+        files.forEach((f) => {
             const response = JSON.parse(f.xhr.response);
-            return response.s3File;
+            // Check if it's a PDF response with multiple images
+            if (response.isPdf && response.s3Files) {
+                allS3Files = allS3Files.concat(response.s3Files);
+            } else {
+                allS3Files.push(response.s3File);
+            }
         });
+        return allS3Files;
+    }
 
+    const getSourceFileMetas = (files) => {
+        let allMetas = [];
+        files.forEach((f) => {
+            const response = JSON.parse(f.xhr.response);
+            // Check if it's a PDF response with multiple images
+            if (response.isPdf && response.s3Files) {
+                response.s3Files.forEach((s3File) => {
+                    allMetas.push({
+                        ...f.meta,
+                        name: s3File.name,
+                        isPdfPage: true
+                    });
+                });
+            } else {
+                allMetas.push(f.meta);
+            }
+        });
+        return allMetas;
     }
 
     const handleSubmit = (files, allFiles) => {
         props.updateStore({ s3SourceFiles: getS3Files(files) });
-        props.updateStore({ sourceFiles: files.map(f => f.meta) });
+        props.updateStore({ sourceFiles: getSourceFileMetas(files) });
         allFiles.forEach(f => f.remove())
         props.jumpToStep(1);
     }

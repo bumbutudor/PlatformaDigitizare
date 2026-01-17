@@ -11,3 +11,4 @@ djangorestframework
 django-multiselectfield
 pytesseract
 pillow
+pdf2image

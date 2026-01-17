@@ -69,7 +69,7 @@ const [key, setKey] = useState(window.location.hash ? window.location.hash : '#d
                             </Tab>
                         </Tabs>
                     </Col>
-
+                </Row> 
             </main>
         </div>
     );
