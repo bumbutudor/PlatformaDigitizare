@@ -63,7 +63,13 @@ def check_searchable_pdf(request):
     """
     Check if searchable PDF exists for a given file.
     Used for polling when PDF generation is async.
+    PDF is considered ready only if:
+    1. File exists
+    2. File size > 0
+    3. File hasn't been modified in the last 5 seconds (to ensure writing is complete)
     """
+    import time
+    
     if request.method == 'GET':
         file_name = request.GET.get('file_name', '')
         period = request.GET.get('period', '')
@@ -90,11 +96,33 @@ def check_searchable_pdf(request):
         pdf_path = os.path.join(settings.MEDIA_ROOT, ocr_path.strip('/'), base_name + '.pdf')
         
         if os.path.exists(pdf_path):
+            # Check file size
+            file_size = os.path.getsize(pdf_path)
+            if file_size == 0:
+                return JsonResponse({"exists": False, "status": "empty_file"})
+            
+            # Check if file was modified recently (still being written)
+            mtime = os.path.getmtime(pdf_path)
+            current_time = time.time()
+            seconds_since_modified = current_time - mtime
+            
+            # Wait at least 5 seconds after last modification to ensure file is complete
+            if seconds_since_modified < 5:
+                return JsonResponse({
+                    "exists": False, 
+                    "status": "still_writing",
+                    "secondsSinceModified": seconds_since_modified
+                })
+            
             # Build URL
             pdf_url = f"/media{ocr_path}{base_name}.pdf"
-            return JsonResponse({"exists": True, "pdfUrl": pdf_url})
+            return JsonResponse({
+                "exists": True, 
+                "pdfUrl": pdf_url,
+                "fileSize": file_size
+            })
         else:
-            return JsonResponse({"exists": False})
+            return JsonResponse({"exists": False, "status": "not_found"})
     
     return JsonResponse({"exists": False, "error": "Method not allowed"})
 

@@ -40,9 +40,11 @@ class DocumentPanel extends React.Component {
       pollingPdfUrl: null, // URL găsit prin polling
       isPolling: false,
       pollingMessage: '',
+      useSearchablePdf: false, // Flag pentru a folosi PDF searchable când e disponibil
     };
     this.panelRef = React.createRef();
     this.pollingInterval = null;
+    this.pollingStartTime = null;
   }
 
   handleMouseDown = (e) => {
@@ -71,14 +73,19 @@ class DocumentPanel extends React.Component {
   };
 
   componentDidMount() {
-    this.startPollingIfNeeded();
+    this.startPollingForSearchablePdf();
   }
 
   componentDidUpdate(prevProps) {
     // Restart polling if panel reopens or file changes
     if (this.props.isOpen && !prevProps.isOpen) {
-      this.setState({ pollingPdfUrl: null });
-      this.startPollingIfNeeded();
+      this.setState({ pollingPdfUrl: null, useSearchablePdf: false });
+      this.startPollingForSearchablePdf();
+    }
+    // Dacă fileName s-a schimbat, resetăm și repornim polling
+    if (this.props.fileName !== prevProps.fileName) {
+      this.setState({ pollingPdfUrl: null, useSearchablePdf: false });
+      this.startPollingForSearchablePdf();
     }
   }
 
@@ -88,22 +95,30 @@ class DocumentPanel extends React.Component {
     this.stopPolling();
   }
 
-  startPollingIfNeeded = () => {
-    const { pdfUrl, fileName, period, alphabet, apiBase } = this.props;
+  startPollingForSearchablePdf = () => {
+    const { pdfUrl, fileName, period, apiBase } = this.props;
     
-    // Dacă avem deja PDF, nu facem polling
+    // Dacă avem deja un PDF searchable din props, îl folosim direct
     if (pdfUrl) {
-      this.stopPolling();
+      this.setState({ useSearchablePdf: true });
       return;
     }
     
-    // Dacă avem fileName și period, începem polling
+    // Dacă avem fileName și period, începem polling în fundal
     if (fileName && period && apiBase) {
-      this.setState({ isPolling: true, pollingMessage: 'Se așteaptă generarea PDF-ului searchable...' });
+      this.pollingStartTime = Date.now();
+      this.setState({ 
+        isPolling: true, 
+        pollingMessage: 'Se caută PDF-ul searchable...' 
+      });
       
+      // Verificăm imediat o dată
+      this.checkForPdf();
+      
+      // Apoi continuăm polling la fiecare 5 secunde (mărit de la 3)
       this.pollingInterval = setInterval(() => {
         this.checkForPdf();
-      }, 3000); // Verificăm la fiecare 3 secunde
+      }, 5000);
     }
   };
 
@@ -129,12 +144,33 @@ class DocumentPanel extends React.Component {
       const data = await response.json();
       
       if (data.exists && data.pdfUrl) {
+        const fullPdfUrl = `${apiBase}${data.pdfUrl.startsWith('/') ? data.pdfUrl.slice(1) : data.pdfUrl}`;
         this.setState({ 
-          pollingPdfUrl: `${apiBase}${data.pdfUrl.startsWith('/') ? data.pdfUrl.slice(1) : data.pdfUrl}`,
+          pollingPdfUrl: fullPdfUrl,
+          useSearchablePdf: true,
           isPolling: false,
           pollingMessage: ''
         });
         this.stopPolling();
+      } else {
+        // Actualizăm mesajul cu timpul trecut și status
+        const elapsedSeconds = Math.floor((Date.now() - this.pollingStartTime) / 1000);
+        let statusMessage = 'Se caută PDF-ul searchable...';
+        
+        if (data.status === 'still_writing') {
+          statusMessage = 'PDF se generează, așteptăm finalizarea...';
+        } else if (data.status === 'empty_file') {
+          statusMessage = 'PDF detectat, se așteaptă scrierea conținutului...';
+        }
+        
+        this.setState({
+          pollingMessage: `${statusMessage} (${elapsedSeconds}s)`
+        });
+        
+        // Oprim după 3 minute de polling
+        if (elapsedSeconds > 180) {
+          this.stopPolling();
+        }
       }
     } catch (error) {
       console.error('Error checking for PDF:', error);
@@ -143,24 +179,24 @@ class DocumentPanel extends React.Component {
 
   render() {
     const { isOpen, onClose, pdfUrl, imageUrl, searchQuery, title, apiBase } = this.props;
-    const { pollingPdfUrl, isPolling, pollingMessage } = this.state;
+    const { pollingPdfUrl, isPolling, pollingMessage, useSearchablePdf } = this.state;
     
     if (!isOpen) return null;
     
-    // Folosim PDF-ul din polling dacă e disponibil, altfel cel din props
-    const effectivePdfUrl = pollingPdfUrl || pdfUrl;
+    // Determinăm ce să afișăm:
+    // 1. Dacă avem PDF searchable (din props sau polling), îl folosim
+    // 2. Altfel, afișăm imaginea originală
+    const effectivePdfUrl = useSearchablePdf ? (pollingPdfUrl || pdfUrl) : null;
     
     // Convert URLs to proxy URLs to bypass X-Frame-Options
     const proxyPdfUrl = getProxyUrl(effectivePdfUrl, apiBase);
     const proxyImageUrl = getProxyUrl(imageUrl, apiBase);
     
-    const documentUrl = proxyPdfUrl || proxyImageUrl;
-    const isPdf = !!proxyPdfUrl;
-    
-    // Construim URL-ul cu parametru de căutare pentru PDF
-    const displayUrl = isPdf && searchQuery 
-      ? `${documentUrl}#search=${encodeURIComponent(searchQuery)}&zoom=100`
-      : documentUrl;
+    // Afișăm PDF searchable dacă e disponibil, altfel imaginea
+    const showPdf = !!proxyPdfUrl;
+    const displayUrl = showPdf && searchQuery 
+      ? `${proxyPdfUrl}#search=${encodeURIComponent(searchQuery)}&zoom=100`
+      : proxyPdfUrl;
     
     return (
       <div 
@@ -208,8 +244,31 @@ class DocumentPanel extends React.Component {
           alignItems: 'center',
           backgroundColor: '#f8f9fa',
         }}>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <strong>{title || 'Document Original'}</strong>
+            {isPolling && (
+              <span style={{ 
+                fontSize: '12px', 
+                color: '#6c757d',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <span className="spinner-border spinner-border-sm" role="status" />
+                {pollingMessage}
+              </span>
+            )}
+            {useSearchablePdf && (
+              <span style={{ 
+                fontSize: '11px', 
+                color: '#28a745',
+                backgroundColor: '#d4edda',
+                padding: '2px 8px',
+                borderRadius: '10px',
+              }}>
+                PDF Searchable
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -229,7 +288,7 @@ class DocumentPanel extends React.Component {
         
         {/* Document Content */}
         <div style={{ flex: 1, overflow: 'hidden' }}>
-          {isPdf ? (
+          {showPdf ? (
             <iframe
               src={displayUrl}
               title={title}
@@ -251,24 +310,6 @@ class DocumentPanel extends React.Component {
                 alt="Document original"
                 style={{ maxWidth: '100%', height: 'auto', objectFit: 'contain' }}
               />
-            </div>
-          ) : isPolling ? (
-            <div style={{ 
-              padding: '40px 20px', 
-              textAlign: 'center', 
-              color: '#6c757d',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-            }}>
-              <div className="spinner-border text-primary mb-3" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-              <p>{pollingMessage}</p>
-              <small>PDF-ul searchable se generează în fundal de FineReader.</small>
-              <small>Verificare automată la fiecare 3 secunde...</small>
             </div>
           ) : (
             <div style={{ padding: '20px', textAlign: 'center', color: '#6c757d' }}>
