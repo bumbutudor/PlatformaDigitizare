@@ -18,16 +18,36 @@ from PIL import Image
 """
 
 
-def get_searchable_pdf_url(file_name, media_root, ocr_path, api_base_url):
+def get_searchable_pdf_url(file_name, media_root, ocr_path, api_base_url, wait_timeout=30):
     """
-    Check if searchable PDF exists and return its URL
+    Check if searchable PDF exists and return its URL.
+    Waits up to wait_timeout seconds for PDF to appear (FineReader generates PDF after TXT/DOCX).
     """
     base_name = os.path.splitext(file_name)[0]
     pdf_path = os.path.join(media_root, ocr_path.strip('/'), base_name + '.pdf')
     
-    if os.path.exists(pdf_path):
-        # Return relative URL to the PDF
-        return f"{api_base_url}media{ocr_path}{base_name}.pdf"
+    # Wait for PDF to appear (FineReader generates it after TXT and DOCX)
+    waited = 0
+    while waited < wait_timeout:
+        if os.path.exists(pdf_path):
+            # Check if file is not empty and not being written
+            try:
+                file_size = os.path.getsize(pdf_path)
+                if file_size > 0:
+                    # Wait a bit more to ensure file is fully written
+                    mtime = os.path.getmtime(pdf_path)
+                    if time.time() - mtime >= 2:  # File not modified in last 2 seconds
+                        print(f"[get_searchable_pdf_url] PDF found: {pdf_path} (size: {file_size})")
+                        return f"{api_base_url}media{ocr_path}{base_name}.pdf"
+            except:
+                pass
+        
+        time.sleep(1)
+        waited += 1
+        if waited % 5 == 0:
+            print(f"[get_searchable_pdf_url] Waiting for PDF: {pdf_path} ({waited}s)")
+    
+    print(f"[get_searchable_pdf_url] PDF not found after {wait_timeout}s: {pdf_path}")
     return None
 
 
