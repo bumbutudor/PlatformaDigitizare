@@ -179,20 +179,50 @@ export default class Step7 extends Component {
               </label>
             </div>
 
-            {this.props.getStore().preprocessedFiles.length != 0 && (
+            {this.props.getStore().preprocessedFiles.length != 0 && (() => {
+                // Verificăm dacă avem PDF sau imagini
+                const s3SourceFiles = this.props.getStore().s3SourceFiles;
+                const hasPdf = s3SourceFiles.some(file => file.isPdf || file.url?.toLowerCase().endsWith('.pdf'));
+                
+                return (
               <div className="form-group row">
+                {/* Dacă e PDF: afișăm PDF-ul, dacă sunt imagini: afișăm imaginea preprocesată */}
                 <div className="col-4">
                   <Accordion defaultActiveKey={0} alwaysOpen>
-                    {this.props
-                      .getStore()
-                      .s3PreprocessedFiles.map((src, index) => (
-                        console.log(src),
+                    {hasPdf ? (
+                      // Afișăm PDF-urile sursă
+                      s3SourceFiles.map((file, index) => (
+                        <Accordion.Item eventKey={index} key={index}>
+                          <Accordion.Header>
+                            PDF sursă
+                          </Accordion.Header>
+                          <Accordion.Body>
+                            <iframe
+                              src={file.url}
+                              title={`PDF sursă ${index + 1}`}
+                              width="100%"
+                              height="400px"
+                              style={{ border: '1px solid #dee2e6' }}
+                            />
+                            <button
+                              type="button"
+                              className="btn btn-link col-12"
+                              onClick={() => saveAs(file.url)}
+                            >
+                              Descarcă PDF-ul sursă
+                            </button>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      ))
+                    ) : (
+                      // Afișăm imaginile preprocesate
+                      this.props.getStore().s3PreprocessedFiles.map((src, index) => (
                         <Accordion.Item eventKey={index} key={index}>
                           <Accordion.Header>
                             Imagine preprocesată
                           </Accordion.Header>
                           <Accordion.Body>
-                            <><a
+                            <a
                               className=""
                               data-fancybox="gallery_2"
                               data-src={src}
@@ -204,23 +234,18 @@ export default class Step7 extends Component {
                                 src={src}
                               />
                             </a>
-                              <button
-
-                                type="button"
-                                className="btn btn-link col-12"
-                                onClick={() => saveAs(src)}
-                              >
-                                Descarcă imaginea preprocesată
-                              </button>
-                            </>
-
+                            <button
+                              type="button"
+                              className="btn btn-link col-12"
+                              onClick={() => saveAs(src)}
+                            >
+                              Descarcă imaginea preprocesată
+                            </button>
                           </Accordion.Body>
                         </Accordion.Item>
-                      ))}
+                      ))
+                    )}
                   </Accordion>
-
-
-
                 </div>
 
                 <div className="col-4">
@@ -303,7 +328,7 @@ export default class Step7 extends Component {
                 </div>
 
               </div>
-            )}
+                );})()}
             <div className="d-flex flex-row justify-content-center p-4 m-2 border gap-3 bg-light rounded">
               <button className="btn btn-primary" onClick={() => {
                 this.props.jumpToStep(0); this.props.resetStore();

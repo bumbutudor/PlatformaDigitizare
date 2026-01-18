@@ -97,7 +97,7 @@ const FileUpload = (props) => {
         accept=".jpg,.jpeg,.png, .tiff, .tif, .pdf" // .pdf, docx
         maxFiles={5}
         inputContent="Trage sau click pentru a selecta fișiere"
-        submitButtonContent="Continuă cu procesarea imaginii"
+        submitButtonContent="Continuă"
         styles={
             {
                 dropzone: { height: 300, border: "2px dashed" },

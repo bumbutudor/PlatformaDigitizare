@@ -118,7 +118,7 @@ class RichTextEditor extends React.Component {
             onChange={this.onChange}
             placeholder="Tell a story..."
             ref="editor"
-            spellCheck={true}
+            spellCheck={false}
             value="123"
           />
         </div>

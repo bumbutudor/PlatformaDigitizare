@@ -30,118 +30,256 @@ const getProxyUrl = (url, apiBase) => {
   return url;
 };
 
-// Panel lateral pentru vizualizare document original
-const DocumentPanel = ({ isOpen, onClose, pdfUrl, imageUrl, searchContext, title, apiBase }) => {
-  if (!isOpen) return null;
-  
-  // Convert URLs to proxy URLs to bypass X-Frame-Options
-  const proxyPdfUrl = getProxyUrl(pdfUrl, apiBase);
-  const proxyImageUrl = getProxyUrl(imageUrl, apiBase);
-  
-  const documentUrl = proxyPdfUrl || proxyImageUrl;
-  const isPdf = !!proxyPdfUrl;
-  
-  // Construim URL-ul cu parametru de căutare pentru PDF
-  const displayUrl = isPdf && searchContext 
-    ? `${documentUrl}#search=${encodeURIComponent(searchContext)}`
-    : documentUrl;
-  
-  return (
-    <div 
-      className="document-panel"
-      style={{
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        width: '45%',
-        height: '100vh',
-        backgroundColor: 'white',
-        boxShadow: '-4px 0 20px rgba(0,0,0,0.3)',
-        zIndex: 1050,
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'transform 0.3s ease',
-      }}
-    >
-      {/* Header */}
-      <div style={{
-        padding: '12px 16px',
-        borderBottom: '1px solid #dee2e6',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#f8f9fa',
-      }}>
-        <div>
-          <strong>{title || 'Document Original'}</strong>
-          {searchContext && (
-            <span style={{ marginLeft: '10px', color: '#6c757d', fontSize: '13px' }}>
-              Căutare: "{searchContext}"
-            </span>
+// Panel lateral pentru vizualizare document original cu resize și polling pentru PDF
+class DocumentPanel extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      width: 45, // procent
+      isResizing: false,
+      pollingPdfUrl: null, // URL găsit prin polling
+      isPolling: false,
+      pollingMessage: '',
+    };
+    this.panelRef = React.createRef();
+    this.pollingInterval = null;
+  }
+
+  handleMouseDown = (e) => {
+    e.preventDefault();
+    this.setState({ isResizing: true });
+    document.addEventListener('mousemove', this.handleMouseMove);
+    document.addEventListener('mouseup', this.handleMouseUp);
+  };
+
+  handleMouseMove = (e) => {
+    if (!this.state.isResizing) return;
+    
+    const windowWidth = window.innerWidth;
+    const newWidth = ((windowWidth - e.clientX) / windowWidth) * 100;
+    
+    // Limităm între 25% și 80%
+    if (newWidth >= 25 && newWidth <= 80) {
+      this.setState({ width: newWidth });
+    }
+  };
+
+  handleMouseUp = () => {
+    this.setState({ isResizing: false });
+    document.removeEventListener('mousemove', this.handleMouseMove);
+    document.removeEventListener('mouseup', this.handleMouseUp);
+  };
+
+  componentDidMount() {
+    this.startPollingIfNeeded();
+  }
+
+  componentDidUpdate(prevProps) {
+    // Restart polling if panel reopens or file changes
+    if (this.props.isOpen && !prevProps.isOpen) {
+      this.setState({ pollingPdfUrl: null });
+      this.startPollingIfNeeded();
+    }
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mousemove', this.handleMouseMove);
+    document.removeEventListener('mouseup', this.handleMouseUp);
+    this.stopPolling();
+  }
+
+  startPollingIfNeeded = () => {
+    const { pdfUrl, fileName, period, alphabet, apiBase } = this.props;
+    
+    // Dacă avem deja PDF, nu facem polling
+    if (pdfUrl) {
+      this.stopPolling();
+      return;
+    }
+    
+    // Dacă avem fileName și period, începem polling
+    if (fileName && period && apiBase) {
+      this.setState({ isPolling: true, pollingMessage: 'Se așteaptă generarea PDF-ului searchable...' });
+      
+      this.pollingInterval = setInterval(() => {
+        this.checkForPdf();
+      }, 3000); // Verificăm la fiecare 3 secunde
+    }
+  };
+
+  stopPolling = () => {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+    this.setState({ isPolling: false, pollingMessage: '' });
+  };
+
+  checkForPdf = async () => {
+    const { fileName, period, alphabet, apiBase } = this.props;
+    
+    try {
+      const params = new URLSearchParams({
+        file_name: fileName,
+        period: period,
+        alphabet: alphabet || ''
+      });
+      
+      const response = await fetch(`${apiBase}check-pdf/?${params}`);
+      const data = await response.json();
+      
+      if (data.exists && data.pdfUrl) {
+        this.setState({ 
+          pollingPdfUrl: `${apiBase}${data.pdfUrl.startsWith('/') ? data.pdfUrl.slice(1) : data.pdfUrl}`,
+          isPolling: false,
+          pollingMessage: ''
+        });
+        this.stopPolling();
+      }
+    } catch (error) {
+      console.error('Error checking for PDF:', error);
+    }
+  };
+
+  render() {
+    const { isOpen, onClose, pdfUrl, imageUrl, searchQuery, title, apiBase } = this.props;
+    const { pollingPdfUrl, isPolling, pollingMessage } = this.state;
+    
+    if (!isOpen) return null;
+    
+    // Folosim PDF-ul din polling dacă e disponibil, altfel cel din props
+    const effectivePdfUrl = pollingPdfUrl || pdfUrl;
+    
+    // Convert URLs to proxy URLs to bypass X-Frame-Options
+    const proxyPdfUrl = getProxyUrl(effectivePdfUrl, apiBase);
+    const proxyImageUrl = getProxyUrl(imageUrl, apiBase);
+    
+    const documentUrl = proxyPdfUrl || proxyImageUrl;
+    const isPdf = !!proxyPdfUrl;
+    
+    // Construim URL-ul cu parametru de căutare pentru PDF
+    const displayUrl = isPdf && searchQuery 
+      ? `${documentUrl}#search=${encodeURIComponent(searchQuery)}&zoom=100`
+      : documentUrl;
+    
+    return (
+      <div 
+        ref={this.panelRef}
+        className="document-panel"
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          width: `${this.state.width}%`,
+          height: '100vh',
+          backgroundColor: 'white',
+          boxShadow: '-4px 0 20px rgba(0,0,0,0.3)',
+          zIndex: 1050,
+          display: 'flex',
+          flexDirection: 'column',
+          userSelect: this.state.isResizing ? 'none' : 'auto',
+        }}
+      >
+        {/* Resize Handle */}
+        <div
+          onMouseDown={this.handleMouseDown}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '6px',
+            height: '100%',
+            cursor: 'ew-resize',
+            backgroundColor: this.state.isResizing ? '#007bff' : 'transparent',
+            transition: 'background-color 0.2s',
+            zIndex: 1051,
+          }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = '#007bff'}
+          onMouseLeave={(e) => !this.state.isResizing && (e.target.style.backgroundColor = 'transparent')}
+          title="Trage pentru a redimensiona"
+        />
+        
+        {/* Header */}
+        <div style={{
+          padding: '12px 16px',
+          borderBottom: '1px solid #dee2e6',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: '#f8f9fa',
+        }}>
+          <div>
+            <strong>{title || 'Document Original'}</strong>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              padding: '0 8px',
+              color: '#6c757d',
+            }}
+            title="Închide panoul"
+          >
+            ×
+          </button>
+        </div>
+        
+        {/* Document Content */}
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          {isPdf ? (
+            <iframe
+              src={displayUrl}
+              title={title}
+              width="100%"
+              height="100%"
+              style={{ border: 'none' }}
+              spellCheck={false}
+            />
+          ) : proxyImageUrl ? (
+            <div style={{ 
+              height: '100%', 
+              overflow: 'auto', 
+              display: 'flex', 
+              justifyContent: 'center',
+              padding: '10px',
+            }}>
+              <img
+                src={proxyImageUrl}
+                alt="Document original"
+                style={{ maxWidth: '100%', height: 'auto', objectFit: 'contain' }}
+              />
+            </div>
+          ) : isPolling ? (
+            <div style={{ 
+              padding: '40px 20px', 
+              textAlign: 'center', 
+              color: '#6c757d',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+            }}>
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p>{pollingMessage}</p>
+              <small>PDF-ul searchable se generează în fundal de FineReader.</small>
+              <small>Verificare automată la fiecare 3 secunde...</small>
+            </div>
+          ) : (
+            <div style={{ padding: '20px', textAlign: 'center', color: '#6c757d' }}>
+              Nu există document disponibil pentru verificare.
+            </div>
           )}
         </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
-            padding: '0 8px',
-            color: '#6c757d',
-          }}
-          title="Închide panoul"
-        >
-          ×
-        </button>
       </div>
-      
-      {/* Document Content */}
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        {isPdf ? (
-          <iframe
-            src={displayUrl}
-            title={title}
-            width="100%"
-            height="100%"
-            style={{ border: 'none' }}
-          />
-        ) : proxyImageUrl ? (
-          <div style={{ 
-            height: '100%', 
-            overflow: 'auto', 
-            display: 'flex', 
-            justifyContent: 'center',
-            padding: '10px',
-          }}>
-            <img
-              src={proxyImageUrl}
-              alt="Document original"
-              style={{ maxWidth: '100%', height: 'auto', objectFit: 'contain' }}
-            />
-          </div>
-        ) : (
-          <div style={{ padding: '20px', textAlign: 'center', color: '#6c757d' }}>
-            Nu există document disponibil pentru verificare.
-          </div>
-        )}
-      </div>
-      
-      {/* Hint */}
-      {isPdf && searchContext && (
-        <div style={{
-          padding: '8px 16px',
-          backgroundColor: '#e7f3ff',
-          borderTop: '1px solid #b8daff',
-          fontSize: '12px',
-          color: '#004085',
-        }}>
-          💡 Folosește Ctrl+F în PDF pentru a căuta exact: <code style={{backgroundColor: '#fff', padding: '2px 6px', borderRadius: '3px'}}>{searchContext}</code>
-        </div>
-      )}
-    </div>
-  );
-};
+    );
+  }
+}
 
 // Overlay pentru click în afară
 const PanelOverlay = ({ isOpen, onClick }) => {
@@ -168,12 +306,14 @@ class Step6 extends Component {
 
     this.state = {
       transResults: props.getStore().transResults,
+      ocrResults: props.getStore().ocrResults, // Textul OCR original (chirilic)
       sourceFiles: props.getStore().sourceFiles,
       preprocessedFiles: props.getStore().preprocessedFiles,
       layoutName: "default",
       s3PreprocessedFiles: props.getStore().s3PreprocessedFiles,
       s3SourceFiles: props.getStore().s3SourceFiles,
       period: props.getStore().period,
+      alphabet: props.getStore().alphabet,
 
       show: false,
       showNextStep: false,
@@ -193,7 +333,7 @@ class Step6 extends Component {
       
       // Panel lateral pentru verificare document
       showDocumentPanel: false,
-      searchContext: "",  // Contextul pentru căutare precisă (cuvânt + vecini)
+      searchQuery: "",  // Cuvântul + 2 caractere din stânga și dreapta
       documentPanelTitle: "",
     };
 
@@ -369,38 +509,36 @@ class Step6 extends Component {
     // Cleanup if needed
   }
 
-  // Double-click handler - deschide panelul cu căutare precisă
+  // Double-click handler - deschide panelul cu căutare în documentul original
   handleDoubleClick = (e, index) => {
     const textarea = e.target;
     const cursorPos = textarea.selectionStart;
-    const text = textarea.value;
+    const transText = textarea.value; // Text transliterat
+    const ocrText = this.state.ocrResults[index] || ''; // Text OCR original (chirilic)
     
-    // Find word boundaries
+    // Find word boundaries in transliterated text
     let wordStart = cursorPos;
     let wordEnd = cursorPos;
-    while (wordStart > 0 && /\S/.test(text[wordStart - 1])) wordStart--;
-    while (wordEnd < text.length && /\S/.test(text[wordEnd])) wordEnd++;
-    const word = text.substring(wordStart, wordEnd).trim();
+    while (wordStart > 0 && /\S/.test(transText[wordStart - 1])) wordStart--;
+    while (wordEnd < transText.length && /\S/.test(transText[wordEnd])) wordEnd++;
+    const transWord = transText.substring(wordStart, wordEnd).trim();
     
-    if (!word) return;
+    if (!transWord) return;
     
     // Selectăm cuvântul în textarea
     textarea.setSelectionRange(wordStart, wordEnd);
     
-    // Extragem contextul pentru căutare precisă (cuvântul + caractere din jur)
-    const contextStart = Math.max(0, wordStart - 15);
-    const contextEnd = Math.min(text.length, wordEnd + 15);
-    let searchContext = text.substring(contextStart, contextEnd).trim();
+    // Mapăm cuvântul transliterat la cel original din OCR
+    // Numărăm al câtelea cuvânt e în textul transliterat
+    const transWordsBeforeCursor = transText.substring(0, wordStart).split(/\s+/).filter(w => w.length > 0);
+    const wordIndex = transWordsBeforeCursor.length;
     
-    // Curățăm contextul de newlines și spații multiple
-    searchContext = searchContext.replace(/\s+/g, ' ');
+    // Găsim cuvântul corespunzător din textul OCR
+    const ocrWords = ocrText.split(/\s+/).filter(w => w.length > 0);
+    const originalWord = ocrWords[wordIndex] || transWord; // Fallback la cuvântul transliterat
     
-    // Calculăm poziția caracterului pentru identificare unică
-    const charPosition = wordStart;
-    
-    // Calculate line number (1-based)
-    const textBeforeCursor = text.substring(0, wordStart);
-    const lineNumber = (textBeforeCursor.match(/\n/g) || []).length + 1;
+    // Căutăm în PDF după cuvântul original (chirilic)
+    const searchQuery = originalWord;
     
     const pdfUrl = this.getSearchablePdfUrl(index);
     const sourceFile = this.state.s3SourceFiles[index];
@@ -409,11 +547,10 @@ class Step6 extends Component {
     if (pdfUrl || sourceFile?.url) {
       this.setState({
         showDocumentPanel: true,
-        selectedWord: word,
-        searchContext: searchContext,
-        selectedLineNumber: lineNumber,
+        selectedWord: transWord,
+        searchQuery: searchQuery,
         activeDocIndex: index,
-        documentPanelTitle: `Verificare: "${word}" (poziția ${charPosition}, linia ${lineNumber})`,
+        documentPanelTitle: `Verificare: "${transWord}" → "${originalWord}"`,
       });
     }
   };
@@ -515,6 +652,7 @@ class Step6 extends Component {
                                     this.state.show ? "textarea-reduced" : "textarea-normal"
                                   }`}
                                   rows="14"
+                                  spellCheck="false"
                                 ></textarea>
                               </Col>
                               <Col sm={3}>
@@ -624,9 +762,12 @@ class Step6 extends Component {
           onClose={this.closeDocumentPanel}
           pdfUrl={this.getSearchablePdfUrl(this.state.activeDocIndex)}
           imageUrl={this.state.s3SourceFiles[this.state.activeDocIndex]?.url}
-          searchContext={this.state.searchContext}
+          searchQuery={this.state.searchQuery}
           title={this.state.documentPanelTitle}
           apiBase={this.API}
+          fileName={this.state.s3SourceFiles[this.state.activeDocIndex]?.name || this.state.sourceFiles[this.state.activeDocIndex]?.name}
+          period={this.state.period}
+          alphabet={this.state.alphabet}
         />
       </div>
     );

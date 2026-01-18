@@ -59,6 +59,46 @@ def serve_media(request, path):
     return response
 
 
+def check_searchable_pdf(request):
+    """
+    Check if searchable PDF exists for a given file.
+    Used for polling when PDF generation is async.
+    """
+    if request.method == 'GET':
+        file_name = request.GET.get('file_name', '')
+        period = request.GET.get('period', '')
+        alphabet = request.GET.get('alphabet', '')
+        
+        if not file_name or not period:
+            return JsonResponse({"exists": False, "error": "Missing parameters"})
+        
+        # Determine OCR path based on period/alphabet
+        ocr_paths = {
+            'secolulXX_cyrillic': '/ocr/secolulXX/cyrillic/',
+            'secolulXX': '/ocr/secolulXX/cyrillic/',
+            'secolulXIX_cyrillicRomanian': '/ocr/secolulXIX/cyrillicRomanian/',
+            'secolulXIX': '/ocr/secolulXIX/',
+            'secolulXIX_cyrillicTransitional': '/ocr/secolulXIX/',
+            'secolulXVIII': '/ocr/secolulXVIII/',
+            'secolulXVII': '/ocr/secolulXVII/',
+        }
+        
+        key = f"{period}_{alphabet}" if alphabet else period
+        ocr_path = ocr_paths.get(key, ocr_paths.get(period, '/ocr/'))
+        
+        base_name = os.path.splitext(file_name)[0]
+        pdf_path = os.path.join(settings.MEDIA_ROOT, ocr_path.strip('/'), base_name + '.pdf')
+        
+        if os.path.exists(pdf_path):
+            # Build URL
+            pdf_url = f"/media{ocr_path}{base_name}.pdf"
+            return JsonResponse({"exists": True, "pdfUrl": pdf_url})
+        else:
+            return JsonResponse({"exists": False})
+    
+    return JsonResponse({"exists": False, "error": "Method not allowed"})
+
+
 class ExceptionDictionaryEntryViewSet(viewsets.ModelViewSet):
     queryset = ExceptionDictionaryEntry.objects.all()
     serializer_class = ExceptionDictionaryEntrySerializer
