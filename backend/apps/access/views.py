@@ -69,6 +69,7 @@ def check_searchable_pdf(request):
     3. File hasn't been modified in the last 5 seconds (to ensure writing is complete)
     """
     import time
+    import glob
     
     if request.method == 'GET':
         file_name = request.GET.get('file_name', '')
@@ -95,10 +96,15 @@ def check_searchable_pdf(request):
         base_name = os.path.splitext(file_name)[0]
         pdf_path = os.path.join(settings.MEDIA_ROOT, ocr_path.strip('/'), base_name + '.pdf')
         
+        # Debug: log what we're looking for
+        print(f"[check-pdf] Looking for: {pdf_path}")
+        print(f"[check-pdf] file_name={file_name}, period={period}, alphabet={alphabet}")
+        
         if os.path.exists(pdf_path):
             # Check file size
             file_size = os.path.getsize(pdf_path)
             if file_size == 0:
+                print(f"[check-pdf] File exists but is empty: {pdf_path}")
                 return JsonResponse({"exists": False, "status": "empty_file"})
             
             # Check if file was modified recently (still being written)
@@ -106,23 +112,33 @@ def check_searchable_pdf(request):
             current_time = time.time()
             seconds_since_modified = current_time - mtime
             
-            # Wait at least 5 seconds after last modification to ensure file is complete
-            if seconds_since_modified < 5:
+            # Wait at least 10 seconds after last modification to ensure file is complete
+            if seconds_since_modified < 10:
+                print(f"[check-pdf] File still being written, modified {seconds_since_modified:.1f}s ago")
                 return JsonResponse({
                     "exists": False, 
                     "status": "still_writing",
-                    "secondsSinceModified": seconds_since_modified
+                    "secondsSinceModified": round(seconds_since_modified, 1)
                 })
             
             # Build URL
             pdf_url = f"/media{ocr_path}{base_name}.pdf"
+            print(f"[check-pdf] PDF ready: {pdf_url} (size: {file_size} bytes)")
             return JsonResponse({
                 "exists": True, 
                 "pdfUrl": pdf_url,
                 "fileSize": file_size
             })
         else:
-            return JsonResponse({"exists": False, "status": "not_found"})
+            # Debug: list what PDFs exist in that folder
+            folder_path = os.path.join(settings.MEDIA_ROOT, ocr_path.strip('/'))
+            if os.path.exists(folder_path):
+                pdfs_in_folder = glob.glob(os.path.join(folder_path, '*.pdf'))
+                print(f"[check-pdf] PDF not found. PDFs in folder: {pdfs_in_folder[:5]}")  # Show first 5
+            else:
+                print(f"[check-pdf] Folder doesn't exist: {folder_path}")
+            
+            return JsonResponse({"exists": False, "status": "not_found", "checkedPath": pdf_path})
     
     return JsonResponse({"exists": False, "error": "Method not allowed"})
 

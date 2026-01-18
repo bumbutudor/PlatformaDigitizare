@@ -143,8 +143,11 @@ class DocumentPanel extends React.Component {
       const response = await fetch(`${apiBase}check-pdf/?${params}`);
       const data = await response.json();
       
+      console.log('[DocumentPanel] check-pdf response:', data);
+      
       if (data.exists && data.pdfUrl) {
         const fullPdfUrl = `${apiBase}${data.pdfUrl.startsWith('/') ? data.pdfUrl.slice(1) : data.pdfUrl}`;
+        console.log('[DocumentPanel] PDF found, full URL:', fullPdfUrl);
         this.setState({ 
           pollingPdfUrl: fullPdfUrl,
           useSearchablePdf: true,
