@@ -34,7 +34,7 @@ def test_finereader_ocr(input_file, output_file, pattern_file=None):
     try:
         # Create FineReader Application object
         print("\n[1] Creating FineReader COM object...")
-        fr_app = win32com.client.Dispatch("FineReader.Application")
+        fr_app = win32com.client.Dispatch("ABBYY.FineReader15.OCR.Application")
         print("    SUCCESS: FineReader COM object created")
         
         # Show version info
