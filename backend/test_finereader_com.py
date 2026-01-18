@@ -37,88 +37,48 @@ def test_finereader_ocr(input_file, output_file, pattern_file=None):
         fr_app = win32com.client.Dispatch("ABBYY.FineReader15.OCR.Application")
         print("    SUCCESS: FineReader COM object created")
         
-        # Show version info
-        print(f"    FineReader version: {fr_app.Version if hasattr(fr_app, 'Version') else 'Unknown'}")
-        
-        # Explore available methods and properties
-        print("\n[2] Exploring available methods/properties...")
+        # Set recognition languages
+        print("\n[2] Setting recognition languages...")
         try:
-            # Use win32com to get type info
-            for attr in dir(fr_app):
-                if not attr.startswith('_'):
-                    print(f"    - {attr}")
+            fr_app.SetRecognitionLanguages("Romanian")
+            print("    SUCCESS: Language set to Romanian")
         except Exception as e:
-            print(f"    Could not list attributes: {e}")
+            print(f"    WARNING: Could not set language: {e}")
         
-        # Try different approaches to process the file
-        print("\n[3] Trying to process file...")
-        
-        # Approach 1: Try OpenDocument
+        # Try AddImages method
+        print(f"\n[3] Adding image: {input_file}")
         try:
-            print("    Trying OpenDocument...")
-            doc = fr_app.OpenDocument(input_file)
-            print("    SUCCESS: OpenDocument worked!")
+            fr_app.AddImages(input_file)
+            print("    SUCCESS: Image added with AddImages")
         except Exception as e:
-            print(f"    OpenDocument failed: {e}")
+            print(f"    AddImages failed: {e}")
             
-            # Approach 2: Try ProcessFile
+            # Try OpenRead
             try:
-                print("    Trying ProcessFile...")
-                result = fr_app.ProcessFile(input_file, output_file)
-                print(f"    SUCCESS: ProcessFile worked! Result: {result}")
-                return True, "ProcessFile succeeded"
+                print("    Trying OpenRead...")
+                fr_app.OpenRead(input_file)
+                print("    SUCCESS: OpenRead worked!")
             except Exception as e2:
-                print(f"    ProcessFile failed: {e2}")
-                
-                # Approach 3: Try Recognize
-                try:
-                    print("    Trying Recognize...")
-                    result = fr_app.Recognize(input_file)
-                    print(f"    SUCCESS: Recognize worked! Result: {result}")
-                except Exception as e3:
-                    print(f"    Recognize failed: {e3}")
-                    
-                    # Approach 4: Try NewDocument
-                    try:
-                        print("    Trying NewDocument...")
-                        doc = fr_app.NewDocument()
-                        print("    SUCCESS: NewDocument worked!")
-                    except Exception as e4:
-                        print(f"    NewDocument failed: {e4}")
-                        
-                        # Approach 5: Try Documents collection
-                        try:
-                            print("    Trying Documents.Add...")
-                            doc = fr_app.Documents.Add()
-                            print("    SUCCESS: Documents.Add worked!")
-                        except Exception as e5:
-                            print(f"    Documents.Add failed: {e5}")
-                            raise Exception("Could not create/open document with any method")
+                print(f"    OpenRead failed: {e2}")
         
-        return True, "Test completed"
+        # Try StartExecute
+        print("\n[4] Starting OCR execution...")
+        try:
+            fr_app.StartExecute()
+            print("    SUCCESS: StartExecute called")
+        except Exception as e:
+            print(f"    StartExecute failed: {e}")
+        
+        print("\n[5] Test completed - FineReader window should be open")
+        print("    Note: FineReader 15 Standard edition opens UI for OCR")
+        print("    For headless/automated OCR, FineReader Server or Engine is needed")
+        
+        return True, "Test completed - check FineReader window"
         
     except Exception as e:
         print(f"\nERROR: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
-        
-        # Try alternative COM object names
-        print("\n[*] Trying alternative COM object names...")
-        alternatives = [
-            "FineReader.Application.15",
-            "FineReader.Application.1", 
-            "ABBYY.FineReader.Application",
-            "FREngine.Application",
-            "FineReaderOCR.Application",
-        ]
-        
-        for alt in alternatives:
-            try:
-                print(f"    Trying: {alt}...")
-                test_app = win32com.client.Dispatch(alt)
-                print(f"    SUCCESS: {alt} works!")
-            except:
-                print(f"    FAILED: {alt}")
         
         return False, str(e)
 
