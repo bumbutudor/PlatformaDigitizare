@@ -75,7 +75,10 @@ export default class Step3 extends Component {
     this.setState({ showLoader: true });
 
     const ocrEndpoint = "ocr/";
-    const postData = this.state;
+    const postData = {
+      ...this.state,
+      api: this.props.getStore().api  // Include API URL for searchable PDF paths
+    };
     // console.log(postData);
 
     this.API.post(ocrEndpoint, postData)
@@ -84,6 +87,20 @@ export default class Step3 extends Component {
         if (data.ocrResults.length > 0) {
           this.setState({ ocrResults: data.ocrResults });
           this.props.updateStore({ ocrResults: data.ocrResults });
+          
+          // Store searchable PDFs if available
+          if (data.searchablePdfs && data.searchablePdfs.length > 0) {
+            this.props.updateStore({ searchablePdfs: data.searchablePdfs });
+            
+            // Update s3SourceFiles with searchable PDF URLs
+            const updatedSourceFiles = this.state.s3SourceFiles.map((file, index) => ({
+              ...file,
+              searchablePdfUrl: data.searchablePdfs[index] || null
+            }));
+            this.setState({ s3SourceFiles: updatedSourceFiles });
+            this.props.updateStore({ s3SourceFiles: updatedSourceFiles });
+          }
+          
           this.setState({ showNextStep: true });
         } else {
           this.setState({ showError: true });
@@ -582,34 +599,48 @@ export default class Step3 extends Component {
               {this.state.sourceFiles.length !== 0 && (
                 <>
                   <Accordion defaultActiveKey={0} alwaysOpen>
-                    {this.state.s3PreprocessedFiles.map((s3_url, index) => (
-                      <Accordion.Item eventKey={index} key={index}>
-                        <Accordion.Header>
-                          Sursa - imagine preprocesată {index + 1}
-                        </Accordion.Header>
-                        <Accordion.Body>
-                          <div
-                            key={index}
-                            className="preprocessedFile mb-2"
-                          >
-                            <a
-                              className=""
-                              data-fancybox="gallery_2"
-                              data-src={s3_url}
-                              data-caption="imagine procesată"
+                    {this.state.s3PreprocessedFiles.map((s3_url, index) => {
+                      const isPdf = this.state.s3SourceFiles[index]?.isPdf || 
+                                    (typeof s3_url === 'string' && s3_url.toLowerCase().endsWith('.pdf'));
+                      return (
+                        <Accordion.Item eventKey={index} key={index}>
+                          <Accordion.Header>
+                            Sursa - {isPdf ? 'document PDF' : 'imagine preprocesată'} {index + 1}
+                          </Accordion.Header>
+                          <Accordion.Body>
+                            <div
                               key={index}
+                              className="preprocessedFile mb-2"
                             >
-                              <img
-                                src={s3_url}
-                                className="Accordion_image"
-                                width="90%"
-                                alt=""
-                              />
-                            </a>
-                          </div>
-                        </Accordion.Body>
-                      </Accordion.Item>
-                    ))}
+                              {isPdf ? (
+                                <iframe
+                                  src={typeof s3_url === 'object' ? s3_url.url : s3_url}
+                                  title={`PDF Document ${index + 1}`}
+                                  width="100%"
+                                  height="500px"
+                                  style={{ border: '1px solid #ccc' }}
+                                />
+                              ) : (
+                                <a
+                                  className=""
+                                  data-fancybox="gallery_2"
+                                  data-src={s3_url}
+                                  data-caption="imagine procesată"
+                                  key={index}
+                                >
+                                  <img
+                                    src={s3_url}
+                                    className="Accordion_image"
+                                    width="90%"
+                                    alt=""
+                                  />
+                                </a>
+                              )}
+                            </div>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      );
+                    })}
                   </Accordion>
                 </>
               )}

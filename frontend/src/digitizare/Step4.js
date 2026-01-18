@@ -14,8 +14,27 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import ReactImageLightbox from "react-image-lightbox";
 import "react-image-lightbox/style.css";
+import Modal from "react-bootstrap/Modal";
 
-// PDF Viewer Component
+// PDF Viewer Component with search support
+const PdfViewerWithSearch = ({ url, title, searchWord, onClose }) => (
+  <Modal show={true} onHide={onClose} size="xl" centered>
+    <Modal.Header closeButton>
+      <Modal.Title>{title} {searchWord && `- Căutare: "${searchWord}"`}</Modal.Title>
+    </Modal.Header>
+    <Modal.Body style={{ height: '80vh' }}>
+      <iframe 
+        src={searchWord ? `${url}#search=${encodeURIComponent(searchWord)}` : url}
+        title={title}
+        width="100%" 
+        height="100%" 
+        style={{ border: 'none' }}
+      />
+    </Modal.Body>
+  </Modal>
+);
+
+// Simple PDF Viewer Component
 const PdfViewer = ({ url, title }) => (
   <div className="pdf-viewer-container" style={{ height: '500px', width: '100%' }}>
     <iframe 
@@ -38,6 +57,7 @@ class Step4 extends Component {
       s3SourceFiles: props.getStore().s3SourceFiles,
       preprocessedFiles: props.getStore().preprocessedFiles,
       s3PreprocessedFiles: props.getStore().s3PreprocessedFiles,
+      searchablePdfUrl: props.getStore().searchablePdfUrl || null,
       layoutName: "default",
       showk: false,
       showNextStep: false,
@@ -48,6 +68,17 @@ class Step4 extends Component {
       lightboxImageSrc: "",
 
       keyboardLayout: null, // State to hold the dynamic keyboard layout
+      
+      // Context menu state
+      showContextMenu: false,
+      contextMenuX: 0,
+      contextMenuY: 0,
+      selectedWord: "",
+      activeDocIndex: 0,
+      
+      // PDF search modal
+      showPdfSearchModal: false,
+      pdfSearchWord: "",
     };
 
     this.textareaRefs = {}; // References to textareas
@@ -79,6 +110,9 @@ class Step4 extends Component {
   componentDidMount() {
     // After component mounts, generate the dynamic keyboard layout
     this.generateDynamicKeyboardLayout();
+    
+    // Add click listener to hide context menu
+    document.addEventListener('click', this.hideContextMenu);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -86,6 +120,11 @@ class Step4 extends Component {
     if (prevState.ocrResults !== this.state.ocrResults) {
       this.generateDynamicKeyboardLayout();
     }
+  }
+
+  componentWillUnmount() {
+    // Remove click listener
+    document.removeEventListener('click', this.hideContextMenu);
   }
 
   // Function to generate the dynamic keyboard layout
@@ -341,6 +380,80 @@ class Step4 extends Component {
     });
   };
 
+  // Context menu handlers
+  handleContextMenu = (e, index) => {
+    e.preventDefault();
+    
+    const textarea = e.target;
+    const selectedText = textarea.value.substring(
+      textarea.selectionStart,
+      textarea.selectionEnd
+    ).trim();
+    
+    // Get the word under cursor if no selection
+    let word = selectedText;
+    if (!word) {
+      const cursorPos = textarea.selectionStart;
+      const text = textarea.value;
+      // Find word boundaries
+      let start = cursorPos;
+      let end = cursorPos;
+      while (start > 0 && /\S/.test(text[start - 1])) start--;
+      while (end < text.length && /\S/.test(text[end])) end++;
+      word = text.substring(start, end).trim();
+    }
+    
+    if (word && this.getSearchablePdfUrl(index)) {
+      this.setState({
+        showContextMenu: true,
+        contextMenuX: e.clientX,
+        contextMenuY: e.clientY,
+        selectedWord: word,
+        activeDocIndex: index,
+      });
+    }
+  };
+
+  hideContextMenu = () => {
+    this.setState({ showContextMenu: false });
+  };
+
+  getSearchablePdfUrl = (index) => {
+    // Check if searchable PDF is available
+    const sourceFile = this.state.s3SourceFiles[index];
+    if (sourceFile?.searchablePdfUrl) {
+      return sourceFile.searchablePdfUrl;
+    }
+    // Check store for searchable PDF URL
+    const storePdfUrl = this.props.getStore().searchablePdfUrl;
+    if (storePdfUrl) {
+      return storePdfUrl;
+    }
+    // If source is PDF, it might be searchable already
+    if (sourceFile?.isPdf) {
+      return sourceFile.url;
+    }
+    return null;
+  };
+
+  searchInPdf = () => {
+    const pdfUrl = this.getSearchablePdfUrl(this.state.activeDocIndex);
+    if (pdfUrl && this.state.selectedWord) {
+      this.setState({
+        showPdfSearchModal: true,
+        pdfSearchWord: this.state.selectedWord,
+        showContextMenu: false,
+      });
+    }
+  };
+
+  closePdfSearchModal = () => {
+    this.setState({
+      showPdfSearchModal: false,
+      pdfSearchWord: "",
+    });
+  };
+
   render() {
     return (
       <div className="step step4">
@@ -384,9 +497,13 @@ class Step4 extends Component {
                                   key={index}
                                   id={index}
                                   onFocus={this.setActiveInput}
-                                  onClick={(e) => this.onInputChanged(e, index)}
+                                  onClick={(e) => {
+                                    this.onInputChanged(e, index);
+                                    this.hideContextMenu();
+                                  }}
                                   onKeyUp={(e) => this.onInputChanged(e, index)}
                                   onSelect={(e) => this.onInputChanged(e, index)}
+                                  onContextMenu={(e) => this.handleContextMenu(e, index)}
                                   value={item}
                                   onChange={this.onChangeInput}
                                   className={`form-control text ${
@@ -512,6 +629,48 @@ class Step4 extends Component {
           <ReactImageLightbox
             mainSrc={this.state.lightboxImageSrc}
             onCloseRequest={this.closeLightbox}
+          />
+        )}
+
+        {/* Context Menu for word search in PDF */}
+        {this.state.showContextMenu && (
+          <div
+            className="context-menu"
+            style={{
+              position: 'fixed',
+              top: this.state.contextMenuY,
+              left: this.state.contextMenuX,
+              backgroundColor: 'white',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+              zIndex: 1000,
+              padding: '5px 0',
+            }}
+          >
+            <div
+              className="context-menu-item"
+              style={{
+                padding: '8px 16px',
+                cursor: 'pointer',
+                hover: { backgroundColor: '#f0f0f0' },
+              }}
+              onClick={this.searchInPdf}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+            >
+              🔍 Caută "{this.state.selectedWord}" în PDF
+            </div>
+          </div>
+        )}
+
+        {/* PDF Search Modal */}
+        {this.state.showPdfSearchModal && (
+          <PdfViewerWithSearch
+            url={this.getSearchablePdfUrl(this.state.activeDocIndex)}
+            title="Document PDF - Căutare"
+            searchWord={this.state.pdfSearchWord}
+            onClose={this.closePdfSearchModal}
           />
         )}
       </div>

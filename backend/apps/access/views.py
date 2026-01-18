@@ -257,8 +257,19 @@ def preprocess(request):
 def ocr(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        ocr_results = local_ocr(data, settings.MEDIA_ROOT)
-        return JsonResponse({"code": 200, "msg": "success", "ocrResults": ocr_results})
+        ocr_response = local_ocr(data, settings.MEDIA_ROOT)
+        
+        # Handle both old format (list) and new format (dict with ocrResults and searchablePdfs)
+        if isinstance(ocr_response, dict):
+            return JsonResponse({
+                "code": 200, 
+                "msg": "success", 
+                "ocrResults": ocr_response.get("ocrResults", []),
+                "searchablePdfs": ocr_response.get("searchablePdfs", [])
+            })
+        else:
+            # Backwards compatibility
+            return JsonResponse({"code": 200, "msg": "success", "ocrResults": ocr_response})
     else:
         return JsonResponse({"code": 500, "msg": "server error"})
 

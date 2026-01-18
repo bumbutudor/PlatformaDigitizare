@@ -18,6 +18,19 @@ from PIL import Image
 """
 
 
+def get_searchable_pdf_url(file_name, media_root, ocr_path, api_base_url):
+    """
+    Check if searchable PDF exists and return its URL
+    """
+    base_name = os.path.splitext(file_name)[0]
+    pdf_path = os.path.join(media_root, ocr_path.strip('/'), base_name + '.pdf')
+    
+    if os.path.exists(pdf_path):
+        # Return relative URL to the PDF
+        return f"{api_base_url}media{ocr_path}{base_name}.pdf"
+    return None
+
+
 def local_ocr(data, media_root):
     try:
         period = data['period']
@@ -25,6 +38,8 @@ def local_ocr(data, media_root):
         files = data['sourceFiles']
         number_of_files = len(files)
         ocr_results = []
+        searchable_pdfs = []
+        api_base_url = data.get('api', '')
 
         if period == 'secolulXX' and alphabet == 'cyrillic':
             # model secolulXX.fbt
@@ -38,7 +53,12 @@ def local_ocr(data, media_root):
                                 '/' + os.path.splitext(file["name"])[0] + '.txt'
                 ocr_result = load_txt(ocr_file_path)
                 ocr_results.append(ocr_result)
-            return ocr_results
+                
+                # Check for searchable PDF
+                pdf_url = get_searchable_pdf_url(file["name"], media_root, ocr_path, api_base_url)
+                searchable_pdfs.append(pdf_url)
+            
+            return {"ocrResults": ocr_results, "searchablePdfs": searchable_pdfs}
 
         if period == 'secolulXX' and alphabet == 'latin':
             # TODO : Implement when model is ready
