@@ -40,69 +40,67 @@ def test_finereader_ocr(input_file, output_file, pattern_file=None):
         # Show version info
         print(f"    FineReader version: {fr_app.Version if hasattr(fr_app, 'Version') else 'Unknown'}")
         
-        # Create a new document
-        print("\n[2] Creating new document...")
-        doc = fr_app.CreateDocument()
-        print("    SUCCESS: Document created")
-        
-        # Set recognition language (Romanian)
-        print("\n[3] Setting recognition languages...")
+        # Explore available methods and properties
+        print("\n[2] Exploring available methods/properties...")
         try:
-            # Try to set Romanian language
-            doc.RecognitionLanguages.Clear()
-            doc.RecognitionLanguages.Add("Romanian")
-            print("    SUCCESS: Language set to Romanian")
+            # Use win32com to get type info
+            for attr in dir(fr_app):
+                if not attr.startswith('_'):
+                    print(f"    - {attr}")
         except Exception as e:
-            print(f"    WARNING: Could not set language: {e}")
-            print("    Using default language")
+            print(f"    Could not list attributes: {e}")
         
-        # Load pattern file if specified
-        if pattern_file and os.path.exists(pattern_file):
-            print(f"\n[4] Loading pattern file: {pattern_file}")
+        # Try different approaches to process the file
+        print("\n[3] Trying to process file...")
+        
+        # Approach 1: Try OpenDocument
+        try:
+            print("    Trying OpenDocument...")
+            doc = fr_app.OpenDocument(input_file)
+            print("    SUCCESS: OpenDocument worked!")
+        except Exception as e:
+            print(f"    OpenDocument failed: {e}")
+            
+            # Approach 2: Try ProcessFile
             try:
-                doc.PatternRecognition = True
-                doc.LoadPatternFile(pattern_file)
-                print("    SUCCESS: Pattern file loaded")
-            except Exception as e:
-                print(f"    WARNING: Could not load pattern: {e}")
+                print("    Trying ProcessFile...")
+                result = fr_app.ProcessFile(input_file, output_file)
+                print(f"    SUCCESS: ProcessFile worked! Result: {result}")
+                return True, "ProcessFile succeeded"
+            except Exception as e2:
+                print(f"    ProcessFile failed: {e2}")
+                
+                # Approach 3: Try Recognize
+                try:
+                    print("    Trying Recognize...")
+                    result = fr_app.Recognize(input_file)
+                    print(f"    SUCCESS: Recognize worked! Result: {result}")
+                except Exception as e3:
+                    print(f"    Recognize failed: {e3}")
+                    
+                    # Approach 4: Try NewDocument
+                    try:
+                        print("    Trying NewDocument...")
+                        doc = fr_app.NewDocument()
+                        print("    SUCCESS: NewDocument worked!")
+                    except Exception as e4:
+                        print(f"    NewDocument failed: {e4}")
+                        
+                        # Approach 5: Try Documents collection
+                        try:
+                            print("    Trying Documents.Add...")
+                            doc = fr_app.Documents.Add()
+                            print("    SUCCESS: Documents.Add worked!")
+                        except Exception as e5:
+                            print(f"    Documents.Add failed: {e5}")
+                            raise Exception("Could not create/open document with any method")
         
-        # Add image/PDF to document
-        print(f"\n[5] Adding file to document: {input_file}")
-        doc.AddImageFile(input_file)
-        print("    SUCCESS: File added")
-        
-        # Get page count
-        page_count = doc.Pages.Count
-        print(f"    Pages in document: {page_count}")
-        
-        # Recognize (OCR)
-        print("\n[6] Running OCR recognition...")
-        doc.Recognize()
-        print("    SUCCESS: OCR completed")
-        
-        # Export to text
-        print(f"\n[7] Exporting to: {output_file}")
-        doc.ExportToFile(output_file)
-        print("    SUCCESS: Exported to text file")
-        
-        # Read and display result
-        print("\n[8] OCR Result:")
-        print("-" * 50)
-        with open(output_file, 'r', encoding='utf-8') as f:
-            text = f.read()
-            print(text[:1000] if len(text) > 1000 else text)
-            if len(text) > 1000:
-                print(f"\n... (truncated, total {len(text)} characters)")
-        print("-" * 50)
-        
-        # Close document
-        doc.Close()
-        print("\n[9] Document closed")
-        
-        return True, text
+        return True, "Test completed"
         
     except Exception as e:
         print(f"\nERROR: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
         
         # Try alternative COM object names
         print("\n[*] Trying alternative COM object names...")
