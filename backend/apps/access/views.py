@@ -83,34 +83,39 @@ def home(request):
 
 def upload(request):
     myfile = request.FILES['uploadedFiles']
+    period = request.POST.get('period', 'secolulXX')  # Get period from request
     saveToCloud = False
     fs = FileSystemStorage()
     filename = fs.save(myfile.name, myfile)
-    print(filename)
+    print(f"Uploaded file: {filename}, Period: {period}")
     uploaded_file_url = fs.url(filename)
     uploaded_file_path = settings.MEDIA_ROOT + '/' + filename
 
-    # Check if file is PDF - upload directly without conversion
+    # Check if file is PDF - upload to period-specific folder
     if filename.lower().endswith('.pdf'):
-        # Create pdfs folder if not exists
-        pdf_folder = os.path.join(settings.MEDIA_ROOT, 'pdfs')
+        # Create pdfs/period folder if not exists
+        pdf_folder = os.path.join(settings.MEDIA_ROOT, 'pdfs', period)
         os.makedirs(pdf_folder, exist_ok=True)
         
-        # Move PDF to pdfs folder
+        # Move PDF to period-specific pdfs folder (replace if exists)
         pdf_path = os.path.join(pdf_folder, filename)
+        if os.path.exists(pdf_path):
+            os.remove(pdf_path)
         os.rename(uploaded_file_path, pdf_path)
         
         # Upload PDF to S3
-        s3_url = s3_uploader.upload_file(pdf_path, 'pdfs/' + filename)
+        s3_path_pdf = f'pdfs/{period}/{filename}'
+        s3_url = s3_uploader.upload_file(pdf_path, s3_path_pdf)
         
         # Create DB record
-        File.objects.create(image=fs.url('pdfs/' + filename))
+        File.objects.create(image=fs.url(f'pdfs/{period}/{filename}'))
         
         return JsonResponse({
             "code": 200, 
             "msg": "success", 
             "isPdf": True,
-            "s3File": {"name": filename, "url": s3_url, "isPdf": True}
+            "period": period,
+            "s3File": {"name": filename, "url": s3_url, "isPdf": True, "period": period}
         })
 
     # Convert TIFF to PNG if required

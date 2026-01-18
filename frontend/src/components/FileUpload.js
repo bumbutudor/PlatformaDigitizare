@@ -8,6 +8,7 @@ const FileUpload = (props) => {
     const fileParams = ({ file, meta }) => {
         const body = new FormData();
         body.append("uploadedFiles", file);
+        body.append("period", props.getStore().period || "secolulXX");
         // console.log(file);
         return { url: props.getStore().api + "upload/", body }; // localhost http://127.0.0.1:8000/get_file/
     };

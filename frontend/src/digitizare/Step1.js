@@ -14,7 +14,9 @@ import StepsInfo from "../components/StepsInfo";
 export default class Step1 extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      selectedPeriod: props.getStore().period || "secolulXX"
+    };
 
     this.Popover = (
       <Popover id="popover-basic">
@@ -36,7 +38,14 @@ export default class Step1 extends Component {
     editorInstance.flipX();
   }
 
+  handlePeriodChange = (e) => {
+    const period = e.target.value;
+    this.setState({ selectedPeriod: period });
+    this.props.updateStore({ period: period });
+  }
+
   render() {
+    const periodOptions = this.props.getStore().periodOptions;
 
     return (
       <div className="step step1">
@@ -49,6 +58,25 @@ export default class Step1 extends Component {
                   <Button type="button" className="btn btn-info text-white mx-4">Info</Button>
                 </OverlayTrigger>
               </Form.Label>
+              
+              {/* Selector pentru perioada documentului */}
+              <Form.Group className="mb-3 col-md-6">
+                <Form.Label><strong>1.1 Selectează perioada documentului:</strong></Form.Label>
+                <Form.Select 
+                  value={this.state.selectedPeriod}
+                  onChange={this.handlePeriodChange}
+                  className="mb-3"
+                >
+                  {Object.entries(periodOptions).map(([key, value]) => (
+                    <option key={key} value={key}>{value}</option>
+                  ))}
+                </Form.Select>
+                <Form.Text className="text-muted">
+                  Perioada ajută la selectarea modelului OCR potrivit pentru documentul tău.
+                </Form.Text>
+              </Form.Group>
+
+              <Form.Label><strong>1.2 Încarcă fișierele:</strong></Form.Label>
               <FileUpload
                 jumpToStep={(i) => this.props.jumpToStep(i)}
                 getStore={() => this.props.getStore()}
