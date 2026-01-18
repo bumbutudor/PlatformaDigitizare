@@ -1,7 +1,8 @@
 from multiprocessing.connection import wait
 from click import command
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
+from django.views.decorators.clickjacking import xframe_options_exempt
 from .models import File
 from django.core.files.storage import FileSystemStorage
 from .utils import *
@@ -11,6 +12,7 @@ from django.conf import settings
 import json
 import requests
 import time
+import mimetypes
 from .upload_cloud import S3Uploader
 from datetime import datetime
 from django.shortcuts import render
@@ -24,6 +26,37 @@ from .models import ExceptionDictionary
 from .models import Period
 from .models import Alphabet
 from PIL import Image
+
+
+@xframe_options_exempt
+def serve_media(request, path):
+    """
+    Serve media files with X-Frame-Options exempt to allow embedding in iframes.
+    This bypasses ngrok's X-Frame-Options restrictions.
+    """
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+    
+    if not os.path.exists(file_path):
+        return HttpResponse("File not found", status=404)
+    
+    # Security check - make sure path doesn't escape MEDIA_ROOT
+    file_path = os.path.abspath(file_path)
+    media_root = os.path.abspath(settings.MEDIA_ROOT)
+    if not file_path.startswith(media_root):
+        return HttpResponse("Access denied", status=403)
+    
+    # Determine content type
+    content_type, _ = mimetypes.guess_type(file_path)
+    if content_type is None:
+        content_type = 'application/octet-stream'
+    
+    # For PDFs, we want inline display
+    response = FileResponse(open(file_path, 'rb'), content_type=content_type)
+    
+    if content_type == 'application/pdf':
+        response['Content-Disposition'] = f'inline; filename="{os.path.basename(file_path)}"'
+    
+    return response
 
 
 class ExceptionDictionaryEntryViewSet(viewsets.ModelViewSet):

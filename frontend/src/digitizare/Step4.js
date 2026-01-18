@@ -16,36 +16,151 @@ import ReactImageLightbox from "react-image-lightbox";
 import "react-image-lightbox/style.css";
 import Modal from "react-bootstrap/Modal";
 
-// PDF Viewer Component with search support
-const PdfViewerWithSearch = ({ url, title, searchWord, onClose }) => (
-  <Modal show={true} onHide={onClose} size="xl" centered>
-    <Modal.Header closeButton>
-      <Modal.Title>{title} {searchWord && `- Căutare: "${searchWord}"`}</Modal.Title>
-    </Modal.Header>
-    <Modal.Body style={{ height: '80vh' }}>
-      <iframe 
-        src={searchWord ? `${url}#search=${encodeURIComponent(searchWord)}` : url}
-        title={title}
-        width="100%" 
-        height="100%" 
-        style={{ border: 'none' }}
-      />
-    </Modal.Body>
-  </Modal>
-);
+// Note: Using media-proxy to bypass X-Frame-Options restrictions from ngrok
 
-// Simple PDF Viewer Component
-const PdfViewer = ({ url, title }) => (
-  <div className="pdf-viewer-container" style={{ height: '500px', width: '100%' }}>
-    <iframe 
-      src={url} 
-      title={title}
-      width="100%" 
-      height="100%" 
-      style={{ border: '1px solid #ccc' }}
+// Helper function to convert media URL to proxy URL
+const getProxyUrl = (url, apiBase) => {
+  if (!url) return null;
+  // Extract path after /media/
+  const mediaMatch = url.match(/\/media\/(.+)$/);
+  if (mediaMatch) {
+    // Use the proxy endpoint
+    return `${apiBase}media-proxy/${mediaMatch[1]}`;
+  }
+  return url;
+};
+
+// Panel lateral pentru vizualizare document original
+const DocumentPanel = ({ isOpen, onClose, pdfUrl, imageUrl, searchContext, title, apiBase }) => {
+  if (!isOpen) return null;
+  
+  // Convert URLs to proxy URLs to bypass X-Frame-Options
+  const proxyPdfUrl = getProxyUrl(pdfUrl, apiBase);
+  const proxyImageUrl = getProxyUrl(imageUrl, apiBase);
+  
+  const documentUrl = proxyPdfUrl || proxyImageUrl;
+  const isPdf = !!proxyPdfUrl;
+  
+  // Construim URL-ul cu parametru de căutare pentru PDF
+  const displayUrl = isPdf && searchContext 
+    ? `${documentUrl}#search=${encodeURIComponent(searchContext)}`
+    : documentUrl;
+  
+  return (
+    <div 
+      className="document-panel"
+      style={{
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        width: '45%',
+        height: '100vh',
+        backgroundColor: 'white',
+        boxShadow: '-4px 0 20px rgba(0,0,0,0.3)',
+        zIndex: 1050,
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'transform 0.3s ease',
+      }}
+    >
+      {/* Header */}
+      <div style={{
+        padding: '12px 16px',
+        borderBottom: '1px solid #dee2e6',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#f8f9fa',
+      }}>
+        <div>
+          <strong>{title || 'Document Original'}</strong>
+          {searchContext && (
+            <span style={{ marginLeft: '10px', color: '#6c757d', fontSize: '13px' }}>
+              Căutare: "{searchContext}"
+            </span>
+          )}
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
+            padding: '0 8px',
+            color: '#6c757d',
+          }}
+          title="Închide panoul"
+        >
+          ×
+        </button>
+      </div>
+      
+      {/* Document Content */}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        {isPdf ? (
+          <iframe
+            src={displayUrl}
+            title={title}
+            width="100%"
+            height="100%"
+            style={{ border: 'none' }}
+          />
+        ) : proxyImageUrl ? (
+          <div style={{ 
+            height: '100%', 
+            overflow: 'auto', 
+            display: 'flex', 
+            justifyContent: 'center',
+            padding: '10px',
+          }}>
+            <img
+              src={proxyImageUrl}
+              alt="Document original"
+              style={{ maxWidth: '100%', height: 'auto', objectFit: 'contain' }}
+            />
+          </div>
+        ) : (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#6c757d' }}>
+            Nu există document disponibil pentru verificare.
+          </div>
+        )}
+      </div>
+      
+      {/* Hint */}
+      {isPdf && searchContext && (
+        <div style={{
+          padding: '8px 16px',
+          backgroundColor: '#e7f3ff',
+          borderTop: '1px solid #b8daff',
+          fontSize: '12px',
+          color: '#004085',
+        }}>
+          💡 Folosește Ctrl+F în PDF pentru a căuta exact: <code style={{backgroundColor: '#fff', padding: '2px 6px', borderRadius: '3px'}}>{searchContext}</code>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Overlay pentru click în afară
+const PanelOverlay = ({ isOpen, onClick }) => {
+  if (!isOpen) return null;
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        zIndex: 1040,
+      }}
     />
-  </div>
-);
+  );
+};
 
 class Step4 extends Component {
   constructor(props) {
@@ -69,16 +184,18 @@ class Step4 extends Component {
 
       keyboardLayout: null, // State to hold the dynamic keyboard layout
       
-      // Context menu state
-      showContextMenu: false,
-      contextMenuX: 0,
-      contextMenuY: 0,
+      // Search tooltip state (shown on double-click)
+      showSearchTooltip: false,
+      tooltipX: 0,
+      tooltipY: 0,
       selectedWord: "",
+      selectedLineNumber: 1,
       activeDocIndex: 0,
       
-      // PDF search modal
-      showPdfSearchModal: false,
-      pdfSearchWord: "",
+      // Panel lateral pentru verificare document
+      showDocumentPanel: false,
+      searchContext: "",  // Contextul pentru căutare precisă (cuvânt + vecini)
+      documentPanelTitle: "",
     };
 
     this.textareaRefs = {}; // References to textareas
@@ -110,9 +227,6 @@ class Step4 extends Component {
   componentDidMount() {
     // After component mounts, generate the dynamic keyboard layout
     this.generateDynamicKeyboardLayout();
-    
-    // Add click listener to hide context menu
-    document.addEventListener('click', this.hideContextMenu);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -123,8 +237,7 @@ class Step4 extends Component {
   }
 
   componentWillUnmount() {
-    // Remove click listener
-    document.removeEventListener('click', this.hideContextMenu);
+    // Cleanup if needed
   }
 
   // Function to generate the dynamic keyboard layout
@@ -380,36 +493,52 @@ class Step4 extends Component {
     });
   };
 
-  // Context menu handlers
-  handleContextMenu = (e, index) => {
-    e.preventDefault();
-    
+  // Double-click handler - deschide panelul cu căutare precisă
+  handleDoubleClick = (e, index) => {
     const textarea = e.target;
-    const selectedText = textarea.value.substring(
-      textarea.selectionStart,
-      textarea.selectionEnd
-    ).trim();
+    const cursorPos = textarea.selectionStart;
+    const text = textarea.value;
     
-    // Get the word under cursor if no selection
-    let word = selectedText;
-    if (!word) {
-      const cursorPos = textarea.selectionStart;
-      const text = textarea.value;
-      // Find word boundaries
-      let start = cursorPos;
-      let end = cursorPos;
-      while (start > 0 && /\S/.test(text[start - 1])) start--;
-      while (end < text.length && /\S/.test(text[end])) end++;
-      word = text.substring(start, end).trim();
-    }
+    // Find word boundaries
+    let wordStart = cursorPos;
+    let wordEnd = cursorPos;
+    while (wordStart > 0 && /\S/.test(text[wordStart - 1])) wordStart--;
+    while (wordEnd < text.length && /\S/.test(text[wordEnd])) wordEnd++;
+    const word = text.substring(wordStart, wordEnd).trim();
     
-    if (word && this.getSearchablePdfUrl(index)) {
+    if (!word) return;
+    
+    // Selectăm cuvântul în textarea
+    textarea.setSelectionRange(wordStart, wordEnd);
+    
+    // Extragem contextul pentru căutare precisă (cuvântul + caractere din jur)
+    // Luăm 15-20 caractere înainte și după pentru unicitate
+    const contextStart = Math.max(0, wordStart - 15);
+    const contextEnd = Math.min(text.length, wordEnd + 15);
+    let searchContext = text.substring(contextStart, contextEnd).trim();
+    
+    // Curățăm contextul de newlines și spații multiple
+    searchContext = searchContext.replace(/\s+/g, ' ');
+    
+    // Calculăm poziția caracterului pentru identificare unică
+    const charPosition = wordStart;
+    
+    // Calculate line number (1-based)
+    const textBeforeCursor = text.substring(0, wordStart);
+    const lineNumber = (textBeforeCursor.match(/\n/g) || []).length + 1;
+    
+    const pdfUrl = this.getSearchablePdfUrl(index);
+    const sourceFile = this.state.s3SourceFiles[index];
+    
+    // Dacă avem PDF sau imagine, deschidem panelul
+    if (pdfUrl || sourceFile?.url) {
       this.setState({
-        showContextMenu: true,
-        contextMenuX: e.clientX,
-        contextMenuY: e.clientY,
+        showDocumentPanel: true,
         selectedWord: word,
+        searchContext: searchContext,
+        selectedLineNumber: lineNumber,
         activeDocIndex: index,
+        documentPanelTitle: `Verificare: "${word}" (poziția ${charPosition}, linia ${lineNumber})`,
       });
     }
   };
@@ -436,22 +565,26 @@ class Step4 extends Component {
     return null;
   };
 
-  searchInPdf = () => {
-    const pdfUrl = this.getSearchablePdfUrl(this.state.activeDocIndex);
-    if (pdfUrl && this.state.selectedWord) {
-      this.setState({
-        showPdfSearchModal: true,
-        pdfSearchWord: this.state.selectedWord,
-        showContextMenu: false,
-      });
-    }
+  // Deschide panelul lateral cu documentul
+  openDocumentPanel = (index) => {
+    const sourceFile = this.state.s3SourceFiles[index];
+    this.setState({
+      showDocumentPanel: true,
+      activeDocIndex: index,
+      searchContext: '',
+      documentPanelTitle: `Document original: ${sourceFile?.name || 'Document ' + (index + 1)}`,
+    });
   };
 
-  closePdfSearchModal = () => {
+  closeDocumentPanel = () => {
     this.setState({
-      showPdfSearchModal: false,
-      pdfSearchWord: "",
+      showDocumentPanel: false,
+      searchContext: '',
     });
+  };
+
+  hideSearchTooltip = () => {
+    this.setState({ showSearchTooltip: false });
   };
 
   render() {
@@ -499,11 +632,11 @@ class Step4 extends Component {
                                   onFocus={this.setActiveInput}
                                   onClick={(e) => {
                                     this.onInputChanged(e, index);
-                                    this.hideContextMenu();
+                                    this.hideSearchTooltip();
                                   }}
                                   onKeyUp={(e) => this.onInputChanged(e, index)}
                                   onSelect={(e) => this.onInputChanged(e, index)}
-                                  onContextMenu={(e) => this.handleContextMenu(e, index)}
+                                  onDoubleClick={(e) => this.handleDoubleClick(e, index)}
                                   value={item}
                                   onChange={this.onChangeInput}
                                   className={`form-control text ${
@@ -532,15 +665,18 @@ class Step4 extends Component {
                                     )}
                                   </button>
                                   <div className="mt-3">
-                                    {this.state.s3SourceFiles[index]?.isPdf ? (
-                                      <div>
-                                        <span>Compară rezultatul OCR cu documentul PDF:</span>
-                                        <PdfViewer 
-                                          url={this.state.s3SourceFiles[index].url} 
-                                          title={`PDF Document ${index + 1}`}
-                                        />
-                                      </div>
-                                    ) : (
+                                    <Button
+                                      variant="outline-primary"
+                                      size="sm"
+                                      onClick={() => this.openDocumentPanel(index)}
+                                      style={{ marginBottom: '10px' }}
+                                    >
+                                      📄 Deschide documentul original pentru verificare
+                                    </Button>
+                                    <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                                      💡 Dublu-click pe un cuvânt din text pentru a-l căuta în document
+                                    </div>
+                                    {!this.state.s3SourceFiles[index]?.isPdf && (
                                       <span
                                         className="image-link"
                                         onClick={() =>
@@ -548,15 +684,16 @@ class Step4 extends Component {
                                             this.state.s3SourceFiles[index].url
                                           )
                                         }
+                                        style={{ display: 'block', marginTop: '10px' }}
                                       >
-                                        Compară rezultatul OCR cu imaginea sursă
-                                        originală:
+                                        <small className="text-muted">Click pentru imagine mărită:</small>
                                         <img
                                           width="100"
                                           src={
                                             this.state.s3SourceFiles[index].url
                                           }
                                           alt="Original Source"
+                                          style={{ display: 'block', marginTop: '5px' }}
                                         />
                                       </span>
                                     )}
@@ -632,47 +769,20 @@ class Step4 extends Component {
           />
         )}
 
-        {/* Context Menu for word search in PDF */}
-        {this.state.showContextMenu && (
-          <div
-            className="context-menu"
-            style={{
-              position: 'fixed',
-              top: this.state.contextMenuY,
-              left: this.state.contextMenuX,
-              backgroundColor: 'white',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-              zIndex: 1000,
-              padding: '5px 0',
-            }}
-          >
-            <div
-              className="context-menu-item"
-              style={{
-                padding: '8px 16px',
-                cursor: 'pointer',
-                hover: { backgroundColor: '#f0f0f0' },
-              }}
-              onClick={this.searchInPdf}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
-            >
-              🔍 Caută "{this.state.selectedWord}" în PDF
-            </div>
-          </div>
-        )}
-
-        {/* PDF Search Modal */}
-        {this.state.showPdfSearchModal && (
-          <PdfViewerWithSearch
-            url={this.getSearchablePdfUrl(this.state.activeDocIndex)}
-            title="Document PDF - Căutare"
-            searchWord={this.state.pdfSearchWord}
-            onClose={this.closePdfSearchModal}
-          />
-        )}
+        {/* Panel lateral pentru verificare document */}
+        <PanelOverlay 
+          isOpen={this.state.showDocumentPanel} 
+          onClick={this.closeDocumentPanel} 
+        />
+        <DocumentPanel
+          isOpen={this.state.showDocumentPanel}
+          onClose={this.closeDocumentPanel}
+          pdfUrl={this.getSearchablePdfUrl(this.state.activeDocIndex)}
+          imageUrl={this.state.s3SourceFiles[this.state.activeDocIndex]?.url}
+          searchContext={this.state.searchContext}
+          title={this.state.documentPanelTitle}
+          apiBase={this.API}
+        />
       </div>
     );
   }
