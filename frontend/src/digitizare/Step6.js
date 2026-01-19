@@ -420,7 +420,7 @@ class Step6 extends Component {
   handleDoubleClick = (e, index) => {
     const textarea = e.target;
     const cursorPos = textarea.selectionStart;
-    const transText = textarea.value; // Text transliterat
+    const transText = textarea.value; // Text transliterat (poate fi editat de user)
     const ocrText = this.state.ocrResults[index] || ''; // Text OCR original (chirilic)
     
     // Find word boundaries in transliterated text
@@ -436,13 +436,46 @@ class Step6 extends Component {
     textarea.setSelectionRange(wordStart, wordEnd);
     
     // Mapăm cuvântul transliterat la cel original din OCR
-    // Numărăm al câtelea cuvânt e în textul transliterat
-    const transWordsBeforeCursor = transText.substring(0, wordStart).split(/\s+/).filter(w => w.length > 0);
-    const wordIndex = transWordsBeforeCursor.length;
+    // Folosim o abordare mai robustă: găsim linia în care suntem și mapăm pe linie
     
-    // Găsim cuvântul corespunzător din textul OCR
-    const ocrWords = ocrText.split(/\s+/).filter(w => w.length > 0);
-    const originalWord = ocrWords[wordIndex] || transWord; // Fallback la cuvântul transliterat
+    // Găsim linia curentă în textul transliterat
+    const transLines = transText.split('\n');
+    const ocrLines = ocrText.split('\n');
+    
+    let charCount = 0;
+    let lineIndex = 0;
+    for (let i = 0; i < transLines.length; i++) {
+      if (charCount + transLines[i].length >= wordStart) {
+        lineIndex = i;
+        break;
+      }
+      charCount += transLines[i].length + 1; // +1 for \n
+    }
+    
+    // Poziția în linie
+    const positionInLine = wordStart - charCount;
+    
+    // Cuvintele din linia curentă (transliterat și OCR)
+    const transWordsInLine = transLines[lineIndex]?.split(/\s+/).filter(w => w.length > 0) || [];
+    const ocrWordsInLine = ocrLines[lineIndex]?.split(/\s+/).filter(w => w.length > 0) || [];
+    
+    // Numărăm al câtelea cuvânt e în linia transliterată
+    const textBeforeCursorInLine = transLines[lineIndex]?.substring(0, positionInLine) || '';
+    const wordsBeforeCursor = textBeforeCursorInLine.split(/\s+/).filter(w => w.length > 0);
+    const wordIndexInLine = wordsBeforeCursor.length;
+    
+    // Găsim cuvântul corespunzător din OCR (pe aceeași poziție în linie)
+    let originalWord = ocrWordsInLine[wordIndexInLine] || transWord;
+    
+    // Fallback: dacă linia OCR are mai puține cuvinte, folosim ultimul cuvânt sau cuvântul transliterat
+    if (wordIndexInLine >= ocrWordsInLine.length && ocrWordsInLine.length > 0) {
+      // Poate că OCR-ul are mai puține cuvinte - încercăm să găsim cel mai apropiat
+      originalWord = ocrWordsInLine[ocrWordsInLine.length - 1] || transWord;
+    }
+    
+    console.log(`[Step6] Mapping: line ${lineIndex}, word ${wordIndexInLine}`);
+    console.log(`[Step6] Trans line words: ${transWordsInLine.length}, OCR line words: ${ocrWordsInLine.length}`);
+    console.log(`[Step6] "${transWord}" → "${originalWord}"`);
     
     // Căutăm în PDF după cuvântul original (chirilic)
     const searchQuery = originalWord;
