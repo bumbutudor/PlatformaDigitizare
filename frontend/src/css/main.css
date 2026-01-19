@@ -215,6 +215,7 @@ ol.progtrckr li.progtrckr-done:hover:before {
   bottom: 5%;
   left: 50%;
   transform: translate(-50%, 0%);
+  padding: 0.4rem 0.75rem;
 }
 
 .dzu-previewContainer {
@@ -249,7 +250,7 @@ ol.progtrckr li.progtrckr-done:hover:before {
   position: absolute;
   bottom: 5%;
   right: 5%;
-  padding: 0.45rem 0.75rem;
+  padding: 0.4rem 0.75rem;
   font-size: 1rem;
   font-family: "Open Sans", monospace;
 }
