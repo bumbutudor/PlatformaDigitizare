@@ -61,6 +61,33 @@ def local_ocr(data, media_root):
         searchable_pdfs = []
         api_base_url = data.get('api', '')
 
+        # Verifică mai întâi dacă este selectat modelul Tesseract
+        ocrOptions = data.get('ocrOptions', {})
+        use_tesseract = ocrOptions.get("useTesseract", False) if ocrOptions else False
+        
+        if use_tesseract:
+            print(f"[Tesseract OCR] Processing {len(files)} files with RTS_from_Cyrillic model")
+            # Creează directorul pentru output Tesseract
+            ocr_path = '/ocr/tesseract/'
+            tesseract_output_dir = os.path.join(media_root, 'ocr', 'tesseract')
+            os.makedirs(tesseract_output_dir, exist_ok=True)
+            
+            for file in files:
+                file_path = os.path.join(media_root, file["name"])
+                print(f"[Tesseract OCR] Processing file: {file_path}")
+                ocr_result, pdf_path = tesseract_ocr(file_path, tesseract_output_dir)
+                ocr_results.append(ocr_result)
+                
+                # Generează URL pentru PDF searchable
+                if pdf_path and os.path.exists(pdf_path):
+                    base_name = os.path.splitext(file["name"])[0]
+                    pdf_url = f"{api_base_url}media{ocr_path}{base_name}.pdf"
+                    searchable_pdfs.append(pdf_url)
+                    print(f"[Tesseract OCR] PDF generated: {pdf_url}")
+                else:
+                    searchable_pdfs.append(None)
+            return {"ocrResults": ocr_results, "searchablePdfs": searchable_pdfs}
+
         if period == 'secolulXX' and alphabet == 'cyrillic':
             # model secolulXX.fbt
             ocr_path = '/ocr/secolulXX/cyrillic/'
@@ -131,18 +158,7 @@ def local_ocr(data, media_root):
             # TODO : Implement using Gimp
             pass
 
-        # Condiție nouă pentru Tesseract
-        ocrOptions = data.get('ocrOptions')  # Presupunem că această valoare este trimisă prin data
-        use_tesseract = ocrOptions.get("useTesseract", False)
-        print(use_tesseract)
-        if use_tesseract:
-            for file in files:
-                file_path = os.path.join(media_root, file["name"])
-                ocr_result = tesseract_ocr(file_path)
-                ocr_results.append(ocr_result)
-            return ocr_results
-
-        # Dacă niciuna din condițiile anterioare nu este îndeplinită, se va returna  o listă goală
+        # Dacă niciuna din condițiile anterioare nu este îndeplinită, se va returna o listă goală
         return ocr_results
 
     except Exception as e:
@@ -150,21 +166,43 @@ def local_ocr(data, media_root):
         # logging.error(f"A apărut o eroare: {e}") - în cazul în care folosiți modulul de logging
         return []
 
-def tesseract_ocr(file_path):
+def tesseract_ocr(file_path, output_dir=None):
     """
-    Procesează o imagine folosind Tesseract OCR și returnează textul recunoscut.
+    Procesează o imagine folosind Tesseract OCR și returnează textul recunoscut + PDF searchable.
 
     :param file_path: Calea către fișierul imagine care va fi procesat
+    :param output_dir: Directorul unde se salvează PDF-ul searchable
     :type file_path: str
-    :return: Textul recunoscut din imagine
-    :rtype: str
+    :type output_dir: str
+    :return: Tuple (text recunoscut, calea către PDF searchable)
+    :rtype: tuple
     """
     image = Image.open(file_path)
+    
+    # Extrage textul
     text = pytesseract.image_to_string(image, lang='RTS_from_Cyrillic')
-
-    # Aplică modificările necesare asupra textului recunoscut
     modified_text = tesseract_ocr_postprocess(text)
-    return modified_text
+    
+    # Generează PDF searchable
+    pdf_path = None
+    if output_dir:
+        try:
+            # Generează PDF cu text searchable
+            pdf_bytes = pytesseract.image_to_pdf_or_hocr(image, lang='RTS_from_Cyrillic', extension='pdf')
+            
+            # Salvează PDF-ul
+            base_name = os.path.splitext(os.path.basename(file_path))[0]
+            pdf_path = os.path.join(output_dir, f"{base_name}.pdf")
+            
+            with open(pdf_path, 'wb') as f:
+                f.write(pdf_bytes)
+            
+            print(f"[Tesseract OCR] Searchable PDF saved: {pdf_path}")
+        except Exception as e:
+            print(f"[Tesseract OCR] Error generating PDF: {e}")
+            pdf_path = None
+    
+    return modified_text, pdf_path
 
 
 def tesseract_ocr_postprocess(text):
