@@ -29,8 +29,13 @@ def wait_for_files(required_files, folder_path, file_ext, timeout=120, sleep_tim
 
     print("required files", required_files)
     while not all_files_found:
-        # get all files in folder
-        files = os.listdir(folder_path)
+        # the output folder may not exist yet (created by the hot folder when
+        # the first result is written) - treat that as "no files found yet"
+        # instead of crashing with FileNotFoundError.
+        try:
+            files = os.listdir(folder_path)
+        except FileNotFoundError:
+            files = []
 
         # check if all files are found
         # chech if starts with the same name
@@ -55,8 +60,17 @@ def process_image_for_ocr(file_path, out_path, resolution=300):
     # TODO : Implement using opencv
     dpi = (resolution, resolution)
     temp_filename = set_image_dpi(file_path, dpi=dpi)
-    im_new = remove_noise_and_smooth(temp_filename)
-    cv2.imwrite(out_path, im_new)
+    try:
+        im_new = remove_noise_and_smooth(temp_filename)
+        cv2.imwrite(out_path, im_new)
+    finally:
+        # set_image_dpi writes a temporary file with delete=False; make sure we
+        # always remove it so repeated preprocessing does not leak temp files.
+        try:
+            if temp_filename and os.path.exists(temp_filename):
+                os.remove(temp_filename)
+        except OSError:
+            pass
     return im_new
 
 def do_not_preprocess(file_path, out_path, resolution=300):
@@ -75,9 +89,15 @@ def set_image_dpi(file_path, dpi=300):
     factor = max(1, int(IMAGE_SIZE / length_x))
     size = factor * length_x, factor * width_y
     # size = (1800, 1800)
-    im_resized = im.resize(size, Image.ANTIALIAS)
+    # Image.ANTIALIAS was removed in Pillow 10; use the new Resampling enum when
+    # available and fall back to the legacy constant on older versions.
+    resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS", None)
+    if resample is None:
+        resample = getattr(Image, "ANTIALIAS", 1)
+    im_resized = im.resize(size, resample)
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
     temp_filename = temp_file.name
+    temp_file.close()
     im_resized.save(temp_filename, dpi=dpi)
     return temp_filename
 

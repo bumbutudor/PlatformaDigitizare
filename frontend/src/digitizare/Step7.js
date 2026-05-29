@@ -16,6 +16,8 @@ import FetchWrapper from '../components/FetchWrapper';
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import StepsInfo from "../components/StepsInfo";
+import ServiceGate from '../components/ServiceGate';
+import { SERVICES } from '../utils/ServiceStatus';
 
 export default class Step7 extends Component {
   constructor(props) {
@@ -37,6 +39,7 @@ export default class Step7 extends Component {
       // input: ""
       inputID: 0,
       saving: false,
+      serviceBlock: { blocked: false },
     };
     this.isValidated = this.isValidated.bind(this);
     this.API = new FetchWrapper(props.getStore().api);
@@ -336,11 +339,15 @@ export default class Step7 extends Component {
                 Digitizează un document nou
               </button>
               {this.props.getStore().sourceFiles.length > 0 &&
-                <button className="btn btn-success" onClick={this.handlePublishRequest.bind(this)}>
+                <button className="btn btn-success" disabled={this.state.serviceBlock.blocked} onClick={this.handlePublishRequest.bind(this)}>
                   Publică documentul digitizat
                 </button>
               }
             </div>
+            <ServiceGate
+              requiredServices={[SERVICES.PUBLISH]}
+              onBlockChange={(block) => this.setState({ serviceBlock: block })}
+            />
 
           </form >
           {/* <div className="col-2 m-4">

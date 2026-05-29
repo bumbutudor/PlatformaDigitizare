@@ -13,6 +13,8 @@ import Popover from "react-bootstrap/Popover";
 import Draggable from 'react-draggable'; // The default
 import DictionaryModal from '../components/DictionaryModal';
 import StepsInfo from '../components/StepsInfo';
+import ServiceGate from '../components/ServiceGate';
+import { SERVICES } from '../utils/ServiceStatus';
 
 
 // Transliteraion
@@ -53,6 +55,7 @@ export default class Step5 extends Component {
       showNextStep: false,
       showErrors: false,
       showModal: false,
+      serviceBlock: { blocked: false },
     };
 
     this.step5Info = (
@@ -222,6 +225,7 @@ export default class Step5 extends Component {
                   this.state.show ?
                     <Button
                       variant="primary"
+                      disabled={this.state.serviceBlock.blocked}
                       onClick={this.handleTransRequest.bind(this)}>
                       Start Transliterare
                     </Button>
@@ -248,6 +252,10 @@ export default class Step5 extends Component {
                 {!this.state.show && <> <Button variant="primary mx-4" onClick={() => this.props.jumpToStep(5)}>Verifică și editează rezultatul</Button> </>} */}
               </div>
               {this.state.showError && <Alert variant="danger">A apărut o eroare la transliterare. Vă rugăm să încercați din nou.</Alert>}
+              <ServiceGate
+                requiredServices={[SERVICES.TRANSLITERA]}
+                onBlockChange={(block) => this.setState({ serviceBlock: block })}
+              />
             </div>
           </Form>
         </div>

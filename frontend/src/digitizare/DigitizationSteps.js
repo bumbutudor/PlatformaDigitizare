@@ -11,6 +11,8 @@ import Step6 from "./Step6";
 import Step7 from "./Step7";
 import Exceptions from "../components/ExceptionDict";
 import Form from "react-bootstrap/Form";
+import ServiceStatus from "../utils/ServiceStatus";
+import ServiceStatusBadge from "../components/ServiceStatusBadge";
 
 import "../css/main.css";
 
@@ -88,9 +90,16 @@ export default class DigitizationSteps extends Component {
     };
   }
 
-  componentDidMount() { }
+  componentDidMount() {
+    // Start polling backend service health so steps can disable actions when a
+    // required service is offline.
+    ServiceStatus.configure(this.sampleStore.api);
+    ServiceStatus.start(20000);
+  }
 
-  componentWillUnmount() { }
+  componentWillUnmount() {
+    ServiceStatus.stop();
+  }
 
   getStore() {
     return this.sampleStore;
@@ -263,6 +272,10 @@ export default class DigitizationSteps extends Component {
     return (
       <div className="example">
         {/* check button saveToCloud */}
+
+        <div className="d-flex justify-content-end p-2">
+          <ServiceStatusBadge />
+        </div>
 
         <div className="step-progress">
           <StepZilla

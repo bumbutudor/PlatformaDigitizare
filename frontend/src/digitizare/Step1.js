@@ -9,6 +9,8 @@ import Button from "react-bootstrap/Button";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import StepsInfo from "../components/StepsInfo";
+import ServiceGate from "../components/ServiceGate";
+import { SERVICES } from "../utils/ServiceStatus";
 
 
 export default class Step1 extends Component {
@@ -77,6 +79,7 @@ export default class Step1 extends Component {
               </Form.Group>
 
               <Form.Label><strong>1.2 Încarcă fișierele:</strong></Form.Label>
+              <ServiceGate requiredServices={[SERVICES.S3]} />
               <FileUpload
                 jumpToStep={(i) => this.props.jumpToStep(i)}
                 getStore={() => this.props.getStore()}

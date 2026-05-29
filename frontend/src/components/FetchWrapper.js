@@ -4,7 +4,11 @@ export default class FetchWrapper {
     }
 
     get(endpoint) {
-        return fetch(this.baseURL + endpoint)
+        return fetch(this.baseURL + endpoint, {
+            headers: {
+                "ngrok-skip-browser-warning": "true"
+            }
+        })
             .then(response => response.json());
     }
 
@@ -27,7 +31,9 @@ export default class FetchWrapper {
             method,
             headers: {
                 // send a header with every post, put, delete request
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                // skip ngrok's interstitial HTML page so responses are JSON
+                "ngrok-skip-browser-warning": "true"
             },
             body: JSON.stringify(body)
         }).then(response => response.json());

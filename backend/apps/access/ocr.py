@@ -163,8 +163,9 @@ def local_ocr(data, media_root):
 
     except Exception as e:
         print(f"A apărut o eroare: {e}")
-        # logging.error(f"A apărut o eroare: {e}") - în cazul în care folosiți modulul de logging
-        return []
+        # Nu mai înghițim eroarea: o propagăm ca să fie raportată corect către
+        # frontend (altfel utilizatorul primea "success" cu rezultate goale).
+        raise
 
 def tesseract_ocr(file_path, output_dir=None):
     """

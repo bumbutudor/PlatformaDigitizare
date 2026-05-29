@@ -180,3 +180,34 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
+# -------------------------------------------------------------------
+# External services configuration (used by health checks & pipeline)
+# -------------------------------------------------------------------
+
+# ABBYY FineReader Hot Folder paths.
+# INPUT  = folder watched by FineReader where images are dropped.
+# OUTPUT = folder where FineReader writes recognized .txt/.pdf results.
+FINEREADER_INPUT_DIR = os.getenv(
+    'FINEREADER_INPUT_DIR', default=MEDIA_ROOT)
+FINEREADER_OUTPUT_DIR = os.getenv(
+    'FINEREADER_OUTPUT_DIR', default=os.path.join(MEDIA_ROOT, 'ocr'))
+
+# Transliteration service endpoint.
+TRANSLITERA_URL = os.getenv(
+    'TRANSLITERA_URL', default='https://translitera.cc/ProcessServlet')
+
+# Publishing platform endpoint.
+PUBLISH_URL = os.getenv(
+    'PUBLISH_URL', default='https://digi.emoldova.org/api/drafts')
+
+# AWS S3 configuration.
+AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY', default='')
+AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY', default='')
+AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET', default='emoldova.bucket')
+
+# How long (seconds) health-check results are cached before re-probing.
+HEALTH_CACHE_TTL = int(os.getenv('HEALTH_CACHE_TTL', default='12'))
+# Per-service network timeout (seconds) for health probes.
+HEALTH_PROBE_TIMEOUT = float(os.getenv('HEALTH_PROBE_TIMEOUT', default='5'))
+

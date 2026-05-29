@@ -7,6 +7,7 @@ from .models import File
 from django.core.files.storage import FileSystemStorage
 from .utils import *
 from .ocr import local_ocr
+from .health import get_health
 import os
 from django.conf import settings
 import json
@@ -95,12 +96,14 @@ def exception_dictionary(request):
 # Apelam functia pentru a obtine vocabularul din fisierul "vocabular.txt"
 filepath = settings.BASE_DIR + '/vocabular.txt'
 vocabulary = obtine_vocabular(filepath)
-# AWS credentials
-AWS_ACCESS_KEY = os.environ['AWS_ACCESS_KEY']
-AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
+# AWS credentials - read defensively so a missing env var does not crash the
+# whole app at import time (the platform should still start and report S3 as
+# offline via the /health/ endpoint instead).
+AWS_ACCESS_KEY = getattr(settings, 'AWS_ACCESS_KEY', '') or os.getenv('AWS_ACCESS_KEY', '')
+AWS_SECRET_KEY = getattr(settings, 'AWS_SECRET_KEY', '') or os.getenv('AWS_SECRET_KEY', '')
 
 # S3 bucket name
-bucket_name = 'emoldova.bucket'
+bucket_name = getattr(settings, 'AWS_S3_BUCKET', 'emoldova.bucket')
 
 # S3 path
 today = datetime.now().strftime('%Y-%m-%d/')
@@ -112,6 +115,19 @@ s3_uploader = S3Uploader(bucket_name, s3_path, AWS_ACCESS_KEY, AWS_SECRET_KEY)
 
 def home(request):
     return HttpResponse('<h4 style="color: #52C41A">API pentru Platforma de Digitizare</h4>')
+
+
+def health(request):
+    """
+    Diagnostic endpoint reporting the status of every external service the
+    pipeline depends on. Returns HTTP 200 when all critical services are online
+    and HTTP 503 when at least one critical service is offline, so monitoring
+    tools can alert on it while the frontend still receives the detailed body.
+    """
+    force = request.GET.get('force') in ('1', 'true', 'yes')
+    data = get_health(force=force)
+    status_code = 200 if data.get('overall') == 'ok' else 503
+    return JsonResponse(data, status=status_code)
 
 
 def upload(request):
@@ -290,8 +306,15 @@ def preprocess(request):
 def ocr(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        ocr_response = local_ocr(data, settings.MEDIA_ROOT)
-        
+        try:
+            ocr_response = local_ocr(data, settings.MEDIA_ROOT)
+        except Exception as e:
+            print(f"[ocr] Eroare la procesarea OCR: {e}")
+            return JsonResponse(
+                {"code": 500, "msg": f"Eroare la procesarea OCR: {e}"},
+                status=500,
+            )
+
         # Handle both old format (list) and new format (dict with ocrResults and searchablePdfs)
         if isinstance(ocr_response, dict):
             return JsonResponse({
@@ -461,16 +484,33 @@ def publish(request):
             'Authorization': 'Token Eik9DFwbyxkZMptuFzfPdKHG2REm5syrzgDrcYGD',
         }
 
-        response = requests.post(draft_endpoint, headers=headers, json=draft_data)
+        try:
+            response = requests.post(
+                draft_endpoint, headers=headers, json=draft_data, timeout=30)
+        except requests.RequestException as e:
+            print(f"[publish] Serviciul de publicare este indisponibil: {e}")
+            return JsonResponse(
+                {"code": 503, "msg": f"Serviciul de publicare este indisponibil: {e}"},
+                status=503,
+            )
 
         # Check the response
         if response.status_code == 200 or response.status_code == 201:
             print("Successfully created the article.")
-            print(response.json())
+            try:
+                print(response.json())
+            except ValueError:
+                pass
             return JsonResponse({"code": 200, "msg": "Successfully created the article."})
         else:
             print(f"Failed to create the article. Status code: {response.status_code}.")
-            print(response.json())
-            return JsonResponse({"code": 500, "msg": "server error"})
+            try:
+                print(response.json())
+            except ValueError:
+                pass
+            return JsonResponse(
+                {"code": 500, "msg": f"Publicare eșuată (status {response.status_code})."},
+                status=500,
+            )
     else:
         return JsonResponse({"code": 500, "msg": "server error"})

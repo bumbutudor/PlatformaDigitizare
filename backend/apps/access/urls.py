@@ -1,6 +1,6 @@
 from xml.sax.saxutils import prepare_input_source
 from django.urls import path, include
-from .views import upload, preprocess, ocr, transliterate, publish, home, exception_dictionary, serve_media
+from .views import upload, preprocess, ocr, transliterate, publish, home, exception_dictionary, serve_media, health
 from .views import ExceptionDictionaryEntryViewSet, PeriodViewSet, AlphabetViewSet, ExceptionDictionaryViewSet
 from rest_framework import routers
 
@@ -12,6 +12,7 @@ router.register(r'exception-dictionary', ExceptionDictionaryEntryViewSet)
 
 urlpatterns = [
     path('', home),
+    path('health/', health),
     path('upload/', upload),
     path('preprocess/', preprocess),
     path('ocr/', ocr),

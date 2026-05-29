@@ -10,6 +10,8 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import FetchWrapper from '../components/FetchWrapper';
 import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert';
+import ServiceGate from '../components/ServiceGate';
+import { SERVICES } from '../utils/ServiceStatus';
 
 // OCR
 export default class Step3 extends Component {
@@ -30,6 +32,7 @@ export default class Step3 extends Component {
       showLoader: false,
       showNextStep: false,
       showError: false,
+      serviceBlock: { blocked: false },
     };
 
     this.step3Info = (
@@ -548,7 +551,7 @@ export default class Step3 extends Component {
               )}
 
               <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
-                {this.state.period && this.state.show ? (
+                {this.state.period && this.state.show && !this.state.serviceBlock.blocked ? (
                   <Button
                     variant="primary"
                     onClick={this.handleOCRRequest.bind(this)}
@@ -587,6 +590,10 @@ export default class Step3 extends Component {
                   </Alert.Heading>
                 </Alert>
               )}
+              <ServiceGate
+                requiredServices={[SERVICES.FINEREADER]}
+                onBlockChange={(block) => this.setState({ serviceBlock: block })}
+              />
             </div>
           </Form>
         </div>
