@@ -161,6 +161,26 @@ class ScanTailorTests(SimpleTestCase):
             response = self.client.post("/ocr/", json.dumps(self.data), content_type="application/json")
         self.assertEqual(response.status_code, 503)
 
+    def test_finereader_reads_processed_name_and_returns_matching_pdf(self):
+        processed = self.run_job()
+        basename = Path(processed[0]).stem
+        inbox = self.root / "watched"
+        inbox.mkdir()
+        output = self.root / "ocr" / "secolulXVIII"
+        output.mkdir(parents=True)
+        (output / "page.txt").write_text("old original OCR", encoding="utf-8")
+        (output / (basename + ".txt")).write_text("processed OCR", encoding="utf-8")
+        pdf = output / (basename + ".pdf")
+        pdf.write_bytes(b"%PDF test fixture")
+        os.utime(pdf, (1, 1))
+        self.data.update(period="secolulXVIII", alphabet="cyrillicRomanian",
+                         preprocessedFiles=processed, api="https://example.test/")
+        with override_settings(FINEREADER_SCANTAILOR_INPUT_DIRS={"secolulXVIII": str(inbox)}):
+            result = local_ocr(self.data, str(self.root))
+        self.assertEqual(result["ocrResults"], ["processed OCR"])
+        self.assertEqual(result["searchablePdfs"], [f"https://example.test/media/ocr/secolulXVIII/{basename}.pdf"])
+        self.assertEqual((inbox / (basename + ".png")).read_bytes(), (self.root / processed[0]).read_bytes())
+
     def test_health_reports_cli_version_and_is_optional(self):
         with patch("apps.access.health.cli_version", return_value="0.9.11.1"):
             result = check_scantailor()

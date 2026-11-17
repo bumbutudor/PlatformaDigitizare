@@ -17,6 +17,7 @@ from urllib.parse import quote
 import os
 from django.conf import settings
 import json
+import logging
 import requests
 import time
 import mimetypes
@@ -312,7 +313,7 @@ def ocr(request):
         except ScanTailorError as exc:
             return JsonResponse({"code": exc.status_code, "msg": str(exc)}, status=exc.status_code)
         except Exception as e:
-            print(f"[ocr] Eroare la procesarea OCR: {e}")
+            logging.getLogger(__name__).warning("OCR processing failed: %s", e)
             return JsonResponse(
                 {"code": 500, "msg": f"Eroare la procesarea OCR: {e}"},
                 status=500,

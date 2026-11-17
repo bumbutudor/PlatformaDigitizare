@@ -191,7 +191,7 @@ Verificare backend, din `backend` (PowerShell):
 
 ```powershell
 $env:SCANTAILOR_INTEGRATION = '1'
-.\venv\Scripts\python.exe manage.py test apps.access.tests apps.access.test_scantailor --noinput
+.\venv\Scripts\python.exe manage.py test apps.access.tests apps.access.test_ocr apps.access.test_scantailor --noinput
 ```
 
 Fără variabila `SCANTAILOR_INTEGRATION`, testul care pornește executabilul este

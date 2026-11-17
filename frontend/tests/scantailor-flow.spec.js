@@ -76,4 +76,25 @@ describe('ScanTailor preprocessing and OCR flow', () => {
     expect(step.state.errorMessage).to.equal('Hot Folder neconfigurat');
     expect(step.state.show).to.equal(true);
   });
+
+  it('keeps processed pages while deriving the OCR engine again after a model change', async () => {
+    store = { ...store, period: 'secolulXIX', ocrModel: 'secolulXIX_4',
+      preprocessedFiles: ['pre/ScanTailor/job/page.png'] };
+    const step = new Step3({ getStore: () => store, updateStore: () => {} });
+    step.setState = update => { step.state = { ...step.state, ...update }; };
+    const requests = [];
+    step.API.post = async (endpoint, body) => {
+      requests.push(body);
+      return { code: 200, ocrResults: ['text'], ocrReviewRefs: [] };
+    };
+    await step.handleOCRRequest();
+    step.setState({ period: 'secolulXVIII', ocrOptions: { useTesseract: true } });
+    await step.handleOCRRequest();
+    expect(requests[0].ocrOptions.useTesseract).to.equal(true);
+    expect(requests[1].ocrOptions.useTesseract).to.equal(false);
+    requests.forEach(request => {
+      expect(request.preprocessWith).to.equal('ScanTailor');
+      expect(request.preprocessedFiles).to.deep.equal(['pre/ScanTailor/job/page.png']);
+    });
+  });
 });

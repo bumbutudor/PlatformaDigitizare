@@ -13,6 +13,7 @@ import Alert from 'react-bootstrap/Alert';
 import ServiceGate from '../components/ServiceGate';
 import { SERVICES } from '../utils/ServiceStatus';
 import { cleanOcrResults } from '../utils/OcrText';
+import { buildOcrRequest, ocrFailureMessage } from '../utils/OcrModels';
 import CodexCorrectionReview from '../components/CodexCorrectionReview';
 
 // OCR
@@ -113,25 +114,25 @@ export default class Step3 extends Component {
 
   async handleOCRRequest() {
     this.setState({ show: false });
-    this.setState({ showError: false });
+    this.setState({ showError: false, errorMessage: '' });
     this.setState({ showLoader: true });
 
     const ocrEndpoint = "ocr/";
-    const postData = {
+    // Derive the OCR engine from the current model and keep ScanTailor's
+    // processed-image routing in the same request.
+    const postData = buildOcrRequest({
       ...this.state,
       preprocessWith: this.props.getStore().preprocessWith,
       preprocessMode: this.props.getStore().preprocessMode,
-      api: this.props.getStore().api  // Include API URL for searchable PDF paths
-    };
+    }, this.props.getStore().api);
     // console.log(postData);
 
     return this.API.post(ocrEndpoint, postData)
       .then((data) => {
         console.log(data);
-        if (!data || data.code !== 200 || !Array.isArray(data.ocrResults)) {
-          throw new Error((data && data.msg) || 'Serverul nu a returnat rezultatele OCR.');
-        }
-        if (data.ocrResults.length > 0) {
+        const hasResults = data && data.code === 200 && Array.isArray(data.ocrResults)
+          && data.ocrResults.length > 0;
+        if (hasResults) {
           const ocrResults = cleanOcrResults(data.ocrResults);
           const ocrReviewRefs = Array.isArray(data.ocrReviewRefs)
             ? data.ocrReviewRefs
@@ -154,7 +155,13 @@ export default class Step3 extends Component {
           
           this.setState({ showNextStep: true });
         } else {
-          this.setState({ showError: true });
+          // Re-enable "Start OCR" so the user can retry without reselecting.
+          this.setState({
+            showError: true,
+            errorMessage: ocrFailureMessage(data) || 'Serverul nu a returnat rezultatele OCR.',
+            showNextStep: false,
+            show: true,
+          });
         }
       })
       .catch((error) => {
@@ -357,12 +364,10 @@ export default class Step3 extends Component {
                             ocrModel: "secolulXIX_4",
                             alphabet: "cyrillicTransitional",
                             show: true,
-                            ocrOptions: { useTesseract: true },
                           });
                           this.props.updateStore({
                             ocrModel: "secolulXIX_4",
                             alphabet: "cyrillicTransitional",
-                            ocrOptions: { useTesseract: true },
                           });
                         }}
                       />
@@ -636,7 +641,9 @@ export default class Step3 extends Component {
                   <Alert.Heading>
                     A apărut o eroare, incercati din nou...
                   </Alert.Heading>
-                  <p className="mb-0">{this.state.errorMessage}</p>
+                  {this.state.errorMessage && (
+                    <p className="mb-0">{this.state.errorMessage}</p>
+                  )}
                 </Alert>
               )}
               <ServiceGate
