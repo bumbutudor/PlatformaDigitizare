@@ -157,35 +157,85 @@ intrare, 60 milioane pixeli estimați/la ieșire și 120 secunde/cerere. Un sing
 job rulează per proces Django; cererile concurente primesc 429 și pot fi reluate.
 `SCANTAILOR_TIMEOUT` și `SCANTAILOR_MAX_FILES` sunt configurabile.
 
-### ABBYY Hot Folder: configurația verificată la 17 noiembrie 2026
+### ABBYY Hot Folder: configurația verificată la 18 noiembrie 2026
 
 Configurația completă, cu căi absolute și numele fișierelor `.hft`, este în
-[snapshot-ul JSON](docs/hotfolder-windows-2026-11-17.json). Toate cele șapte
-task-uri erau `Watching…` în UI, programate `everyMinute`, cu subfoldere incluse.
-Valorile `paused` din unele fișiere `.hft` nu reflectau starea UI curentă.
+[snapshot-ul JSON](docs/hotfolder-windows-2026-11-18.json). Cele 12 task-uri
+sunt programate `everyMinute` și păstrează sursele (`postProcessAction=nothing`).
+Starea din fișierul `.hft` poate diferi de starea afișată în aplicație.
 
 Căile de mai jos sunt relative la
 `C:\Users\tudor\Desktop\PlatformaDigitizare\backend\media\`.
 
 | Task | Intrare | Ieșire | Formate |
 |---|---|---|---|
+| FR_Preprocessing | `media` (fără subfoldere) | `pre\FR` | JPG, numai preprocesare |
 | SecXX_preFR | `pre\FR` | `ocr\secolulXX\cyrillic` | TXT, DOCX, PDF căutabil |
 | SecXX_PDF | `pdfs\secolulXX` | `ocr\secolulXX\cyrillic` | TXT, DOCX, PDF căutabil |
 | SecXX_OpenCV | `pre\OpenCV` | `ocr\secolulXX\cyrillic` | TXT, DOCX, PDF căutabil |
 | SecXVIII_Geografie_ScanTailor | `out` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
 | SecXVIII_Geografie_preFR | `pre\FR` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
+| SecXVIII_Geografie_OpenCV | `pre\OpenCV` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
+| SecXVIII_Geografie_PDF | `pdfs\secolulXVIII` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
 | SecXVII_PDF | `pdfs\secolulXVII` | `ocr\secolulXVII` | TXT, DOCX, PDF căutabil |
+| SecXVII_OpenCV | `pre\OpenCV` | `ocr\secolulXVII` | TXT, DOCX, PDF căutabil |
 | SecXIX_Epistolariu_OpenCV | `pre\OpenCV` | `ocr\secolulXIX\cyrillicRomanian` | Numai TXT |
+| SecXIX_Epistolariu_PDF | `pdfs\secolulXIX` | `ocr\secolulXIX\cyrillicRomanian` | Numai TXT |
 
-Niciun task nu urmărește `media` sau `pre\ScanTailor`. La cererea OCR, imaginile
-noi ScanTailor sunt copiate atomic, cu nume unice, în `out` pentru XVIII și
-`pre\OpenCV` pentru XIX/XX. Folderul OpenCV este comun celor două task-uri, deci
-ambele pot procesa aceeași imagine. Pentru XVII nu există un task de imagini:
-cererea raportează lipsa configurării, fără să aștepte un rezultat imposibil.
+În tabel, intrarea `media` înseamnă rădăcina însăși. Toate task-urile OCR includ
+subfolderele; task-ul de preprocesare nu le include, evitând reintroducerea
+rezultatelor în același circuit. `pre\FR` are OCR numai pentru XVIII și XX;
+pentru XVII și XIX se folosește OpenCV sau ScanTailor.
+
+Imaginile ScanTailor sunt copiate atomic, cu nume unice, în `out` pentru XVIII
+și `pre\OpenCV` pentru XVII/XIX/XX. Pe această mașină, `.env` configurează
+`FINEREADER_SCANTAILOR_XVII_INPUT` către `pre\OpenCV`; valoarea implicită din
+cod rămâne goală pentru serverele fără un astfel de task. Folderul OpenCV este
+comun celor patru modele, deci fiecare imagine este recunoscută de patru ori.
+Această configurație este provizorie și poate mări timpul de răspuns.
+
 Căile se pot modifica prin `FINEREADER_SCANTAILOR_XVII_INPUT`,
 `FINEREADER_SCANTAILOR_XVIII_INPUT`, `FINEREADER_SCANTAILOR_XIX_INPUT` și
-`FINEREADER_SCANTAILOR_XX_INPUT`. Configurarea acestor variabile nu creează
-task-uri ABBYY. Tesseract primește direct PNG-ul procesat când este selectat.
+`FINEREADER_SCANTAILOR_XX_INPUT`. Variabilele nu creează task-uri ABBYY.
+Tesseract primește direct PNG-ul procesat când este selectat.
+
+Task-ul Windows `Digitizare Server` execută `scripts/start_server.py` la
+conectarea utilizatorului `tudor`, pornind Hot Folder și Django. A fost testată
+pornirea efectivă a backend-ului prin acest task. Fără autentificarea Windows,
+Hot Folder nu poate procesa; autentificarea automată nu este configurată.
+Sleep-ul este dezactivat la alimentarea din priză.
+
+### Arhivare și publicare
+
+`Digitizare Archive Old Media` rulează zilnic la 03:00 și recuperează execuțiile
+ratate când sesiunea este disponibilă. Rulează
+`scripts/cleanup_media.py --apply --days 7`. Scriptul mută rezultatele vechi din
+`ocr`, `pre`, `out`, `pdfs` în `.ops/media-archive/<data>/`, păstrând structura
+și un manifest JSONL. Nu șterge permanent și nu golește arhiva. Exclude
+fișierele referite în baza de date, fișierele urmărite în Git, modelele,
+arhivele și materialele video.
+Fără `--apply`, afișează doar numărul și volumul fișierelor eligibile.
+
+Arhivarea inițială a păstrat 13.077 fișiere (608.613.324 octeți) în
+`.ops/media-archive/20261117-203352-233273`. Cele 14 configurații `.hft` vechi
+pline cu zerouri au fost mutate în `.ops/hotfolder-20261117/invalid-configs`;
+configurațiile și istoricul complet anterior sunt în backup-urile alăturate.
+
+Frontend-ul se construiește cu `npm run build-digitizare` din `frontend`.
+Comanda așteaptă terminarea webpack și copierea tuturor fișierelor în `docs`.
+Publicarea folosește sesiunea WinSCP locală `tudor@digitizare.math.md`, către
+`/var/www/digitalizare`. Se copiază `index.html`, `main.js`, `runtime-config.js`
+și `dist/bundle.js`. Versiunea anterioară este păstrată în `.ops/frontend-before`.
+Fișierele publicate au fost comparate cu build-ul local și sunt identice.
+
+Verificări pe API-ul public la 18 noiembrie: pagina `samples/5.jpg`, cu spații
+în numele încărcat, a produs text și PDF prin XX/OpenCV (aproximativ 72 s).
+Aceeași imagine preprocesată a produs text prin XIX/Epistolariu, XVII și XVIII.
+Conversia ei într-un PDF de o pagină a verificat task-urile PDF XVIII (49 s,
+text și PDF) și XIX (28 s, text). Preprocesarea FineReader a întors JPG.
+Un rezultat intenționat absent a întors HTTP 500 după 120 s, cu numele
+fișierului în mesaj. Acestea verifică rutele, nu acuratețea modelelor; ABBYY
+poate exporta TXT gol când nu detectează zone de text într-o imagine.
 
 Verificare backend, din `backend` (PowerShell):
 

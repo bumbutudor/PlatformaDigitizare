@@ -11,6 +11,7 @@
 .idea/
 .tmp-chrome-*/
 /ngrok.txt
+/.ops/
 
 # no thx
 frontend/node_modules

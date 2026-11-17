@@ -1,0 +1,348 @@
+{
+  "verifiedDate": "2026-11-18",
+  "configurationDirectory": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder",
+  "tasks": [
+    {
+      "name": "FR_Preprocessing",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\FR_Preprocessing.hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media",
+          "includeSubfolders": false
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\FR",
+          "format": "jpeg_color",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "PreprocessOnly",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXIX_Epistolariu_OpenCV",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXVIII_Geografie_OpenCV(3).hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXIX\\cyrillicRomanian",
+          "format": "text",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXIX_Epistolariu_PDF",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXIX_Epistolariu_PDF.hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pdfs\\secolulXIX",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXIX\\cyrillicRomanian",
+          "format": "text",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXVIII_Geografie_OpenCV",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXVIII_Geografie_OpenCV.hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "text",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "docx",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "pdf",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXVIII_Geografie_PDF",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXVIII_Geografie_PDF.hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pdfs\\secolulXVIII",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "text",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "docx",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "pdf",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXVIII_Geografie_ScanTailor",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXVIII_Geografie_preFR(2).hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\out",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "text",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "docx",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "pdf",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXVIII_Geografie_preFR",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXVIII_Geografie_OpenCV(2).hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\FR",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "text",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "docx",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVIII",
+          "format": "pdf",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXVII_OpenCV",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXVII_OpenCV.hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVII",
+          "format": "text",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVII",
+          "format": "docx",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVII",
+          "format": "pdf",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXVII_PDF",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXVII_NT_preFR(2).hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pdfs\\secolulXVII",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVII",
+          "format": "text",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVII",
+          "format": "docx",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXVII",
+          "format": "pdf",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXX_OpenCV",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXX_OpenCV.hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXX\\cyrillic",
+          "format": "text",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXX\\cyrillic",
+          "format": "docx",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXX\\cyrillic",
+          "format": "pdf",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXX_PDF",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXX_preFR(2).hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pdfs\\secolulXX",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXX\\cyrillic",
+          "format": "text",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXX\\cyrillic",
+          "format": "docx",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXX\\cyrillic",
+          "format": "pdf",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    },
+    {
+      "name": "SecXX_preFR",
+      "configurationFile": "C:\\Users\\tudor\\AppData\\Local\\ABBYY\\FineReader\\15\\HotFolder\\SecXX_OpenCV(2).hft",
+      "schedule": "everyMinute",
+      "inputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\FR",
+          "includeSubfolders": true
+        }
+      ],
+      "outputs": [
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXX\\cyrillic",
+          "format": "text",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXX\\cyrillic",
+          "format": "docx",
+          "nameTemplate": "[F]"
+        },
+        {
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\ocr\\secolulXX\\cyrillic",
+          "format": "pdf",
+          "nameTemplate": "[F]"
+        }
+      ],
+      "processingMode": "AnalyzeAndRecognize",
+      "originalFiles": "nothing",
+      "observedUiStatus": "Watching"
+    }
+  ]
+}
