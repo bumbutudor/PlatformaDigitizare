@@ -7,6 +7,11 @@
 # git credential file
 .gitconfig.local
 
+# Local IDE settings and temporary browser profiles
+.idea/
+.tmp-chrome-*/
+/ngrok.txt
+
 # no thx
 frontend/node_modules
 frontend/coverage
@@ -43,6 +48,11 @@ shilocation
 # BACKEND
 # environment
 backend/venv
+# Uploaded documents and generated OCR output stay on the server.
+# Existing versioned tools/models are kept; new ones must be added explicitly.
+backend/media/
+# FineReader working project (the reusable .fbt models remain versioned).
+backend/ocr_models/BratulOCR/
 backend/media/pre/FR
 backend/media/pre/OpenCV
 backend/media/pre/ScanTailor
@@ -62,6 +72,7 @@ backend/media/*.tif
 backend/media/*.zip
 
 backend/.env
+backend/.codex-access-key*
 # END OF BACKEND
 
 # new folder of frontend

@@ -13,6 +13,7 @@ import Popover from "react-bootstrap/Popover";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Tooltip from "react-bootstrap/Tooltip";
 import { Player } from 'video-react';
+import { apiUrl } from '../utils/ApiConfig';
 // import ScanTailorTutorial from '../assets/ScanTailorTutorial.mp4'
 
 
@@ -164,7 +165,7 @@ const ScanTailor = (props) => {
                 <ListGroup as="ol" numbered>
                     <ListGroup.Item>
                         <Player>
-                            <source src="https://a926-81-180-76-251.eu.ngrok.io/media/pre/ScanTailor/tutorial.mp4" />
+                            <source src={apiUrl('media/pre/ScanTailor/tutorial.mp4')} />
                         </Player>
                     </ListGroup.Item>
                     <ListGroup.Item as="li">Apasă butonul <code>Start preprocesare</code>&nbsp;&nbsp;&nbsp;&nbsp; de mai jos pentru a deschide aplicația ScanTailor în calculatorul tău.

@@ -3,10 +3,10 @@ import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Modal from "react-bootstrap/Modal";
-import FetchWrapper from "./FetchWrapper";
 import Alert from 'react-bootstrap/Alert';
 import { mapPeriod } from "../utils/Utills";
 import Form from 'react-bootstrap/Form';
+import { createApiClient } from '../utils/ApiConfig';
 
 const ExceptionWidget = (props) => {
     const [exceptions, setExceptions] = useState([]);
@@ -17,7 +17,9 @@ const ExceptionWidget = (props) => {
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
-    const API = new FetchWrapper('https://uuj2kn6s.ngrok.app/');
+    const API = props.api && typeof props.api.post === 'function'
+        ? props.api
+        : createApiClient();
 
     const handleAddException = async (event) => {
         setLoading(true);

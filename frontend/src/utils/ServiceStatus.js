@@ -15,7 +15,7 @@ export const SERVICES = {
   TRANSLITERA: "translitera",
   PUBLISH: "publish",
   S3: "s3",
-  OPENAI: "openai",
+  CODEX: "codex",
   BACKEND: "backend", // synthetic - represents the Django server itself
 };
 
@@ -25,7 +25,7 @@ const FALLBACK_LABELS = {
   translitera: "Transliterare",
   publish: "Publicare",
   s3: "Stocare (S3)",
-  openai: "OpenAI (opțional)",
+  codex: "Codex CLI (experimental)",
   backend: "Server (backend)",
 };
 
@@ -80,8 +80,6 @@ class ServiceStatusMonitor {
       response = await fetch(this.baseUrl + "health/", {
         method: "GET",
         headers: {
-          // Skip ngrok's interstitial HTML page so we always get JSON.
-          "ngrok-skip-browser-warning": "true",
           Accept: "application/json",
         },
       });

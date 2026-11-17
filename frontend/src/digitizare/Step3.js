@@ -12,6 +12,8 @@ import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert';
 import ServiceGate from '../components/ServiceGate';
 import { SERVICES } from '../utils/ServiceStatus';
+import { cleanOcrResults } from '../utils/OcrText';
+import CodexCorrectionReview from '../components/CodexCorrectionReview';
 
 // OCR
 export default class Step3 extends Component {
@@ -28,6 +30,7 @@ export default class Step3 extends Component {
       s3SourceFiles: props.getStore().s3SourceFiles,
       ocrModel: props.getStore().ocrModel,
       ocrResults: props.getStore().ocrResults,
+      ocrReviewRefs: props.getStore().ocrReviewRefs || [],
       show: false,
       showLoader: false,
       showNextStep: false,
@@ -56,6 +59,41 @@ export default class Step3 extends Component {
   componentDidMount() {}
 
   componentWillUnmount() {}
+
+  isPdfAtIndex(index) {
+    const sourceFile = this.state.s3SourceFiles[index];
+    const preprocessedFile = this.state.s3PreprocessedFiles[index];
+    const preprocessedUrl = typeof preprocessedFile === 'object'
+      ? preprocessedFile && preprocessedFile.url
+      : preprocessedFile;
+    return Boolean(
+      sourceFile && sourceFile.isPdf
+      || typeof preprocessedUrl === 'string'
+        && preprocessedUrl.toLowerCase().endsWith('.pdf')
+    );
+  }
+
+  getOcrReviewRef(index) {
+    const reviewRef = this.state.ocrReviewRefs[index];
+    if (typeof reviewRef === 'string') {
+      return { imageRef: reviewRef, pageId: String(index + 1) };
+    }
+    if (reviewRef && typeof reviewRef === 'object') {
+      return {
+        imageRef: reviewRef.imageRef || reviewRef.ref || '',
+        pageId: reviewRef.pageId || reviewRef.page_id || String(index + 1),
+      };
+    }
+    return { imageRef: '', pageId: String(index + 1) };
+  }
+
+  handleOcrTextChange(index, value) {
+    this.setState((previous) => {
+      const ocrResults = [...previous.ocrResults];
+      ocrResults[index] = value;
+      return { ocrResults };
+    }, () => this.props.updateStore({ ocrResults: this.state.ocrResults }));
+  }
 
   validationCheck() {
     if (!this._validateOnDemand) return;
@@ -88,8 +126,12 @@ export default class Step3 extends Component {
       .then((data) => {
         console.log(data);
         if (data.ocrResults.length > 0) {
-          this.setState({ ocrResults: data.ocrResults });
-          this.props.updateStore({ ocrResults: data.ocrResults });
+          const ocrResults = cleanOcrResults(data.ocrResults);
+          const ocrReviewRefs = Array.isArray(data.ocrReviewRefs)
+            ? data.ocrReviewRefs
+            : [];
+          this.setState({ ocrResults, ocrReviewRefs });
+          this.props.updateStore({ ocrResults, ocrReviewRefs });
           
           // Store searchable PDFs if available
           if (data.searchablePdfs && data.searchablePdfs.length > 0) {
@@ -657,25 +699,44 @@ export default class Step3 extends Component {
               {this.state.ocrResults.length !== 0 && (
                 <>
                   <Accordion defaultActiveKey={0} alwaysOpen>
-                    {this.state.ocrResults.map((text, index) => (
-                      <Accordion.Item eventKey={index} key={index}>
-                        <Accordion.Header>
-                          Ținta - textul recunoscut {index + 1}
-                        </Accordion.Header>
-                        <Accordion.Body>
-                          <div className="ocrResult mb-4">
-                            {text.split('\n').map((item, key) => {
-                              return (
-                                <span key={key}>
-                                  {item}
-                                  <br />
-                                </span>
-                              );
-                            })}
-                          </div>
-                        </Accordion.Body>
-                      </Accordion.Item>
-                    ))}
+                    {this.state.ocrResults.map((text, index) => {
+                      const isPdf = this.isPdfAtIndex(index);
+                      const reviewRef = this.getOcrReviewRef(index);
+                      return (
+                        <Accordion.Item eventKey={index} key={index}>
+                          <Accordion.Header>
+                            Ținta - textul recunoscut {index + 1}
+                          </Accordion.Header>
+                          <Accordion.Body>
+                            {isPdf ? (
+                              <div className="ocrResult mb-4">
+                                {text.split('\n').map((item, key) => (
+                                  <span key={key}>
+                                    {item}
+                                    <br />
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <CodexCorrectionReview
+                                task="ocr"
+                                api={this.API}
+                                targetText={text}
+                                imageRef={reviewRef.imageRef}
+                                pageId={reviewRef.pageId}
+                                period={this.state.period}
+                                alphabet={this.state.alphabet}
+                                errorThreshold={0.98}
+                                minimumFidelity={0.90}
+                                onTextChange={(value) => (
+                                  this.handleOcrTextChange(index, value)
+                                )}
+                              />
+                            )}
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      );
+                    })}
                   </Accordion>
                 </>
               )}

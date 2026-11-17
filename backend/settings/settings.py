@@ -28,7 +28,6 @@ load_dotenv(dotenv_path)
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', default='unsafe-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', default='')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -44,10 +43,12 @@ INSTALLED_APPS = [
 ]
 
 ALLOWED_HOSTS = ["localhost", "digitizare.math.md", "math.md",
-                 "ngrok.io", "uuj2kn6s.ngrok.app", "127.0.0.1", "81.180.76.233"]
+                 "ngrok.io", "uuj2kn6s.ngrok.app",
+                 "win-htgf0pfg08o.tail688ab8.ts.net",
+                 "127.0.0.1", "81.180.76.233"]
 # CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = False
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:8080",
 #     "http://127.0.0.1:8000",
@@ -60,14 +61,19 @@ CORS_ALLOW_CREDENTIALS = True
 #     'https://digitizare.math.md'
 # ]
 
-CORS_ORIGIN_WHITELIST = [
+CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'http://127.0.0.1:3000',
     'http://localhost:8000',
+    'http://127.0.0.1:8000',
     'http://localhost:8080',
-    'https://ngrok.io',
+    'http://127.0.0.1:8080',
+    'http://localhost:63342',
+    'http://127.0.0.1:63342',
     'https://uuj2kn6s.ngrok.app',
     'https://digitizare.math.md'
 ]
+CORS_ORIGIN_WHITELIST = CORS_ALLOWED_ORIGINS
 
 CSRF_TRUSTED_ORIGINS = ['https://uuj2kn6s.ngrok.app', 'http://localhost:3000',
                         'http://localhost:8000', 'http://localhost:8080', 'https://ngrok.io']
@@ -87,6 +93,7 @@ CORS_ALLOW_HEADERS = (
     'authorization',
     'content-type',
     'dnt',
+    'ngrok-skip-browser-warning',
     'origin',
     'user-agent',
     'x-csrftoken',
@@ -101,8 +108,7 @@ MIDDLEWARE = [
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.access.custom_cors_middleware.CustomCorsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 ROOT_URLCONF = 'settings.urls'
@@ -210,4 +216,65 @@ AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET', default='emoldova.bucket')
 HEALTH_CACHE_TTL = int(os.getenv('HEALTH_CACHE_TTL', default='12'))
 # Per-service network timeout (seconds) for health probes.
 HEALTH_PROBE_TIMEOUT = float(os.getenv('HEALTH_PROBE_TIMEOUT', default='5'))
+
+# Local Codex CLI correction service. Corrections are returned for interactive
+# review only and are never persisted by the backend.
+CODEX_CLI_PATH = os.getenv('CODEX_CLI_PATH', default='codex')
+CODEX_CORRECTION_ENABLED = os.getenv(
+    'CODEX_CORRECTION_ENABLED', default='true').lower() in ('1', 'true', 'yes')
+CODEX_CORRECTION_TIMEOUT = int(os.getenv(
+    'CODEX_CORRECTION_TIMEOUT', default='240'))
+CODEX_CORRECTION_MAX_CHARS = int(os.getenv(
+    'CODEX_CORRECTION_MAX_CHARS', default='20000'))
+CODEX_CORRECTION_MAX_OUTPUT_CHARS = int(os.getenv(
+    'CODEX_CORRECTION_MAX_OUTPUT_CHARS', default='120000'))
+CODEX_CORRECTION_MAX_SUGGESTIONS = int(os.getenv(
+    'CODEX_CORRECTION_MAX_SUGGESTIONS', default='250'))
+CODEX_CORRECTION_MERGE_GAP = int(os.getenv(
+    'CODEX_CORRECTION_MERGE_GAP', default='3'))
+CODEX_CORRECTION_MIN_SIMILARITY = float(os.getenv(
+    'CODEX_CORRECTION_MIN_SIMILARITY', default='0.85'))
+CODEX_CORRECTION_MAX_CONCURRENT = int(os.getenv(
+    'CODEX_CORRECTION_MAX_CONCURRENT', default='1'))
+CODEX_CORRECTION_RATE_LIMIT = int(os.getenv(
+    'CODEX_CORRECTION_RATE_LIMIT', default='20'))
+CODEX_CORRECTION_RATE_WINDOW = int(os.getenv(
+    'CODEX_CORRECTION_RATE_WINDOW', default='600'))
+# Visual OCR audit accepts only short-lived signed references to local images.
+CODEX_OCR_ERROR_THRESHOLD = float(os.getenv(
+    'CODEX_OCR_ERROR_THRESHOLD', default='0.98'))
+CODEX_OCR_MINIMUM_FIDELITY = float(os.getenv(
+    'CODEX_OCR_MINIMUM_FIDELITY', default='0.90'))
+CODEX_OCR_IMAGE_REF_MAX_AGE = int(os.getenv(
+    'CODEX_OCR_IMAGE_REF_MAX_AGE', default='86400'))
+CODEX_OCR_MAX_IMAGE_BYTES = int(os.getenv(
+    'CODEX_OCR_MAX_IMAGE_BYTES', default=str(25 * 1024 * 1024)))
+CODEX_OCR_MAX_IMAGE_PIXELS = int(os.getenv(
+    'CODEX_OCR_MAX_IMAGE_PIXELS', default='40000000'))
+CODEX_OCR_MAX_SANITIZED_BYTES = int(os.getenv(
+    'CODEX_OCR_MAX_SANITIZED_BYTES', default=str(50 * 1024 * 1024)))
+CODEX_OCR_ALLOWED_IMAGE_FORMATS = [
+    image_format.strip().upper()
+    for image_format in os.getenv(
+        'CODEX_OCR_ALLOWED_IMAGE_FORMATS',
+        default='PNG,JPEG,TIFF,BMP,WEBP',
+    ).split(',')
+    if image_format.strip()
+]
+CODEX_ACCESS_KEY = os.getenv('CODEX_ACCESS_KEY', default='')
+CODEX_ACCESS_KEY_FILE = os.getenv(
+    'CODEX_ACCESS_KEY_FILE',
+    default=os.path.join(BASE_DIR, '.codex-access-key'))
+CODEX_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        'CODEX_ALLOWED_ORIGINS',
+        default=(
+            'https://digitizare.math.md,'
+            'http://localhost:8080,http://127.0.0.1:8080,'
+            'http://localhost:63342,http://127.0.0.1:63342'
+        ),
+    ).split(',')
+    if origin.strip()
+]
 

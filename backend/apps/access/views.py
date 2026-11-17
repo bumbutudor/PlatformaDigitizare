@@ -3,11 +3,15 @@ from click import command
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, FileResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.cache import never_cache
 from .models import File
 from django.core.files.storage import FileSystemStorage
 from .utils import *
-from .ocr import local_ocr
+from .ocr import local_ocr, remove_ocr_unknown_markers
 from .health import get_health
+from .codex_correction import CodexCorrectionError, generate_correction_suggestions
+from .codex_ocr_review import create_ocr_review_refs, generate_ocr_review
+from .codex_access import CodexAccessError, require_codex_access
 import os
 from django.conf import settings
 import json
@@ -315,17 +319,35 @@ def ocr(request):
                 status=500,
             )
 
+        # FineReader uses the literal ASCII caret as a marker for an unknown
+        # glyph/artifact. It is not document content and must not reach the UI.
+        if isinstance(ocr_response, dict):
+            raw_ocr_results = ocr_response.get("ocrResults", [])
+        else:
+            raw_ocr_results = ocr_response
+        clean_ocr_results = [
+            remove_ocr_unknown_markers(text)
+            for text in raw_ocr_results
+        ]
+        ocr_review_refs = create_ocr_review_refs(data, len(clean_ocr_results))
+
         # Handle both old format (list) and new format (dict with ocrResults and searchablePdfs)
         if isinstance(ocr_response, dict):
             return JsonResponse({
                 "code": 200, 
                 "msg": "success", 
-                "ocrResults": ocr_response.get("ocrResults", []),
-                "searchablePdfs": ocr_response.get("searchablePdfs", [])
+                "ocrResults": clean_ocr_results,
+                "searchablePdfs": ocr_response.get("searchablePdfs", []),
+                "ocrReviewRefs": ocr_review_refs,
             })
         else:
             # Backwards compatibility
-            return JsonResponse({"code": 200, "msg": "success", "ocrResults": ocr_response})
+            return JsonResponse({
+                "code": 200,
+                "msg": "success",
+                "ocrResults": clean_ocr_results,
+                "ocrReviewRefs": ocr_review_refs,
+            })
     else:
         return JsonResponse({"code": 500, "msg": "server error"})
 
@@ -380,6 +402,9 @@ def transliterate(request):
         trans_results = []
 
         for ocr_result in ocr_results:
+            # Defensive fallback for sessions created before OCR cleanup was
+            # deployed or for clients that call this endpoint directly.
+            ocr_result = remove_ocr_unknown_markers(ocr_result)
             payload = {
                 'cyrillicText': ocr_result,
                 'period': periodOptions[period],
@@ -395,23 +420,90 @@ def transliterate(request):
 
             # Apply additional transliteration rules
             trans_result = apply_additional_transliteration(trans_result, transliteration_map)
-            trans_result = replace_all_exceptions(trans_result)
+            if trans_options.get('useExceptionDictionary', True):
+                trans_result = replace_all_exceptions(trans_result)
             # Continue with existing processing
             # if trans_options.get('removeHyphen', False):
             #     text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(trans_result, vocabulary)
             #     clean_text = replace_all_exceptions(text_no_hyphenation)
             #     trans_result = clean_text  # Update trans_result for further processing
             #
-            if trans_options.get('correctTextWithOpenAIModels', False):
-                corrected_text = correct_text_with_OpenAI(ocr_result, trans_result)
-                trans_result = corrected_text
-
             trans_results.append(trans_result)
 
         return JsonResponse({"code": 200, "msg": "success", "transResults": trans_results})
 
     else:
         return JsonResponse({"code": 405, "msg": "Method not allowed"}, status=405)
+
+
+@never_cache
+def codex_correct(request):
+    """Return reviewable Codex suggestions without modifying or saving text."""
+    if request.method != 'POST':
+        return JsonResponse(
+            {"code": 405, "msg": "Method not allowed"}, status=405)
+
+    try:
+        require_codex_access(request)
+    except CodexAccessError as exc:
+        return JsonResponse(
+            {"code": exc.status_code, "msg": str(exc)},
+            status=exc.status_code,
+        )
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse(
+            {"code": 400, "msg": "Cererea JSON este invalidă."}, status=400)
+
+    if not isinstance(data, dict):
+        return JsonResponse(
+            {"code": 400, "msg": "Cererea trebuie să fie un obiect JSON."},
+            status=400,
+        )
+    task = data.get('task', 'transliteration')
+    if task not in ('transliteration', 'ocr'):
+        return JsonResponse(
+            {"code": 400, "msg": "Tipul de corectare nu este acceptat."},
+            status=400,
+        )
+
+    try:
+        if task == 'ocr':
+            review = generate_ocr_review(
+                target_text=data.get('targetText'),
+                image_ref=data.get('imageRef'),
+                page_id=data.get('pageId'),
+                error_threshold=data.get('errorThreshold'),
+                minimum_fidelity=data.get('minimumFidelity'),
+                period=data.get('period', ''),
+                alphabet=data.get('alphabet', ''),
+            )
+        else:
+            suggestions = generate_correction_suggestions(
+                data.get('sourceText'),
+                data.get('targetText'),
+                data.get('period', ''),
+                data.get('alphabet', ''),
+            )
+    except CodexCorrectionError as exc:
+        response = JsonResponse(
+            {"code": exc.status_code, "msg": str(exc)},
+            status=exc.status_code,
+        )
+        if exc.status_code == 429:
+            response["Retry-After"] = str(
+                getattr(settings, "CODEX_CORRECTION_RATE_WINDOW", 600))
+        return response
+
+    if task == 'ocr':
+        return JsonResponse({"code": 200, "msg": "success", **review})
+    return JsonResponse({
+        "code": 200,
+        "msg": "success",
+        "suggestions": suggestions,
+    })
 
 
 def publish(request):

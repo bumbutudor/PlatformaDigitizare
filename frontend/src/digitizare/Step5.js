@@ -5,16 +5,21 @@ import Form from 'react-bootstrap/Form';
 import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 import OverlayTrigger from 'react-bootstrap/esm/OverlayTrigger';
-import Overlay from 'react-bootstrap/esm/Overlay';
 import FetchWrapper from '../components/FetchWrapper';
+import { cleanOcrResults } from '../utils/OcrText';
 import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert';
 import Popover from "react-bootstrap/Popover";
-import Draggable from 'react-draggable'; // The default
 import DictionaryModal from '../components/DictionaryModal';
+import CodexCorrectionReview from '../components/CodexCorrectionReview';
 import StepsInfo from '../components/StepsInfo';
 import ServiceGate from '../components/ServiceGate';
 import { SERVICES } from '../utils/ServiceStatus';
+import ReactImageLightbox from 'react-image-lightbox';
+import 'react-image-lightbox/style.css';
+import OriginalDocumentPreview from '../components/OriginalDocumentPreview';
+import FloatingOriginalDocumentWidget from '../components/FloatingOriginalDocumentWidget';
+import { buildOriginalDocumentCandidates } from '../utils/DocumentSource';
 
 
 // Transliteraion
@@ -28,6 +33,9 @@ export default class Step5 extends Component {
       preprocessedFiles: props.getStore().preprocessedFiles,
       alphabet: props.getStore().alphabet,
       sourceFiles: props.getStore().sourceFiles,
+      s3SourceFiles: props.getStore().s3SourceFiles || [],
+      s3PreprocessedFiles: props.getStore().s3PreprocessedFiles || [],
+      searchablePdfs: props.getStore().searchablePdfs || [],
       ocrResults: props.getStore().ocrResults,
       transResults: props.getStore().transResults,
       transOptions: props.getStore().transOptions,
@@ -39,23 +47,14 @@ export default class Step5 extends Component {
       ),
 
       exceptionDictionary: [],
-      aboutOpenAI:
-        (
-          <Popover id="popover-basic">
-            <Popover.Header as="h4">{StepsInfo.step5Info2.title}</Popover.Header>
-            <Popover.Body>
-              <div dangerouslySetInnerHTML={{ __html: StepsInfo.step5Info2.body }} />
-
-
-            </Popover.Body>
-          </Popover>
-        ),
       show: true,
       showLoader: false,
       showNextStep: false,
       showErrors: false,
       showModal: false,
       serviceBlock: { blocked: false },
+      isLightboxOpen: false,
+      lightboxImageSrc: '',
     };
 
     this.step5Info = (
@@ -97,10 +96,10 @@ export default class Step5 extends Component {
   }
 
   handleTransOptionsChange(e) {
-    let newState = this.state.transOptions;
-    newState[e.target.name] = e.target.checked;
-    this.setState(newState);
-    // this.props.updateStore({ transOptions: { ...this.state.transOptions, [e.target.name]: e.target.checked } });
+    const { name, checked } = e.target;
+    this.setState((previous) => ({
+      transOptions: { ...previous.transOptions, [name]: checked },
+    }), () => this.props.updateStore({ transOptions: this.state.transOptions }));
   }
 
   async handleTransRequest() {
@@ -109,7 +108,15 @@ export default class Step5 extends Component {
     this.setState({ showLoader: true });
 
     const transEndpoint = 'transliterate/';
-    const postData = this.state;
+    const ocrResults = cleanOcrResults(this.state.ocrResults);
+    this.setState({ ocrResults });
+    this.props.updateStore({ ocrResults });
+    const postData = {
+      period: this.state.period,
+      alphabet: this.state.alphabet,
+      transOptions: this.state.transOptions,
+      ocrResults,
+    };
     this.API.post(transEndpoint, postData)
       .then((data) => {
         if (data.transResults.length > 0) {
@@ -123,16 +130,49 @@ export default class Step5 extends Component {
       })
       .catch((error) => {
         console.log(error);
-        this.setState({ showError: true });
+        this.setState({ showError: true, show: true });
       })
       .finally(() => {
         this.setState({ showLoader: false });
       });
 
   }
+
+  handleCorrectedTextChange(index, correctedText) {
+    this.setState((previous) => {
+      const transResults = [...previous.transResults];
+      transResults[index] = correctedText;
+      return { transResults };
+    }, () => this.props.updateStore({ transResults: this.state.transResults }));
+  }
+
+  getOriginalDocumentCandidates(index) {
+    return buildOriginalDocumentCandidates({
+      s3SourceFiles: this.state.s3SourceFiles,
+      sourceFiles: this.state.sourceFiles,
+      searchablePdfs: this.state.searchablePdfs,
+      s3PreprocessedFiles: this.state.s3PreprocessedFiles,
+      preprocessedFiles: this.state.preprocessedFiles,
+    }, index, this.API.baseURL);
+  }
+
+  openOriginalImage = imageSrc => {
+    this.setState({
+      isLightboxOpen: true,
+      lightboxImageSrc: imageSrc,
+    });
+  };
+
+  closeOriginalImage = () => {
+    this.setState({
+      isLightboxOpen: false,
+      lightboxImageSrc: '',
+    });
+  };
+
   render() {
     return (
-      <div className="step step3">
+      <div className="step step5">
         <div className="row">
           <Form className="form-horizontal">
             <Form.Group>
@@ -185,7 +225,7 @@ export default class Step5 extends Component {
                 <div className='d-flex my-2'>
                   <Form.Check
                     label="Folosește dicționarul de excepții"
-                    name="removeHyphen"
+                    name="useExceptionDictionary"
                     id="checkboxTrans2"
                     type="checkbox"
                     checked={this.state.transOptions.useExceptionDictionary}
@@ -201,24 +241,6 @@ export default class Step5 extends Component {
                     <Button type="button" className="btn btn-info text-white mx-4">?</Button>
                   </OverlayTrigger> */}
                 </div>
-                <div className='d-flex'>
-
-                  <Form.Check
-                    // disabled
-                    label="Corectează textul cu OpenAI o1 (experimental)"
-                    name="correctTextWithOpenAIModels"
-                    id="checkboxTrans4"
-                    type="checkbox"
-                    checked={this.state.transOptions.correctTextWithOpenAIModels}
-                    onChange={this.handleTransOptionsChange.bind(this)}
-                  />
-
-                  <OverlayTrigger trigger="click" rootClose placement="left" overlay={this.state.aboutOpenAI}>
-                    <Button type="button" className="btn btn-info text-white mx-2">?</Button>
-                  </OverlayTrigger>
-
-                </div>
-
               </Form.Group>
               <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
                 {
@@ -262,8 +284,8 @@ export default class Step5 extends Component {
 
         {/* preprocessed image and reognized text */}
         <div className="row">
-          <div className="col-md-12 d-flex gap-2 justify-content-around">
-            <div className="col-sm">
+          <div className="col-md-12 step5-results-layout">
+            <div className="step5-source-column">
               {this.state.ocrResults.length != 0 && <>
                 <Accordion defaultActiveKey={0} alwaysOpen>
                   {
@@ -286,19 +308,26 @@ export default class Step5 extends Component {
               </>}
             </div>
 
-            <div className="col-sm">
-              {this.state.transResults != 0 && <>
+            <div className="step5-target-column">
+              {Array.isArray(this.state.transResults) && this.state.transResults.length > 0 && <>
                 <Accordion defaultActiveKey={0} alwaysOpen>
                   {
                     this.state.transResults.map((text, index) => (
                       <Accordion.Item eventKey={index} key={index}>
                         <Accordion.Header>Ținta - textul transliterat </Accordion.Header>
                         <Accordion.Body>
-                          <div className="transResult mb-4" key={index}>
-
-                            {text.split('\n').map((item, key) => {
-                              return <span key={key}>{item}<br /></span>
-                            })}
+                          <div className="transResult mb-4 step5-target-review" key={index}>
+                            <CodexCorrectionReview
+                              api={this.API}
+                              task="transliteration"
+                              sourceText={this.state.ocrResults[index] || ""}
+                              targetText={text}
+                              period={this.state.period}
+                              alphabet={this.state.alphabet}
+                              onTextChange={(correctedText) => (
+                                this.handleCorrectedTextChange(index, correctedText)
+                              )}
+                            />
                           </div>
                         </Accordion.Body>
                       </Accordion.Item>
@@ -307,8 +336,32 @@ export default class Step5 extends Component {
                 </Accordion>
               </>}
             </div>
+
           </div>
         </div>
+
+        {Array.isArray(this.state.transResults) && this.state.transResults.length > 0 && (
+          <FloatingOriginalDocumentWidget>
+            <div className="step5-original-widget">
+              {this.state.transResults.map((text, index) => (
+                <OriginalDocumentPreview
+                  key={`original-${index}`}
+                  documentIndex={index}
+                  candidates={this.getOriginalDocumentCandidates(index)}
+                  apiBase={this.API.baseURL}
+                  onOpenImage={this.openOriginalImage}
+                />
+              ))}
+            </div>
+          </FloatingOriginalDocumentWidget>
+        )}
+
+        {this.state.isLightboxOpen && (
+          <ReactImageLightbox
+            mainSrc={this.state.lightboxImageSrc}
+            onCloseRequest={this.closeOriginalImage}
+          />
+        )}
 
       </div>
     )

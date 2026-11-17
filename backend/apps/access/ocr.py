@@ -5,6 +5,13 @@ import pytesseract
 from PIL import Image
 
 
+def remove_ocr_unknown_markers(text):
+    """Remove FineReader's ASCII caret marker for an unrecognized artifact."""
+    if not isinstance(text, str):
+        return text
+    return text.replace('^', '')
+
+
 """
     Recunoastrea optica a caracterelor (OCR) prin intermediul unui program local
     ABBYY Hot Folder si modele OCR antrenate cu seturi de date din documente chirilice romanesti
@@ -223,7 +230,7 @@ def tesseract_ocr_postprocess(text):
         .replace('є', 'є')\
         # .replace('k', 'к')\
 
-    return modified_text
+    return remove_ocr_unknown_markers(modified_text)
 
 def local_ocr_finereader_cmd(data, media_root):
     # ocr_model_path = '/ocr/secolulXVII/models/FR15_secXVII_NT/batch.options.xml'

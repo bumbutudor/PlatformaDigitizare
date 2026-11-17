@@ -152,6 +152,13 @@ cuvinte; iar modelul pentru secolul XVII oferă o acuratețe de peste 95% la
 nivel de caractere și dicționare de cuvinte, luând în considerare preprocesarea
 potrivită a imaginii, calitatea de scanare a documentului, uzura acestuia etc.<o:p></o:p></span></p>
 
+<p class="MsoNormal" style="text-align:justify;line-height:150%">
+După OCR, pentru fișierele imagine, modulul experimental <strong>Codex Review</strong>
+poate compara textul recunoscut cu imaginea procesată afișată în acest pas.
+Corectările sunt doar propuneri și se aplică numai după validarea individuală a
+utilizatorului. Auditul vizual Codex nu este disponibil pentru documente PDF.
+</p>
+
 
         `
     },
@@ -217,42 +224,14 @@ varianta corectă fiind “amiază”, aceasta regăsindu-se în dicționarul re
 <span style="mso-spacerun:yes">&nbsp;</span>În acest modul este posibilă adăugarea
 de excepții noi. </p>
 
-<p class="MsoNormal" style="text-align:justify;text-indent:36.0pt;line-height:
-150%"><span lang="ro" style="font-size:12.0pt;line-height:150%;font-family:&quot;Times New Roman&quot;,serif;
-mso-fareast-font-family:&quot;Times New Roman&quot;">Un modul experimental (indisponibil la moment aici) este
-corectarea textului transliterat cu un sistem de inteligență artificială de
-top. Acest sistem se numește GPT-3
-dezvoltat de <span class="SpellE">OpenAI</span>.
-Modelele de învățare automată, numite și modele lingvistice din GPT-3 pot
-rezolva probleme de prelucrare a limbajului natural, precum elaborarea
-rezumatelor, parafrazarea textului, traducerea automată, clasificarea textului,
-transformarea textului din limbaj natural în codul unui limbaj de programare,
-corectarea textului etc. GPT-3 rezolvă aceste probleme cu o acuratețe foarte
-bună, atât pentru limba engleză cât și pentru limba română. În acest modul folosim modelul <i>text-davinci-003 </i>(în continuare <i>davinci</i>)<i>
-</i>pentru corectarea textului recunoscut prin furnizarea condiției: <i>corectează
-textul X</i>, unde X este textul transliterat. Modelul poate procesa până la
-4000 de „<span class="SpellE">tokenuri</span>” per cerere. Un <span class="SpellE">token</span>
-in <i>davinci</i> are in medie 4 caractere din engleza, iar 100 de <span class="SpellE">tokenuri</span> ar fi echivalentul a aproximativ 75 de cuvinte. Un
-moment crucial la corectare este faptul că acest model nu păstrează varianta
-originală a expresiilor arhaice din textul transliterat. Un exemplu corectat de
-<i>davinci </i>este „<i>Cunoscând și Înțelegând măria Ta, noi, românii care
-suntem în țara măriei Tale, nu avem nici Testamentul cel Nou, nici cel Vechi în
-limba noastră.</i>” pentru expresia transliterată „<i>cum să cunoaște că văzând
-și Înțelegând măria ta, că noi rumânii carii <span class="SpellE">sântem</span>
-în țara măriei tale. nu ave m <span class="SpellE">neci</span> Testamentul cel
-nou, <span class="SpellE">neci</span> cel <span class="SpellE">vechiu</span> de
-plin întru limba noastră,</i>”. Lu</span><span class="SpellE"><span lang="RO-MO" style="font-size:12.0pt;line-height:150%;font-family:&quot;Times New Roman&quot;,serif;
-mso-fareast-font-family:&quot;Times New Roman&quot;;mso-ansi-language:RO-MO">ând</span></span><span lang="RO-MO" style="font-size:12.0pt;line-height:150%;font-family:&quot;Times New Roman&quot;,serif;
-mso-fareast-font-family:&quot;Times New Roman&quot;;mso-ansi-language:RO-MO"> în
-considerare că acest text a fost scris în secolul XVII, </span><span lang="ro" style="font-size:12.0pt;line-height:150%;font-family:&quot;Times New Roman&quot;,serif;
-mso-fareast-font-family:&quot;Times New Roman&quot;">practic ceea ce a făcut modelul
-<i style="mso-bidi-font-style:
-normal">davinci</i>  seamănă mai mult cu o aliniere a textului vechi la textul modern. Însă
-acesta nu este cazul și pentru textele din secolul XX unde textul diferă
-nesemnificativ față de textele moderne. În acest caz, <i style="mso-bidi-font-style:
-normal">davinci</i> corectează suficient de bine. După cum am mai spus,
-corectarea textului cu GPT-3 este un modul experimental care trebuie exploatat
-mai mult timp pentru a putea face concluzii mai generale.<o:p></o:p></span></p>
+<p class="MsoNormal" style="text-align:justify;text-indent:36.0pt;line-height:150%">
+Modulul experimental <strong>Codex Review</strong> devine disponibil după
+transliterare. El compară textul transliterat cu textul OCR folosit ca oglindă
+și propune numai corectări neechivoce de OCR sau transliterare. Vocabularul,
+ortografia istorică, formele arhaice, structura și sensul documentului trebuie
+păstrate. Nicio propunere nu modifică automat documentul: forma veche este
+afișată tăiat, forma propusă este evidențiată, iar utilizatorul validează
+individual corectările pe care le consideră necesare.</p>
 
         
         `
@@ -262,19 +241,12 @@ mai mult timp pentru a putea face concluzii mai generale.<o:p></o:p></span></p>
    * Pasul 5: Transliterare
    */
     step5Info2: {
-  title: "OpenAI o1",
+  title: "Codex Review (experimental)",
   body: `
     <p>
-      <strong>OpenAI o1</strong> este un model GPT (Generative Pre-trained Transformer) de nouă generație, bazat pe inteligență artificială generativă.
-    </p>
-    <p>
-      o1 își ia timp să „gândească” înainte să răspundă, ceea ce îl face mai performant decât GPT-4o în sarcini complexe de raționament, știință și programare.
-    </p>
-    <p>
-      Website oficial: 
-      <a rel="nofollow" href="https://openai.com/o1/">
-        openai.com/o1/
-      </a>
+      Codex compară textul OCR cu textul transliterat și propune numai
+      diferențe care pot fi validate individual. Textul nu este modernizat și
+      nicio corectare nu este aplicată automat.
     </p>
   `
 },

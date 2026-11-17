@@ -1,11 +1,11 @@
 django
 django-cors-headers
+python-dotenv
 opencv-python
 spacy
 nltk
 numpy
 Pillow
-openai
 boto3
 djangorestframework
 django-multiselectfield

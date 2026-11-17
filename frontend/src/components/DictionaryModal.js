@@ -8,9 +8,9 @@ import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Spinner from 'react-bootstrap/esm/Spinner';
 import Table from 'react-bootstrap/Table';
-import FetchWrapper from './FetchWrapper';
 import AddExceptionWidget from './AddExceptionWidget';
 import ExceptionListWidget from './ExceptionListWidget';
+import { createApiClient } from '../utils/ApiConfig';
 
 const DictionaryModal = (props) => {
     const [exceptions, setExceptions] = useState([]);
@@ -22,7 +22,9 @@ const DictionaryModal = (props) => {
 
 
 
-    const API = new FetchWrapper('https://uuj2kn6s.ngrok.app/');
+    const API = props.api && typeof props.api.post === 'function'
+        ? props.api
+        : createApiClient();
     const handleGetDictionary = async () => {
         // const proxy = "https://cors-anywhere.herokuapp.com/";
         const dictionaryEndpoint = 'exception-dictionary/';
@@ -35,16 +37,8 @@ const DictionaryModal = (props) => {
 
     // remove exception from the dictionary By name of the exception
     const handleRemoveExceptionById = async (id) => {
-        const response = await fetch('https://uuj2kn6s.ngrok.app/api/exception-dictionary/' + id + '/', {
-            method: 'DELETE',
-            body: JSON.stringify({
-                id: id
-            }),
-        });
-
-        if (response.ok) {
-            handleGetDictionary();
-        }
+        await API.delete('api/exception-dictionary/' + id + '/', { id: id });
+        handleGetDictionary();
 
 
     }

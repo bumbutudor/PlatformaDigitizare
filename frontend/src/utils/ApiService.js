@@ -1,7 +1,6 @@
-import React from "react";
-import FetchWrapper from "../components/FetchWrapper";
+import { createApiClient } from './ApiConfig';
 
-const API = new FetchWrapper('https://uuj2kn6s.ngrok.app/');
+const API = createApiClient();
 
 export const getDictionary = async () => {
     const dictionaryEndpoint = 'exception-dictionary/';

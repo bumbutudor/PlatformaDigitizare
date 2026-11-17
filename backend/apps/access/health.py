@@ -17,6 +17,7 @@ external services on every poll from the frontend.
 """
 
 import os
+import subprocess
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
@@ -24,13 +25,16 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 import requests
 from django.conf import settings
 
+from .codex_correction import _resolve_codex_command, _sanitized_environment
+from .codex_access import get_codex_access_key
+
 
 # Stable identifiers used by both backend and frontend to map steps -> services.
 SERVICE_FINEREADER = "finereader"
 SERVICE_TRANSLITERA = "translitera"
 SERVICE_PUBLISH = "publish"
 SERVICE_S3 = "s3"
-SERVICE_OPENAI = "openai"
+SERVICE_CODEX = "codex"
 
 
 def _result(status, critical, latency_ms=None, message=""):
@@ -142,25 +146,39 @@ def check_s3():
         return _offline(True, f"S3 eroare: {e}", _elapsed_ms(start))
 
 
-def check_openai():
-    """OpenAI is optional (text correction). Reported but never blocks steps."""
+def check_codex():
+    """Verify that the optional local Codex CLI exists and is authenticated."""
     start = time.time()
-    api_key = os.getenv("OPENAI_API_KEY", getattr(settings, "OPENAI_API_KEY", ""))
-    if not api_key:
-        return _offline(False, "Cheie OpenAI neconfigurată (opțional)")
+    if not getattr(settings, "CODEX_CORRECTION_ENABLED", True):
+        return _offline(False, "Corectarea Codex este dezactivată (opțional)")
+    if not get_codex_access_key():
+        return _offline(False, "Cheia de acces Codex nu este configurată")
+    command = _resolve_codex_command()
+    if not command:
+        return _offline(False, "Codex CLI nu este instalat (opțional)")
     try:
-        resp = requests.get(
-            "https://api.openai.com/v1/models",
-            headers={"Authorization": f"Bearer {api_key}"},
+        completed = subprocess.run(
+            [command, "login", "status"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=settings.HEALTH_PROBE_TIMEOUT,
+            env=_sanitized_environment(),
+            shell=False,
+            creationflags=(
+                getattr(subprocess, "CREATE_NO_WINDOW", 0)
+                if os.name == "nt" else 0
+            ),
+            check=False,
         )
-        if resp.status_code < 400:
-            return _online(False, _elapsed_ms(start), "API accesibil")
-        return _offline(
-            False, f"OpenAI HTTP {resp.status_code}", _elapsed_ms(start)
-        )
-    except requests.RequestException as e:
-        return _offline(False, f"OpenAI inaccesibil: {e}", _elapsed_ms(start))
+        if completed.returncode == 0:
+            return _online(False, _elapsed_ms(start), "CLI autentificat")
+        return _offline(False, "Codex CLI nu este autentificat", _elapsed_ms(start))
+    except subprocess.TimeoutExpired:
+        return _offline(False, "Verificarea Codex a expirat", _elapsed_ms(start))
+    except OSError:
+        return _offline(False, "Codex CLI nu poate fi pornit", _elapsed_ms(start))
 
 
 # Registry of all checks. Order is preserved in the response.
@@ -169,7 +187,7 @@ _CHECKS = {
     SERVICE_TRANSLITERA: check_translitera,
     SERVICE_PUBLISH: check_publish,
     SERVICE_S3: check_s3,
-    SERVICE_OPENAI: check_openai,
+    SERVICE_CODEX: check_codex,
 }
 
 # Human-readable labels surfaced to the diagnostic panel.
@@ -178,7 +196,7 @@ SERVICE_LABELS = {
     SERVICE_TRANSLITERA: "Transliterare",
     SERVICE_PUBLISH: "Publicare",
     SERVICE_S3: "Stocare (S3)",
-    SERVICE_OPENAI: "OpenAI (opțional)",
+    SERVICE_CODEX: "Codex CLI (experimental)",
 }
 
 # Simple in-process cache so frequent frontend polls don't re-probe every time.
@@ -197,12 +215,12 @@ def _run_all_checks():
                 result = future.result(timeout=timeout)
             except FutureTimeout:
                 result = _offline(
-                    name not in (SERVICE_OPENAI,),
+                    name not in (SERVICE_CODEX,),
                     "Verificare expirată (timeout)",
                 )
             except Exception as e:  # noqa: BLE001
                 result = _offline(
-                    name not in (SERVICE_OPENAI,), f"Eroare verificare: {e}"
+                    name not in (SERVICE_CODEX,), f"Eroare verificare: {e}"
                 )
             result["label"] = SERVICE_LABELS.get(name, name)
             services[name] = result

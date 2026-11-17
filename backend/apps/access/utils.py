@@ -9,8 +9,6 @@ from PIL import Image
 # import spacy
 import nltk
 import re
-from openai import OpenAI
-from django.conf import settings
 import os
 import time
 
@@ -250,57 +248,6 @@ def replace_all_exceptions(text: str) -> str:
 
     # Replace via lookup
     return pattern.sub(lambda m: mapping[m.group(0)], text)
-
-
-def correct_text_with_OpenAI(ocerized_text, transliterated_text):
-    client = OpenAI(
-        api_key=settings.OPENAI_API_KEY
-    )
-
-    # Mesajul care conține instrucțiunile + textele
-    messages = [
-        {
-            "role": "user",
-            "content": f"""
-    Luind in considerare aceste text: text ocerizat (in chirilica) si text transliterat (cu alfabet latin).
-    Fa modificari in textul transliterat acolo unde algoritmul de trasliterare
-    nu a reusit sa rezolve ambiguitatea de transliterare sau nu a facut corect.
-    Sa nu faci modificari structurale sau de sens.
-    Daca sunt spatii intre caracterele unui cuvant, atunci se poate de eliminat.
-    Daca sunt doua sau mai multe cuvinte care iti par ca stau lipite, atunci pune un spatiu intre ele.
-    Textul transliterat trebuie sa ramana aliniat la original.
-    In rezultat astept doar textul transliterat (cu alfabet latin) ajustat, fara nimic altceva.
-
-    Text ocerizat (in chirilica):
-    {ocerized_text}
-
-    Text transliterat (cu alfabet latin):
-    {transliterated_text}
-    """
-        }
-    ]
-
-    # Apelează API-ul ChatCompletion
-    response = client.chat.completions.create(
-        model="o1-preview",
-        messages=messages
-    )
-
-    corrected_text = response.choices[0].message.content.strip()
-    return corrected_text
-
-
-
-def correct_text(text):
-    # split in ckunks of paragraphs
-    chunks = text.split("\n")
-    print(len(chunks))
-    # print(len(chunks))
-    corrected_text = ""
-    for chunk in chunks:
-        print(chunk)
-        corrected_text += correct_text_with_OpenAI(chunk)
-    return corrected_text
 
 
 periodOptions = {

@@ -4,18 +4,14 @@ export default class FetchWrapper {
     }
 
     get(endpoint) {
-        return fetch(this.baseURL + endpoint, {
-            headers: {
-                "ngrok-skip-browser-warning": "true"
-            }
-        })
+        return fetch(this.baseURL + endpoint)
             .then(response => response.json());
     }
 
-    post(endpoint, body) {
+    post(endpoint, body, extraHeaders = {}) {
         // pass the endpoint and body parameters to _send
         // and specify the method to be 'post' request
-        return this._send("post", endpoint, body);
+        return this._send("post", endpoint, body, extraHeaders);
     }
 
     put(endpoint, body) {
@@ -26,16 +22,15 @@ export default class FetchWrapper {
         return this._send("delete", endpoint, body);
     }
 
-    _send(method, endpoint, body) {
+    _send(method, endpoint, body, extraHeaders = {}) {
         return fetch(this.baseURL + endpoint, {
             method,
             headers: {
                 // send a header with every post, put, delete request
                 "Content-Type": "application/json",
-                // skip ngrok's interstitial HTML page so responses are JSON
-                "ngrok-skip-browser-warning": "true"
+                ...extraHeaders
             },
             body: JSON.stringify(body)
-        }).then(response => response.json());
+        }).then(response => response.status === 204 ? null : response.json());
     }
 }

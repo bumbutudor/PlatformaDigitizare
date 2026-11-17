@@ -83,3 +83,28 @@ indică starea curentă din ciclul de digitizare a documentului.
 
 ## Resources
 https://stackoverflow.com/questions/8408046/how-to-change-the-name-of-a-django-app
+
+## Acces la corectarea Codex
+
+Endpoint-ul `codex-correct/` necesită o cheie locală, care nu este inclusă în
+frontend și nu este salvată în baza de date. Pentru a vedea cheia curentă din
+terminalul calculatorului pe care rulează backend-ul:
+
+`cd backend`
+
+`venv\Scripts\python.exe manage.py codex_access_key --show`
+
+Cheia se introduce în panoul compact din Pasul 3 sau Pasul 5 și este păstrată
+numai în `sessionStorage`, până la închiderea tabului. În Pasul 3, Codex compară
+textul OCR cu imaginea procesată corespunzătoare și propune numai modificări
+care trebuie validate de utilizator. Auditul vizual este disponibil numai pentru
+imagini; documentele PDF sunt excluse. Referințele imaginilor sunt semnate de
+backend, expiră și nu permit trimiterea unor URL-uri sau căi arbitrare.
+
+Pentru a invalida toate sesiunile și a genera o cheie nouă:
+
+`venv\Scripts\python.exe manage.py codex_access_key --rotate`
+
+Dacă `CODEX_ACCESS_KEY` este definită în `.env` sau în environment, rotația se
+face acolo, urmată de repornirea backend-ului; comanda `--rotate` va refuza să
+creeze o cheie concurentă în fișier.

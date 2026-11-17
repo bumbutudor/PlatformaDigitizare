@@ -38,7 +38,7 @@ const AboutPage = () => {
 
     return (
         <div className="tab-content-body">
-            <p className="announcement">25 Decembrie 2022 — a fost lansată  <a href="https://github.com/bumbutudor/PlatformaDigitizare/tree/ngrok-server" target="_blank">DigiApp v0.1.0-beta.14</a></p>
+                <p className="announcement">25 Decembrie 2022 — a fost lansată  <a href="https://github.com/bumbutudor/PlatformaDigitizare/tree/ngrok-server" target="_blank">DigiApp v1.0</a></p>
             <p>
                 Platforma de digitizare oferă instrumente și resurse informaționale pentru digitizarea documentelor românești scrise în alfabete chirilice, tipărite între secolele XVII și XX.
             </p>

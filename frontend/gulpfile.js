@@ -86,6 +86,10 @@ gulp.task(
 
       gulp.src("./dist/main.js").pipe(gulp.dest("./docs"));
 
+      gulp
+        .src("./src/digitizare/runtime-config.js")
+        .pipe(gulp.dest("./docs/"));
+
       gulp.src("./src/digitizare/index.html").pipe(gulp.dest("./docs/"));
     });
 
