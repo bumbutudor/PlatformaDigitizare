@@ -1,6 +1,6 @@
 import os
 import time
-from .utils import load_txt, wait_for_files, replace_extension
+from .utils import load_txt
 import pytesseract
 from PIL import Image
 
@@ -25,48 +25,122 @@ def remove_ocr_unknown_markers(text):
 """
 
 
-def get_searchable_pdf_url(file_name, media_root, ocr_path, api_base_url, wait_timeout=30):
+class OcrError(Exception):
+    """OCR failure whose message is meant to be shown to the user."""
+
+
+# Folderul (relativ la MEDIA_ROOT) in care task-ul Hot Folder al fiecarei
+# perioade scrie rezultatele. Perioada decide folderul; alfabetul trimis de
+# interfata nu mai poate face ca cererea sa nu se potriveasca cu niciun model.
+FINEREADER_OUTPUT_PATHS = {
+    'secolulXX': '/ocr/secolulXX/cyrillic/',
+    'secolulXIX': '/ocr/secolulXIX/cyrillicRomanian/',
+    'secolulXVIII': '/ocr/secolulXVIII/',
+    'secolulXVII': '/ocr/secolulXVII/',
+}
+
+# Perioadele ale caror task-uri Hot Folder genereaza si un PDF cautabil
+# (task-ul de secol XIX, Epistolariu, scrie doar TXT).
+FINEREADER_PDF_PERIODS = {'secolulXX', 'secolulXVIII', 'secolulXVII'}
+
+# Cat asteptam rezultatul text al Hot Folder-ului, respectiv PDF-urile
+# cautabile (un singur termen pentru toate fisierele cererii, nu per fisier).
+FINEREADER_TIMEOUT_SECONDS = 120
+SEARCHABLE_PDF_TIMEOUT_SECONDS = 30
+POLL_SECONDS = 1
+
+
+def _base_name(file):
+    """Numele fisierului fara cale si fara extensie."""
+    name = str(file["name"]).replace('\\', '/')
+    return os.path.splitext(os.path.basename(name))[0]
+
+
+def _output_dir(media_root, ocr_path):
+    return os.path.join(media_root, *ocr_path.strip('/').split('/'))
+
+
+def wait_for_finereader_text(files, output_dir, timeout=None):
     """
-    Check if searchable PDF exists and return its URL.
-    Waits up to wait_timeout seconds for PDF to appear (FineReader generates PDF after TXT/DOCX).
+    Asteapta fisierele .txt scrise de Hot Folder si intoarce caile lor.
+    Daca nu apar toate pana la expirarea termenului, ridica OcrError cu un
+    mesaj care spune ce fisiere lipsesc (in loc de o eroare generica).
     """
-    base_name = os.path.splitext(file_name)[0]
-    pdf_path = os.path.join(media_root, ocr_path.strip('/'), base_name + '.pdf')
-    
-    # Wait for PDF to appear (FineReader generates it after TXT and DOCX)
-    waited = 0
-    while waited < wait_timeout:
-        if os.path.exists(pdf_path):
-            # Check if file is not empty and not being written
-            try:
-                file_size = os.path.getsize(pdf_path)
-                if file_size > 0:
-                    # Wait a bit more to ensure file is fully written
-                    mtime = os.path.getmtime(pdf_path)
-                    if time.time() - mtime >= 2:  # File not modified in last 2 seconds
-                        print(f"[get_searchable_pdf_url] PDF found: {pdf_path} (size: {file_size})")
-                        return f"{api_base_url}media{ocr_path}{base_name}.pdf"
-            except:
-                pass
-        
-        time.sleep(1)
-        waited += 1
-        if waited % 5 == 0:
-            print(f"[get_searchable_pdf_url] Waiting for PDF: {pdf_path} ({waited}s)")
-    
-    print(f"[get_searchable_pdf_url] PDF not found after {wait_timeout}s: {pdf_path}")
-    return None
+    if timeout is None:
+        timeout = FINEREADER_TIMEOUT_SECONDS
+    expected = [
+        (file["name"], os.path.join(output_dir, _base_name(file) + '.txt'))
+        for file in files
+    ]
+    deadline = time.monotonic() + timeout
+    while True:
+        missing = [name for name, path in expected if not os.path.isfile(path)]
+        if not missing:
+            return [path for _, path in expected]
+        if time.monotonic() >= deadline:
+            print(f"[FineReader OCR] Timeout, lipsesc: {missing} in {output_dir}")
+            raise OcrError(
+                f"FineReader nu a produs textul pentru {len(missing)} din "
+                f"{len(expected)} fișiere în {int(timeout)} de secunde "
+                f"({', '.join(missing)}). Verificați că Hot Folder rulează pe "
+                "server pentru perioada selectată și încercați din nou."
+            )
+        time.sleep(POLL_SECONDS)
+
+
+def _pdf_is_complete(pdf_path):
+    """PDF-ul exista, nu e gol si nu a mai fost modificat in ultimele 2 secunde."""
+    try:
+        return (
+            os.path.getsize(pdf_path) > 0
+            and time.time() - os.path.getmtime(pdf_path) >= 2
+        )
+    except OSError:
+        return False
+
+
+def collect_searchable_pdf_urls(files, media_root, ocr_path, api_base_url, timeout=None):
+    """
+    Intoarce, pentru fiecare fisier, URL-ul PDF-ului cautabil sau None.
+    FineReader scrie PDF-ul dupa TXT, deci asteptam putin - dar cu un singur
+    termen comun pentru toate fisierele, ca lipsa PDF-urilor sa coste cel mult
+    `timeout` secunde pe cerere (inainte: `timeout` secunde pentru fiecare fisier).
+    """
+    if timeout is None:
+        timeout = SEARCHABLE_PDF_TIMEOUT_SECONDS
+    output_dir = _output_dir(media_root, ocr_path)
+    base_names = [_base_name(file) for file in files]
+    deadline = time.monotonic() + timeout
+
+    def ready(base_name):
+        return _pdf_is_complete(os.path.join(output_dir, base_name + '.pdf'))
+
+    while not all(ready(base_name) for base_name in base_names):
+        if time.monotonic() >= deadline:
+            break
+        time.sleep(POLL_SECONDS)
+
+    urls = []
+    for base_name in base_names:
+        if ready(base_name):
+            urls.append(f"{api_base_url}media{ocr_path}{base_name}.pdf")
+        else:
+            print(f"[FineReader OCR] PDF cautabil indisponibil: {base_name}.pdf")
+            urls.append(None)
+    return urls
 
 
 def local_ocr(data, media_root):
     try:
-        period = data['period']
-        alphabet = data['alphabet']
+        period = data.get('period')
+        alphabet = data.get('alphabet')
         files = data['sourceFiles']
-        number_of_files = len(files)
         ocr_results = []
         searchable_pdfs = []
         api_base_url = data.get('api', '')
+
+        if not files:
+            raise OcrError("Nu a fost trimis niciun fișier pentru OCR.")
 
         # Verifică mai întâi dacă este selectat modelul Tesseract
         ocrOptions = data.get('ocrOptions', {})
@@ -95,78 +169,24 @@ def local_ocr(data, media_root):
                     searchable_pdfs.append(None)
             return {"ocrResults": ocr_results, "searchablePdfs": searchable_pdfs}
 
-        if period == 'secolulXX' and alphabet == 'cyrillic':
-            # model secolulXX.fbt
-            ocr_path = '/ocr/secolulXX/cyrillic/'
-
-            # wait for all files to be ocr-ed
-            wait_for_files(files, media_root + ocr_path, '.txt')
-
-            for file in files:
-                ocr_file_path = media_root + ocr_path + \
-                                '/' + os.path.splitext(file["name"])[0] + '.txt'
-                ocr_result = load_txt(ocr_file_path)
-                ocr_results.append(ocr_result)
-                
-                # Check for searchable PDF
-                pdf_url = get_searchable_pdf_url(file["name"], media_root, ocr_path, api_base_url)
-                searchable_pdfs.append(pdf_url)
-            
-            return {"ocrResults": ocr_results, "searchablePdfs": searchable_pdfs}
-
+        if period not in FINEREADER_OUTPUT_PATHS:
+            raise OcrError(
+                "Perioada documentului lipsește sau nu are un model OCR.")
         if period == 'secolulXX' and alphabet == 'latin':
             # TODO : Implement when model is ready
-            pass
+            raise OcrError(
+                "Nu există încă un model OCR pentru secolul XX cu alfabet latin.")
 
-        if period == 'secolulXIX' and alphabet == 'cyrillicRomanian':
-            # model secolulXIX_Epistolariu.fbt
+        ocr_path = FINEREADER_OUTPUT_PATHS[period]
+        text_paths = wait_for_finereader_text(
+            files, _output_dir(media_root, ocr_path))
+        ocr_results = [load_txt(text_path) for text_path in text_paths]
 
-            ocr_path = '/ocr/secolulXIX/cyrillicRomanian/'
-            # wait for all files to be ocr-ed
-            wait_for_files(files, media_root + ocr_path, '.txt')
+        if period in FINEREADER_PDF_PERIODS:
+            searchable_pdfs = collect_searchable_pdf_urls(
+                files, media_root, ocr_path, api_base_url)
 
-            for file in files:
-                ocr_file_path = media_root + ocr_path + \
-                                '/' + os.path.splitext(file["name"])[0] + '.txt'
-                ocr_result = load_txt(ocr_file_path)
-                ocr_results.append(ocr_result)
-            return ocr_results
-
-        if period == 'secolulXVIII':
-            # model secolulXVIII_Geografie.fbt
-            ocr_path = '/ocr/secolulXVIII/'
-
-            # wait for all files to be ocr-ed
-            wait_for_files(files, media_root + ocr_path, '.txt')
-
-            for file in files:
-                ocr_file_path = media_root + ocr_path + \
-                                '/' + os.path.splitext(file["name"])[0] + '.txt'
-                ocr_result = load_txt(ocr_file_path)
-                ocr_results.append(ocr_result)
-            return ocr_results
-
-        if period == 'secolulXVII':
-            # model secolulXVII_NT.fbt
-            ocr_path = '/ocr/secolulXVII/'
-
-            # wait for all files to be ocr-ed
-            wait_for_files(files, media_root + ocr_path, '.txt')
-
-            for file in files:
-                uploaded_file_path = media_root + '/' + file["name"]
-                ocr_file_path = media_root + ocr_path + \
-                                '/' + os.path.splitext(file["name"])[0] + '.txt'
-
-                ocr_result = load_txt(ocr_file_path)
-                ocr_results.append(ocr_result)
-            return ocr_results
-        elif period == 'secolulXVII':
-            # TODO : Implement using Gimp
-            pass
-
-        # Dacă niciuna din condițiile anterioare nu este îndeplinită, se va returna o listă goală
-        return ocr_results
+        return {"ocrResults": ocr_results, "searchablePdfs": searchable_pdfs}
 
     except Exception as e:
         print(f"A apărut o eroare: {e}")

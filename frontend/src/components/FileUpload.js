@@ -2,6 +2,7 @@ import React from "react";
 import "react-dropzone-uploader/dist/styles.css";
 import Dropzone from "react-dropzone-uploader";
 import { getDroppedOrSelectedFiles } from "html5-file-selector";
+import { toSourceFileMeta } from "../utils/UploadedFile";
 
 // Custom Preview component to handle PDF files with icon preview
 const CustomPreview = ({ meta, fileWithMeta }) => {
@@ -140,13 +141,9 @@ const FileUpload = (props) => {
 
     const handleSubmit = (files, allFiles) => {
         const s3Files = getS3Files(files);
-        const sourceFileMetas = files.map(f => {
-            const response = JSON.parse(f.xhr.response);
-            return {
-                ...f.meta,
-                isPdf: response.isPdf || false
-            };
-        });
+        const sourceFileMetas = files.map(
+            f => toSourceFileMeta(f.meta, JSON.parse(f.xhr.response))
+        );
         
         props.updateStore({ s3SourceFiles: s3Files });
         props.updateStore({ sourceFiles: sourceFileMetas });
