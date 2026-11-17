@@ -1,8 +1,12 @@
 import os
+import logging
 import time
 from .utils import load_txt, wait_for_files, replace_extension
 import pytesseract
 from PIL import Image
+from .scantailor import processed_ocr_paths, stage_for_finereader
+
+logger = logging.getLogger(__name__)
 
 
 def remove_ocr_unknown_markers(text):
@@ -71,6 +75,11 @@ def local_ocr(data, media_root):
         # Verifică mai întâi dacă este selectat modelul Tesseract
         ocrOptions = data.get('ocrOptions', {})
         use_tesseract = ocrOptions.get("useTesseract", False) if ocrOptions else False
+        processed_paths = processed_ocr_paths(data, media_root)
+        if processed_paths:
+            files = [{"name": path.name} for path in processed_paths]
+            if not use_tesseract:
+                stage_for_finereader(processed_paths, period)
         
         if use_tesseract:
             print(f"[Tesseract OCR] Processing {len(files)} files with RTS_from_Cyrillic model")
@@ -79,8 +88,8 @@ def local_ocr(data, media_root):
             tesseract_output_dir = os.path.join(media_root, 'ocr', 'tesseract')
             os.makedirs(tesseract_output_dir, exist_ok=True)
             
-            for file in files:
-                file_path = os.path.join(media_root, file["name"])
+            for index, file in enumerate(files):
+                file_path = str(processed_paths[index]) if processed_paths else os.path.join(media_root, file["name"])
                 print(f"[Tesseract OCR] Processing file: {file_path}")
                 ocr_result, pdf_path = tesseract_ocr(file_path, tesseract_output_dir)
                 ocr_results.append(ocr_result)
@@ -169,7 +178,7 @@ def local_ocr(data, media_root):
         return ocr_results
 
     except Exception as e:
-        print(f"A apărut o eroare: {e}")
+        logger.warning("OCR processing failed: %s", e)
         # Nu mai înghițim eroarea: o propagăm ca să fie raportată corect către
         # frontend (altfel utilizatorul primea "success" cu rezultate goale).
         raise

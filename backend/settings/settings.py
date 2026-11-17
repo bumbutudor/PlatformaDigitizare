@@ -217,6 +217,23 @@ HEALTH_CACHE_TTL = int(os.getenv('HEALTH_CACHE_TTL', default='12'))
 # Per-service network timeout (seconds) for health probes.
 HEALTH_PROBE_TIMEOUT = float(os.getenv('HEALTH_PROBE_TIMEOUT', default='5'))
 
+# Headless ScanTailor classic / compatible CLI. The GUI executable is not used.
+SCANTAILOR_CLI_PATH = os.getenv('SCANTAILOR_CLI_PATH', default='scantailor-cli')
+SCANTAILOR_ENABLED = os.getenv('SCANTAILOR_ENABLED', default='true').lower() in ('1', 'true', 'yes')
+SCANTAILOR_TIMEOUT = int(os.getenv('SCANTAILOR_TIMEOUT', default='120'))
+SCANTAILOR_MAX_FILES = int(os.getenv('SCANTAILOR_MAX_FILES', default='10'))
+SCANTAILOR_MAX_IMAGE_BYTES = 30 * 1024 * 1024
+SCANTAILOR_MAX_INPUT_PIXELS = 40_000_000
+SCANTAILOR_MAX_OUTPUT_PIXELS = 60_000_000
+
+# Actual Windows Hot Folder routes. XVII currently has only a PDF task.
+FINEREADER_SCANTAILOR_INPUT_DIRS = {
+    'secolulXVII': os.getenv('FINEREADER_SCANTAILOR_XVII_INPUT', ''),
+    'secolulXVIII': os.getenv('FINEREADER_SCANTAILOR_XVIII_INPUT', os.path.join(MEDIA_ROOT, 'out')),
+    'secolulXIX': os.getenv('FINEREADER_SCANTAILOR_XIX_INPUT', os.path.join(MEDIA_ROOT, 'pre', 'OpenCV')),
+    'secolulXX': os.getenv('FINEREADER_SCANTAILOR_XX_INPUT', os.path.join(MEDIA_ROOT, 'pre', 'OpenCV')),
+}
+
 # Local Codex CLI correction service. Corrections are returned for interactive
 # review only and are never persisted by the backend.
 CODEX_CLI_PATH = os.getenv('CODEX_CLI_PATH', default='codex')

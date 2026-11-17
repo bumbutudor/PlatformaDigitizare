@@ -14,6 +14,7 @@ import Form from "react-bootstrap/Form";
 import ServiceStatus from "../utils/ServiceStatus";
 import ServiceStatusBadge from "../components/ServiceStatusBadge";
 import { apiUrl, getApiBaseUrl } from "../utils/ApiConfig";
+import { SCANTAILOR_DEFAULT_OPTIONS } from "../utils/ScanTailorConfig";
 
 import "../css/main.css";
 
@@ -40,7 +41,7 @@ export default class DigitizationSteps extends Component {
       preprocessedFiles: [],
       s3PreprocessedFiles: [],
       preprocessWith: "",
-      preprocessMode: "desktop",
+      preprocessMode: "web",
       ocrResults: [],
       ocrReviewRefs: [],
       transResults: [],
@@ -57,16 +58,7 @@ export default class DigitizationSteps extends Component {
         resolution: 300,
         removeNoise: true,
       },
-      preprocessScanTailor: {
-        resolution: 600, //default is 600 --dpi=<number>  -- sets x and y dpi. default: 600 --dpi-x=<number> --dpi-y=<number> --output-dpi=<number>  -- sets x and y output dpi. default: 600 --output-dpi-x=<number> --output-dpi-y=<number>
-        colorMode: "black_and_white", //default is black_and_white <black_and_white|color_grayscale|mixed>
-        whiteMargins: false, //default is false
-        despeckle: "normal", //default is normal <off|cautious|normal|aggressive>
-        orientation: "none", //default is portrait <left|right|upsidedown|none>
-        contentDetection: "normal", //default is normal <cautious|normal|aggressive>
-        normalizeIllumination: false, //default: false
-        threshold: 0, //n<0 thinner, n>0 thicker; default: 0
-      },
+      preprocessScanTailor: { ...SCANTAILOR_DEFAULT_OPTIONS },
       alphabetOptions: {
         cyrillic: "alfabetul chirilic sovietic",
         latin: "alfabetul românesc modern",
@@ -131,7 +123,7 @@ export default class DigitizationSteps extends Component {
       preprocessedFiles: [],
       s3PreprocessedFiles: [],
       preprocessWith: "",
-      preprocessMode: "desktop",
+      preprocessMode: "web",
       ocrResults: [],
       ocrReviewRefs: [],
       transResults: [],
@@ -148,16 +140,7 @@ export default class DigitizationSteps extends Component {
         resolution: 300,
         removeNoise: true,
       },
-      preprocessScanTailor: {
-        resolution: 600, //default is 600 --dpi=<number>  -- sets x and y dpi. default: 600 --dpi-x=<number> --dpi-y=<number> --output-dpi=<number>  -- sets x and y output dpi. default: 600 --output-dpi-x=<number> --output-dpi-y=<number>
-        colorMode: "black_and_white", //default is black_and_white <black_and_white|color_grayscale|mixed>
-        whiteMargins: false, //default is false
-        despeckle: "normal", //default is normal <off|cautious|normal|aggressive>
-        orientation: "none", //default is portrait <left|right|upsidedown|none>
-        contentDetection: "normal", //default is normal <cautious|normal|aggressive>
-        normalizeIllumination: false, //default: false
-        threshold: 0, //n<0 thinner, n>0 thicker; default: 0
-      },
+      preprocessScanTailor: { ...SCANTAILOR_DEFAULT_OPTIONS },
       alphabetOptions: {
         cyrillic: "alfabetul chirilic sovietic",
         latin: "alfabetul românesc modern",

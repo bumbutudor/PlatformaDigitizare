@@ -35,6 +35,7 @@ export default class Step3 extends Component {
       showLoader: false,
       showNextStep: false,
       showError: false,
+      errorMessage: '',
       serviceBlock: { blocked: false },
     };
 
@@ -118,13 +119,18 @@ export default class Step3 extends Component {
     const ocrEndpoint = "ocr/";
     const postData = {
       ...this.state,
+      preprocessWith: this.props.getStore().preprocessWith,
+      preprocessMode: this.props.getStore().preprocessMode,
       api: this.props.getStore().api  // Include API URL for searchable PDF paths
     };
     // console.log(postData);
 
-    this.API.post(ocrEndpoint, postData)
+    return this.API.post(ocrEndpoint, postData)
       .then((data) => {
         console.log(data);
+        if (!data || data.code !== 200 || !Array.isArray(data.ocrResults)) {
+          throw new Error((data && data.msg) || 'Serverul nu a returnat rezultatele OCR.');
+        }
         if (data.ocrResults.length > 0) {
           const ocrResults = cleanOcrResults(data.ocrResults);
           const ocrReviewRefs = Array.isArray(data.ocrReviewRefs)
@@ -153,7 +159,7 @@ export default class Step3 extends Component {
       })
       .catch((error) => {
         // console.log(error);
-        this.setState({ showError: true });
+        this.setState({ showError: true, errorMessage: error.message || 'Recunoașterea textului a eșuat.' });
         this.setState({ showNextStep: false });
         this.setState({ show: true });
       })
@@ -630,6 +636,7 @@ export default class Step3 extends Component {
                   <Alert.Heading>
                     A apărut o eroare, incercati din nou...
                   </Alert.Heading>
+                  <p className="mb-0">{this.state.errorMessage}</p>
                 </Alert>
               )}
               <ServiceGate

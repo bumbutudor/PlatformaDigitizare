@@ -108,3 +108,92 @@ Pentru a invalida toate sesiunile și a genera o cheie nouă:
 Dacă `CODEX_ACCESS_KEY` este definită în `.env` sau în environment, rotația se
 face acolo, urmată de repornirea backend-ului; comanda `--rotate` va refuza să
 creeze o cheie concurentă în fișier.
+
+## ScanTailor pe server, în pasul 2
+
+Implementarea a fost verificată pe Windows cu `C:\ScanTailor\scantailor-cli.exe`,
+versiunea **0.9.11.1**. Executabilul se găsește prin PATH sau se configurează în
+`backend/.env`: `SCANTAILOR_CLI_PATH=C:\ScanTailor\scantailor-cli.exe`.
+`SCANTAILOR_ENABLED=false` dezactivează acest motor. Diagnosticul `/health/`
+afișează disponibilitatea și versiunea CLI.
+
+Formularul permite DPI sursă și rezultat separate, culoare, orientare,
+îndreptare automată/unghi manual, încadrare, detectarea conținutului, margini în
+mm, aliniere, eliminarea punctelor, grosimea textului, uniformizarea iluminării
+și corectarea curburii. Se încarcă o pagină per imagine; împărțirea unei imagini
+în două pagini și PDF-urile nu sunt acceptate de acest adaptor. Rezultatele sunt
+PNG fără pierderi, în directoare distincte pentru fiecare cerere.
+
+### Diferențe CLI/UI reproduse pe această mașină
+
+- `--deskew=auto` produce în realitate `mode="manual"`, unghi zero. Omiterea
+  argumentului păstrează modul automat; pe `samples/5.jpg` a detectat −1°.
+- Toate valorile `--despeckle` testate produc `despeckleLevel=""` în proiectul
+  salvat; `--dewarping=auto` rămâne `off`, iar `--depth-perception=1.5` rămâne 2.
+- `--orientation=none` este documentat în help, dar este respins de parser.
+- Culoarea trebuie specificată explicit prin CLI și când se citește un proiect;
+  altfel executabilul testat o resetează la alb-negru.
+
+Adaptorul generează intern un proiect `.ScanTailor` cu setările de output în
+formatul UI și îl procesează cu CLI. Nu transmite opțiunile defectuoase de
+despeckle/dewarping/depth, omite deskew pentru modul automat și orientation
+pentru lipsa rotirii. Culoarea și geometria sunt transmise explicit, împreună cu
+etapele 1–6. Nu se acceptă proiecte XML arbitrare de la client.
+
+Testele cu executabilul real recitesc proiectul salvat de CLI pentru a verifica
+modul de îndreptare, unghiul, marginea, alinierea, DPI, culoarea, grosimea textului,
+despeckle și dewarping. Aceste verificări nu demonstrează identitate pixel cu
+pixel cu un export UI sau cu Advanced/Universal; ajustările manuale ale zonelor
+și ale grilei de dewarping din UI nu sunt implementate în formular.
+
+Istoric relevant: [autorul Advanced despre CLI-ul nefuncțional în 2017](https://github.com/4lex4/scantailor-advanced/issues/1),
+[implementarea îndreptării în CLI clasic](https://github.com/scantailor/scantailor/blob/master/ConsoleBatch.cpp).
+Raportul despre filtrele implicite greșite din 0.9.12.2 nu s-a reprodus în
+executabilul local 0.9.11.1, care a executat toate cele șase etape și fără aceste
+două argumente. Le păstrăm explicite pentru predictibilitate.
+
+Limitele implicite sunt 10 imagini/cerere, 30 MB/imagine, 40 milioane pixeli la
+intrare, 60 milioane pixeli estimați/la ieșire și 120 secunde/cerere. Un singur
+job rulează per proces Django; cererile concurente primesc 429 și pot fi reluate.
+`SCANTAILOR_TIMEOUT` și `SCANTAILOR_MAX_FILES` sunt configurabile.
+
+### ABBYY Hot Folder: configurația verificată la 17 noiembrie 2026
+
+Configurația completă, cu căi absolute și numele fișierelor `.hft`, este în
+[snapshot-ul JSON](docs/hotfolder-windows-2026-11-17.json). Toate cele șapte
+task-uri erau `Watching…` în UI, programate `everyMinute`, cu subfoldere incluse.
+Valorile `paused` din unele fișiere `.hft` nu reflectau starea UI curentă.
+
+Căile de mai jos sunt relative la
+`C:\Users\tudor\Desktop\PlatformaDigitizare\backend\media\`.
+
+| Task | Intrare | Ieșire | Formate |
+|---|---|---|---|
+| SecXX_preFR | `pre\FR` | `ocr\secolulXX\cyrillic` | TXT, DOCX, PDF căutabil |
+| SecXX_PDF | `pdfs\secolulXX` | `ocr\secolulXX\cyrillic` | TXT, DOCX, PDF căutabil |
+| SecXX_OpenCV | `pre\OpenCV` | `ocr\secolulXX\cyrillic` | TXT, DOCX, PDF căutabil |
+| SecXVIII_Geografie_ScanTailor | `out` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
+| SecXVIII_Geografie_preFR | `pre\FR` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
+| SecXVII_PDF | `pdfs\secolulXVII` | `ocr\secolulXVII` | TXT, DOCX, PDF căutabil |
+| SecXIX_Epistolariu_OpenCV | `pre\OpenCV` | `ocr\secolulXIX\cyrillicRomanian` | Numai TXT |
+
+Niciun task nu urmărește `media` sau `pre\ScanTailor`. La cererea OCR, imaginile
+noi ScanTailor sunt copiate atomic, cu nume unice, în `out` pentru XVIII și
+`pre\OpenCV` pentru XIX/XX. Folderul OpenCV este comun celor două task-uri, deci
+ambele pot procesa aceeași imagine. Pentru XVII nu există un task de imagini:
+cererea raportează lipsa configurării, fără să aștepte un rezultat imposibil.
+Căile se pot modifica prin `FINEREADER_SCANTAILOR_XVII_INPUT`,
+`FINEREADER_SCANTAILOR_XVIII_INPUT`, `FINEREADER_SCANTAILOR_XIX_INPUT` și
+`FINEREADER_SCANTAILOR_XX_INPUT`. Configurarea acestor variabile nu creează
+task-uri ABBYY. Tesseract primește direct PNG-ul procesat când este selectat.
+
+Verificare backend, din `backend` (PowerShell):
+
+```powershell
+$env:SCANTAILOR_INTEGRATION = '1'
+.\venv\Scripts\python.exe manage.py test apps.access.tests apps.access.test_scantailor --noinput
+```
+
+Fără variabila `SCANTAILOR_INTEGRATION`, testul care pornește executabilul este
+omis; celelalte teste folosesc directoare temporare și nu trimit fișiere către
+Hot Folder-ul real.

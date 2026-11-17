@@ -12,6 +12,8 @@ from .health import get_health
 from .codex_correction import CodexCorrectionError, generate_correction_suggestions
 from .codex_ocr_review import create_ocr_review_refs, generate_ocr_review
 from .codex_access import CodexAccessError, require_codex_access
+from .scantailor import ScanTailorError, preprocess_images
+from urllib.parse import quote
 import os
 from django.conf import settings
 import json
@@ -190,7 +192,22 @@ def upload(request):
 def preprocess(request):
     # print(request.FILES['uploadedFile'])
     if request.method == 'POST':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return JsonResponse({"code": 400, "msg": "Cererea JSON este invalidă."}, status=400)
+        if not isinstance(data, dict):
+            return JsonResponse({"code": 400, "msg": "Cererea trebuie să fie un obiect JSON."}, status=400)
+        if data.get('preprocessWith') == 'ScanTailor' and data.get('preprocessMode', 'web') == 'web':
+            try:
+                processed = preprocess_images(data)
+            except ScanTailorError as exc:
+                return JsonResponse({"code": exc.status_code, "msg": str(exc)}, status=exc.status_code)
+            return JsonResponse({
+                "code": 200, "msg": "success", "preprocessedFiles": processed,
+                # Local URLs keep this engine independent of S3 availability.
+                "s3PreprocessedFiles": [settings.MEDIA_URL + quote(path, safe='/') for path in processed],
+            })
         preprocess_with = data['preprocessWith']
         files = data['sourceFiles']
         number_of_files = len(files)
@@ -279,26 +296,6 @@ def preprocess(request):
                         preprocessedFiles.append('out/' + jpg_file)
                     return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
                                          "preprocessedFiles": preprocessedFiles})
-            elif data["preprocessMode"] == 'web':
-                pre_path = '/pre/ScanTailor/'
-                preprocess_scantailor = data['preprocessScanTailor']
-                for file in files:
-                    uploaded_file_path = settings.MEDIA_ROOT + \
-                                         '/' + file["name"]
-                    output_folder = settings.MEDIA_ROOT + pre_path
-                    command = preprocess_scantailor_cli(
-                        uploaded_file_path, preprocess_scantailor, output_folder)
-                    tiff_file = os.path.splitext(file["name"])[0] + '.tif'
-                    jpg_file = os.path.splitext(file["name"])[0] + '.jpg'
-
-                    os.system(command)
-                    tiff_to_jpg(output_folder + tiff_file)
-
-                    s3_url = s3_uploader.upload_file(
-                        output_folder + jpg_file, 'pre/ScanTailor/' + jpg_file)
-                    preprocessedFiles.append('pre/ScanTailor/' + jpg_file)
-                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
-                                     "preprocessedFiles": preprocessedFiles})
         elif preprocess_with == 'Gimp':
             # TODO : Implement using Gimp
             pass
@@ -312,6 +309,8 @@ def ocr(request):
         data = json.loads(request.body)
         try:
             ocr_response = local_ocr(data, settings.MEDIA_ROOT)
+        except ScanTailorError as exc:
+            return JsonResponse({"code": exc.status_code, "msg": str(exc)}, status=exc.status_code)
         except Exception as e:
             print(f"[ocr] Eroare la procesarea OCR: {e}")
             return JsonResponse(

@@ -17,6 +17,9 @@ import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert'
 import FetchWrapper from "../components/FetchWrapper";
 import StepsInfo from "../components/StepsInfo";
+import ServiceGate from "../components/ServiceGate";
+import { SERVICES } from "../utils/ServiceStatus";
+import { normalizeMediaUrl } from "../utils/DocumentSource";
 
 
 // Step 2 - preprocess the images
@@ -53,10 +56,27 @@ const Step2 = (props) => {
   const [showLoader, setShowLoader] = React.useState(false);
   const [showNextStep, setShowNextStep] = React.useState(false);
   const [showError, setShowError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState('');
+  const [serviceBlock, setServiceBlock] = React.useState({ blocked: false });
+
+  const clearResults = () => {
+    setpreprocessedFiles([]);
+    setS3PreprocessedFiles([]);
+    setShowNextStep(false);
+    setShowError(false);
+    setShow(true);
+    props.updateStore({
+      preprocessedFiles: [], s3PreprocessedFiles: [], ocrResults: [],
+      ocrReviewRefs: [], searchablePdfs: [], transResults: [], savedToCloud: false,
+      s3SourceFiles: props.getStore().s3SourceFiles.map(({ searchablePdfUrl, ...file }) => file),
+    });
+  };
 
   const handleOptionChange = (e) => {
+    clearResults();
     setSelectedOption(e.target.value);
-    props.updateStore({ preprocessWith: e.target.value });
+    setServiceBlock({ blocked: false });
+    props.updateStore({ preprocessWith: e.target.value, preprocessMode: 'web' });
     setShow(true);
   };
 
@@ -81,6 +101,7 @@ const Step2 = (props) => {
   const API = new FetchWrapper(props.getStore().api); // localhost dev server url http://127.0.0.1:8000/
 
   const handlePreprocessRequest = async () => {
+    clearResults();
     setShow(false);
     setShowError(false);
     setShowNextStep(false);
@@ -91,28 +112,26 @@ const Step2 = (props) => {
     const preprocessEndpoint = "preprocess/";
     const requestBody = props.getStore();
 
-    API.post(preprocessEndpoint, requestBody)
-      .then(data => {
-        if (data.preprocessedFiles.length > 0) {
-          setShowNextStep(true);
-          setpreprocessedFiles(data.preprocessedFiles);
-          setS3PreprocessedFiles(data.s3PreprocessedFiles);
-          props.updateStore({ preprocessedFiles: data.preprocessedFiles, s3PreprocessedFiles: data.s3PreprocessedFiles });
-        } else {
-          setShowError(true);
-          setShow(true);
-        }
-
-      })
-      .catch(err => {
-        console.error(err)
-        setShowError(true);
-        setShow(true);
-      })
-      .finally(() => {
-        setShow(false);
-        setShowLoader(false);
-      });
+    try {
+      const data = await API.post(preprocessEndpoint, requestBody);
+      if (!data || data.code !== 200 || !Array.isArray(data.preprocessedFiles)
+          || data.preprocessedFiles.length !== sourceFiles.length
+          || !Array.isArray(data.s3PreprocessedFiles)
+          || data.s3PreprocessedFiles.length !== sourceFiles.length) {
+        throw new Error((data && data.msg) || 'Serverul nu a returnat toate imaginile procesate.');
+      }
+      const urls = data.s3PreprocessedFiles.map(url => normalizeMediaUrl(url, props.getStore().api));
+      setShowNextStep(true);
+      setpreprocessedFiles(data.preprocessedFiles);
+      setS3PreprocessedFiles(urls);
+      props.updateStore({ preprocessedFiles: data.preprocessedFiles, s3PreprocessedFiles: urls });
+    } catch (err) {
+      setErrorMessage(err.message || 'Preprocesarea a eșuat. Încercați din nou.');
+      setShowError(true);
+    } finally {
+      setShow(true);
+      setShowLoader(false);
+    }
 
   };
 
@@ -130,7 +149,7 @@ const Step2 = (props) => {
           </Form.Group>
 
           <div className="row content gap-2 ">
-            <Form.Group className="mb-3 col-sm-3 border rounded px-2 bg-light">
+            <Form.Group as="fieldset" disabled={showLoader} className="mb-3 col-sm-3 border rounded px-2 bg-light">
               <Form.Label>2.1 Selectează motorul:</Form.Label>
 
               <Form.Check
@@ -151,16 +170,15 @@ const Step2 = (props) => {
                 checked={selectedOption === "OpenCV"}
                 onChange={handleOptionChange}
               />
-              {/* <Form.Check
-                disabled
-                label="ScanTailor (disponibil în versiunea desktop)"
+              <Form.Check
+                label="ScanTailor (pe server)"
                 name="group1"
                 type="radio"
                 id="radio3"
                 value="ScanTailor"
                 checked={selectedOption === "ScanTailor"}
                 onChange={handleOptionChange}
-              /> */}
+              />
               <Form.Check
                 label="Fără preprocesare"
                 name="group1"
@@ -205,9 +223,12 @@ const Step2 = (props) => {
             {selectedOption === "ScanTailor" && (
               <div className="col-sm border border rounded px-2 bg-light">
                 <ScanTailor getStore={() => props.getStore()}
+                  disabled={showLoader}
+                  onOptionsChange={clearResults}
                   updateStore={(u) => {
                     props.updateStore(u);
                   }} />
+                <ServiceGate requiredServices={[SERVICES.SCANTAILOR]} onBlockChange={setServiceBlock} />
               </div>
             )}
 
@@ -215,7 +236,7 @@ const Step2 = (props) => {
             <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
 
               {selectedOption && selectedOption !== "None" && show ? (<>
-                <Button variant="primary" onClick={handlePreprocessRequest}>
+                <Button variant="primary" disabled={selectedOption === 'ScanTailor' && serviceBlock.blocked} onClick={handlePreprocessRequest}>
                   Start preprocesare
                 </Button> </>
               ) : selectedOption === "None" && show ? (<>
@@ -242,6 +263,7 @@ const Step2 = (props) => {
 
               <Alert variant="danger">
                 <Alert.Heading>Eroare la prelucrare! Incearcă din nou...</Alert.Heading>
+                <p className="mb-0">{errorMessage}</p>
               </Alert>
             )}
           </div>
