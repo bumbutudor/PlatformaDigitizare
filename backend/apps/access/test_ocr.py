@@ -5,13 +5,14 @@ import time
 from pathlib import Path
 from unittest.mock import patch
 
-from django.test import SimpleTestCase
+from django.test import TestCase
+from .test_ocr_jobs import run_queued_ocr
 
 from . import ocr
 from .ocr import OcrError, OcrNoTextError, local_ocr
 
 
-class FineReaderOcrTests(SimpleTestCase):
+class FineReaderOcrTests(TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -138,6 +139,7 @@ class FineReaderOcrTests(SimpleTestCase):
 
     @patch('apps.access.ocr.tesseract_ocr', return_value=('\n\f', None))
     def test_tesseract_empty_result_has_the_same_error(self, _tesseract):
+        Path(self.media_root, 'page.jpg').write_bytes(b'fixture')
         with self.assertRaises(OcrNoTextError) as raised:
             local_ocr(self.request('secolulXIX', 'cyrillicRomanian', ['page.jpg'],
                                   ocrOptions={'useTesseract': True}), self.media_root)
@@ -155,10 +157,10 @@ class FineReaderOcrTests(SimpleTestCase):
     def test_endpoint_rejects_a_real_bom_only_txt(self):
         self.write_output('ocr/secolulXVIII/Pisania.txt', '\ufeff', age_seconds=10)
         with self.settings(MEDIA_ROOT=self.media_root):
-            response = self.client.post('/ocr/', data=json.dumps(
+            response = run_queued_ocr(self.client, data=json.dumps(
                 self.request('secolulXVIII', 'cyrillicRomanian', ['Pisania.jpg'])
             ), content_type='application/json')
-        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['files'], ['Pisania.jpg'])
 
     def test_missing_output_folder_is_a_timeout_not_a_crash(self):
@@ -262,6 +264,7 @@ class FineReaderOcrTests(SimpleTestCase):
     @patch("apps.access.ocr.tesseract_ocr")
     def test_tesseract_runs_only_when_requested(self, tesseract_ocr):
         tesseract_ocr.return_value = ("tesseract text", None)
+        Path(self.media_root, "page.jpg").write_bytes(b"fixture")
         self.write_output("ocr/secolulXIX/cyrillicRomanian/page.txt", "fr text")
 
         fine_reader = local_ocr(
@@ -282,18 +285,18 @@ class FineReaderOcrTests(SimpleTestCase):
         self.assertEqual(tesseract_ocr.call_count, 1)
 
 
-class OcrEndpointErrorTests(SimpleTestCase):
-    @patch('apps.access.views.create_ocr_review_refs')
-    @patch('apps.access.views.local_ocr')
+class OcrEndpointErrorTests(TestCase):
+    @patch('apps.access.ocr_jobs.create_ocr_review_refs')
+    @patch('apps.access.ocr_jobs.local_ocr')
     def test_empty_results_have_a_user_message_and_no_success_artifacts(self, local, review):
         for result in ({'ocrResults': ['\ufeff^\n'], 'searchablePdfs': ['old.pdf']}, ['\ufeff'], []):
             with self.subTest(result=result):
                 local.return_value = result
-                response = self.client.post('/ocr/', data=json.dumps({
+                response = run_queued_ocr(self.client, data=json.dumps({
                     'sourceFiles': [{'name': 'Pisania.jpg'}], 'period': 'secolulXVIII',
                 }), content_type='application/json')
                 body = response.json()
-                self.assertEqual(response.status_code, 422)
+                self.assertEqual(response.status_code, 200)
                 self.assertEqual(body['code'], 422)
                 self.assertEqual(body['error'], 'ocr_no_text')
                 self.assertIn('Modelul OCR nu a recunoscut niciun text', body['msg'])
@@ -307,9 +310,9 @@ class OcrEndpointErrorTests(SimpleTestCase):
         with tempfile.TemporaryDirectory() as media_root, \
                 self.settings(MEDIA_ROOT=media_root), \
                 patch.object(ocr, "FINEREADER_TIMEOUT_SECONDS", 0), \
+                patch("apps.access.ocr_jobs.FILE_TIMEOUT_SECONDS", 0), \
                 patch.object(ocr, "POLL_SECONDS", 0):
-            response = self.client.post(
-                "/ocr/",
+            response = run_queued_ocr(self.client,
                 data=json.dumps({
                     "period": "secolulXVIII",
                     "alphabet": "cyrillicRomanian",
@@ -318,8 +321,8 @@ class OcrEndpointErrorTests(SimpleTestCase):
                 content_type="application/json",
             )
 
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 200)
         body = response.json()
-        self.assertEqual(body["code"], 500)
+        self.assertEqual(body["code"], 504)
         self.assertIn("inscriptie.jpg", body["msg"])
         self.assertIn("FineReader nu a produs textul", body["msg"])

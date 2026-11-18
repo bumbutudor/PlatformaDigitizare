@@ -226,12 +226,11 @@ SCANTAILOR_MAX_IMAGE_BYTES = 30 * 1024 * 1024
 SCANTAILOR_MAX_INPUT_PIXELS = 40_000_000
 SCANTAILOR_MAX_OUTPUT_PIXELS = 60_000_000
 
-# Actual Windows Hot Folder routes. XVII currently has only a PDF task.
+# One input folder per model; ScanTailor, OpenCV and the Digi worker share these routes.
 FINEREADER_SCANTAILOR_INPUT_DIRS = {
-    'secolulXVII': os.getenv('FINEREADER_SCANTAILOR_XVII_INPUT', ''),
-    'secolulXVIII': os.getenv('FINEREADER_SCANTAILOR_XVIII_INPUT', os.path.join(MEDIA_ROOT, 'out')),
-    'secolulXIX': os.getenv('FINEREADER_SCANTAILOR_XIX_INPUT', os.path.join(MEDIA_ROOT, 'pre', 'OpenCV')),
-    'secolulXX': os.getenv('FINEREADER_SCANTAILOR_XX_INPUT', os.path.join(MEDIA_ROOT, 'pre', 'OpenCV')),
+    'secolul' + century: os.getenv('FINEREADER_SCANTAILOR_' + century + '_INPUT',
+                                  os.path.join(MEDIA_ROOT, 'pre', 'OpenCV', 'secolul' + century))
+    for century in ('XVII', 'XVIII', 'XIX', 'XX')
 }
 
 # Local Codex CLI correction service. Corrections are returned for interactive

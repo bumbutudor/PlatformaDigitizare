@@ -19,26 +19,33 @@
     "Draft ownership is derived from the authenticated Digi session that created the job, never from a browser-supplied user ID.",
     "Saving returns the confirmed draft ID and an owned-draft editor link. Retries reuse the same draft; corrected content updates it.",
     "PDF sources receive download links. OCR with no recognized text returns an error.",
-    "Historical inputs and outputs were preserved. FineReader task configuration was not changed."
+    "Historical inputs and outputs were preserved. Hot Folder inputs were subsequently separated by period; see hotfolder-windows-2026-11-18.json."
   ],
   "configuration": {
     "backend_environment_variable": "DIGI_BRIDGE_KEY",
     "cloudways_private_config": "storage/digitizare-bridge.json",
-    "cloudways_config_fields": ["key", "backend"],
+    "cloudways_config_fields": [
+      "key",
+      "backend"
+    ],
     "credential_policy": "The service key stays in private runtime configuration; browser handoffs use separate scoped capabilities.",
     "handoff_lifetime_hours": 48,
     "maximum_files_per_job": 20,
     "maximum_upload_bytes_per_job": 104857600,
     "maximum_new_jobs_per_user_per_hour": 30,
     "ocr_timeout_seconds_per_file": 300,
-    "private_originals": ".ops/digi-jobs/<job-id>/"
+    "private_originals": ".ops/digi-jobs/<job-id>/",
+    "simple_image_input": "backend/media/pre/OpenCV/secolulXX"
   },
   "deployment": {
-    "django_migration": "access.0025_digi_job",
+    "django_migration": "access.0026_digi_job_ocr_queue",
     "flarum_migration": "2026_11_18_000001_create_digitization_jobs",
     "cloudways_cli": "php8.1",
     "php_note": "PHP 8.2 CLI is incompatible with the installed Carbon version; PHP 7.4 fails Composer requirements. PHP 8.1 was verified.",
-    "flarum_paths": ["packages/digi-media-manager", "vendor/block-cat/digi-media-manager"],
+    "flarum_paths": [
+      "packages/digi-media-manager",
+      "vendor/block-cat/digi-media-manager"
+    ],
     "flarum_build": "cd integrations/digi-media-manager/js && npm ci --ignore-scripts && npm run build",
     "frontend_build": "cd frontend && npm run build-digitizare",
     "frontend_destination": "/var/www/digitalizare",
@@ -61,6 +68,7 @@
   "operational_limits": [
     "The Windows machine, Django worker and FineReader Hot Folder must remain available; startup follows the existing user-login service arrangement.",
     "FineReader still uses Hot Folder rather than Extended CLI export.",
-    "The existing shared OpenCV inbox also triggers other period tasks, which can increase processing time."
-  ]
+    "OpenCV images now enter one period-specific inbox. Changing the selected period after preprocessing can intentionally stage that image to another model."
+  ],
+  "followupVerification": "ocr-queue-hardening-2026-11-18.json"
 }

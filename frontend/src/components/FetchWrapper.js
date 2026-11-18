@@ -3,8 +3,8 @@ export default class FetchWrapper {
         this.baseURL = baseURL;
     }
 
-    get(endpoint) {
-        return fetch(this.baseURL + endpoint)
+    get(endpoint, extraHeaders = {}, signal) {
+        return fetch(this.baseURL + endpoint, { headers: extraHeaders, signal })
             .then(response => response.json());
     }
 

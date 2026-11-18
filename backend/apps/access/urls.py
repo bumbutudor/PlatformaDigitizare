@@ -1,9 +1,9 @@
 from xml.sax.saxutils import prepare_input_source
 from django.urls import path, include
-from .views import upload, preprocess, ocr, transliterate, codex_correct, home, exception_dictionary, serve_media, health
+from .views import upload, preprocess, transliterate, codex_correct, home, exception_dictionary, serve_media, health
 from .views import ExceptionDictionaryEntryViewSet, PeriodViewSet, AlphabetViewSet, ExceptionDictionaryViewSet
 from rest_framework import routers
-from . import digi_bridge
+from . import digi_bridge, ocr_jobs
 
 router = routers.DefaultRouter()
 router.register(r'period', PeriodViewSet)
@@ -16,7 +16,8 @@ urlpatterns = [
     path('health/', health),
     path('upload/', upload),
     path('preprocess/', preprocess),
-    path('ocr/', ocr),
+    path('ocr/', ocr_jobs.submit),
+    path('ocr/jobs/<uuid:job_id>/', ocr_jobs.status),
     path('transliterate/', transliterate),
     path('codex-correct/', codex_correct),
     path('publish/', digi_bridge.publish),

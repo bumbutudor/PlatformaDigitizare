@@ -15,6 +15,7 @@ import { SERVICES } from '../utils/ServiceStatus';
 import { cleanOcrResults, hasOcrText } from '../utils/OcrText';
 import { buildOcrRequest, ocrFailureMessage } from '../utils/OcrModels';
 import CodexCorrectionReview from '../components/CodexCorrectionReview';
+import { pollOcrJob } from '../utils/OcrJobs';
 
 // OCR
 export default class Step3 extends Component {
@@ -37,6 +38,9 @@ export default class Step3 extends Component {
       showNextStep: false,
       showError: false,
       errorMessage: '',
+      jobStatus: '',
+      elapsedSeconds: 0,
+      completedFiles: 0,
       serviceBlock: { blocked: false },
     };
 
@@ -58,9 +62,31 @@ export default class Step3 extends Component {
     return "https://cdn.presslabs.com/wp-content/uploads/2018/10/upload-error.png";
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    const job = this.props.getStore().ocrJob;
+    if (job && job.id && job.token) this.handleOCRRequest(job);
+  }
 
-  componentWillUnmount() {}
+  componentWillUnmount() {
+    this._ocrUnmounted = true;
+    if (this._ocrController) this._ocrController.abort();
+    clearInterval(this._ocrTimer);
+  }
+
+  async awaitOcrJob(data, requestSignature) {
+    if (!data || !data.id || !data.token) return data; // Older backend compatibility during deployment.
+    this.props.updateStore({ ocrJob: { ...data, requestSignature } });
+    if (this._ocrUnmounted) return data;
+    this._ocrController = new AbortController();
+    const start = Date.parse(data.createdAt) || Date.now();
+    this._ocrTimer = setInterval(() => this.setState({ elapsedSeconds: Math.floor((Date.now() - start) / 1000) }), 1000);
+    return pollOcrJob(this.API, data, {
+      signal: this._ocrController.signal,
+      onProgress: progress => this.setState({ jobStatus: progress.status,
+        completedFiles: progress.completedFiles || 0,
+        elapsedSeconds: progress.elapsedSeconds || Math.floor((Date.now() - start) / 1000) }),
+    });
+  }
 
   isPdfAtIndex(index) {
     const sourceFile = this.state.s3SourceFiles[index];
@@ -112,13 +138,15 @@ export default class Step3 extends Component {
     );
   }
 
-  async handleOCRRequest() {
+  async handleOCRRequest(resumeJob) {
+    if (this.state.showLoader) return;
     // A failed rerun must not leave old text, review references or PDF links
     // available for the next step.
     const s3SourceFiles = this.state.s3SourceFiles.map(({ searchablePdfUrl, ...file }) => file);
     const cleared = { ocrResults: [], ocrReviewRefs: [], searchablePdfs: [], s3SourceFiles };
     this.setState({ ...cleared, show: false, showNextStep: false,
-      showError: false, errorMessage: '', showLoader: true });
+      showError: false, errorMessage: '', showLoader: true,
+      jobStatus: 'queued', elapsedSeconds: 0, completedFiles: 0 });
     this.props.updateStore({ ...cleared, transResults: [], savedToCloud: false });
 
     const ocrEndpoint = "ocr/";
@@ -131,8 +159,17 @@ export default class Step3 extends Component {
     }, this.props.getStore().api);
     // console.log(postData);
 
-    return this.API.post(ocrEndpoint, postData)
+    const requestSignature = JSON.stringify([postData.period, postData.ocrModel,
+      postData.sourceFiles, postData.preprocessedFiles, postData.ocrOptions]);
+    const pending = resumeJob && resumeJob.id ? resumeJob : this.props.getStore().ocrJob;
+    const submitting = pending && pending.token && pending.requestSignature === requestSignature
+      ? Promise.resolve({ ...pending, status: 'queued', code: 202 })
+      : this.API.post(ocrEndpoint, postData);
+    return submitting
+      .then(data => this.awaitOcrJob(data, requestSignature))
       .then((data) => {
+        if (this._ocrUnmounted) return;
+        this.props.updateStore({ ocrJob: null });
         const ocrResults = cleanOcrResults(data && data.ocrResults);
         const complete = ocrResults.length > 0 && ocrResults.length === this.state.sourceFiles.length;
         const hasResults = data && data.code === 200 && complete && ocrResults.every(hasOcrText);
@@ -174,13 +211,15 @@ export default class Step3 extends Component {
         }
       })
       .catch((error) => {
+        if (this._ocrUnmounted || error.name === 'AbortError') return;
         // console.log(error);
         this.setState({ showError: true, errorMessage: error.message || 'Recunoașterea textului a eșuat.' });
         this.setState({ showNextStep: false });
         this.setState({ show: true });
       })
       .finally(() => {
-        this.setState({ showLoader: false });
+        clearInterval(this._ocrTimer);
+        if (!this._ocrUnmounted) this.setState({ showLoader: false });
       });
   }
 
@@ -208,7 +247,7 @@ export default class Step3 extends Component {
               </Form.Label>
             </Form.Group>
 
-            <div className="row content gap-2">
+            <fieldset className="row content gap-2" disabled={this.state.showLoader}>
               <Form.Group className="mb-3 col-sm-3 border rounded px-2 bg-light">
                 <Form.Label>3.1 Selectează perioada documentului:</Form.Label>
                 <Form.Check
@@ -645,6 +684,13 @@ export default class Step3 extends Component {
                   </>
                 )}
               </div>
+              {this.state.showLoader && (
+                <Alert variant="info" role="status">
+                  <strong>{this.state.jobStatus === 'processing' ? 'Se recunoaște textul...' : 'Cererea OCR așteaptă în coadă...'}</strong>
+                  <div>Fișiere finalizate: {this.state.completedFiles} / {this.state.sourceFiles.length}</div>
+                  <div aria-live="off">Timp scurs: {Math.floor(this.state.elapsedSeconds / 60)} min {this.state.elapsedSeconds % 60} s</div>
+                </Alert>
+              )}
               {this.state.showError && (
                 <Alert variant="danger">
                   <Alert.Heading>
@@ -659,7 +705,7 @@ export default class Step3 extends Component {
                 requiredServices={[SERVICES.FINEREADER]}
                 onBlockChange={(block) => this.setState({ serviceBlock: block })}
               />
-            </div>
+            </fieldset>
           </Form>
         </div>
 

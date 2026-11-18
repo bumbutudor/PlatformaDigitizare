@@ -11,6 +11,7 @@ import logging
 import os
 import shutil
 import uuid
+import tempfile
 from datetime import timedelta
 from pathlib import Path
 
@@ -54,6 +55,10 @@ def get_job(request, job_id, browser=False):
     if not browser and not service_authorized(request):
         raise PermissionError('Acces neautorizat.')
     job = DigiJob.objects.get(pk=job_id)
+    if job.mode == 'ocr':
+        raise DigiJob.DoesNotExist()
+    if job.expires_at <= timezone.now():
+        raise PermissionError('Legătura cu Digi a expirat. Reia conectarea din Digi.')
     if browser:
         value = request.headers.get('Authorization', '').removeprefix('Bearer ')
         if job.expires_at < timezone.now() or not hmac.compare_digest(
@@ -94,36 +99,45 @@ def submit(request):
         existing = DigiJob.objects.filter(pk=job_id).first()
         if existing:
             return job_json(existing)
-        folder = private_root() / str(job_id)
-        folder.mkdir(parents=True, exist_ok=True)
-        files = []
-        for i, (meta, uploaded) in enumerate(zip(metadata, uploads)):
-            suffix = Path(uploaded.name).suffix.lower()
-            if suffix not in ALLOWED_SUFFIXES:
-                raise ValueError('Sunt acceptate PDF, JPG, PNG și TIFF.')
-            destination = folder / (str(i) + suffix)
-            temporary = folder / (str(uuid.uuid4()) + '.upload')
-            with temporary.open('wb') as out:
-                for chunk in uploaded.chunks():
-                    out.write(chunk)
-            if suffix == '.pdf':
-                with temporary.open('rb') as check:
-                    if not check.read(1024).lstrip().startswith(b'%PDF-'):
-                        raise ValueError('Fișierul PDF este invalid.')
-            else:
-                with Image.open(temporary) as check:
-                    check.verify()
-            os.replace(temporary, destination)
-            files.append({'id': str(meta['id']), 'name': str(meta['name'])[:255],
-                          'url': str(meta['url']), 'stored': destination.name})
-        try:
-            with transaction.atomic():
-                job = DigiJob.objects.create(
-                    id=job_id, mode=mode, status='queued' if mode == 'simple' else 'advanced',
-                    token_hash=hashlib.sha256(token.encode()).hexdigest(), files=files,
-                    expires_at=timezone.now() + timedelta(hours=48))
-        except IntegrityError:
-            job = DigiJob.objects.get(pk=job_id)
+        root = private_root().resolve()
+        root.mkdir(parents=True, exist_ok=True)
+        # Each submit owns its temporary directory, including concurrent retries.
+        # Invalid uploads never leave .upload files or an orphan job directory.
+        with tempfile.TemporaryDirectory(prefix='.upload-', dir=root) as working:
+            folder = Path(working)
+            folder.resolve().relative_to(root)
+            files = []
+            for i, (meta, uploaded) in enumerate(zip(metadata, uploads)):
+                suffix = Path(uploaded.name).suffix.lower()
+                if suffix not in ALLOWED_SUFFIXES:
+                    raise ValueError('Sunt acceptate PDF, JPG, PNG și TIFF.')
+                destination = folder / (str(i) + suffix)
+                temporary = folder / (str(uuid.uuid4()) + '.upload')
+                with temporary.open('wb') as out:
+                    for chunk in uploaded.chunks():
+                        out.write(chunk)
+                if suffix == '.pdf':
+                    with temporary.open('rb') as check:
+                        if not check.read(1024).lstrip().startswith(b'%PDF-'):
+                            raise ValueError('Fișierul PDF este invalid.')
+                else:
+                    with Image.open(temporary) as check:
+                        check.verify()
+                os.replace(temporary, destination)
+                files.append({'id': str(meta['id']), 'name': str(meta['name'])[:255],
+                              'url': str(meta['url']), 'stored': destination.name})
+            try:
+                with transaction.atomic():
+                    job = DigiJob.objects.create(
+                        id=job_id, mode=mode, status='queued' if mode == 'simple' else 'advanced',
+                        token_hash=hashlib.sha256(token.encode()).hexdigest(), files=files,
+                        expires_at=timezone.now() + timedelta(hours=48))
+                    destination = root / str(job_id)
+                    if destination.exists():
+                        raise ValueError('Există fișiere pentru această cerere. Reia trimiterea din Digi.')
+                    folder.rename(destination)
+            except IntegrityError:
+                job = DigiJob.objects.get(pk=job_id)
         return job_json(job)
     except (ValueError, KeyError, TypeError, Image.UnidentifiedImageError) as exc:
         return error(str(exc))
@@ -153,7 +167,7 @@ def stage(job, item, index, advanced=False):
     if is_pdf:
         relative = Path('pdfs/secolulXX') / (name + '.pdf')
     else:
-        relative = Path(name + '.png') if advanced else Path('pre/OpenCV') / (name + '.png')
+        relative = Path(name + '.png') if advanced else Path('pre/OpenCV/secolulXX') / (name + '.png')
     destination = Path(settings.MEDIA_ROOT) / relative
     destination.parent.mkdir(parents=True, exist_ok=True)
     if not destination.exists():

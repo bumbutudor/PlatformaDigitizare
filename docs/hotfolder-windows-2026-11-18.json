@@ -29,8 +29,8 @@
       "schedule": "everyMinute",
       "inputs": [
         {
-          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV",
-          "includeSubfolders": true
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV\\secolulXIX",
+          "includeSubfolders": false
         }
       ],
       "outputs": [
@@ -71,8 +71,8 @@
       "schedule": "everyMinute",
       "inputs": [
         {
-          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV",
-          "includeSubfolders": true
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV\\secolulXVIII",
+          "includeSubfolders": false
         }
       ],
       "outputs": [
@@ -164,8 +164,8 @@
       "schedule": "everyMinute",
       "inputs": [
         {
-          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\FR",
-          "includeSubfolders": true
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\FR\\secolulXVIII",
+          "includeSubfolders": false
         }
       ],
       "outputs": [
@@ -195,8 +195,8 @@
       "schedule": "everyMinute",
       "inputs": [
         {
-          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV",
-          "includeSubfolders": true
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV\\secolulXVII",
+          "includeSubfolders": false
         }
       ],
       "outputs": [
@@ -257,8 +257,8 @@
       "schedule": "everyMinute",
       "inputs": [
         {
-          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV",
-          "includeSubfolders": true
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\OpenCV\\secolulXX",
+          "includeSubfolders": false
         }
       ],
       "outputs": [
@@ -319,8 +319,8 @@
       "schedule": "everyMinute",
       "inputs": [
         {
-          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\FR",
-          "includeSubfolders": true
+          "path": "C:\\Users\\tudor\\Desktop\\PlatformaDigitizare\\backend\\media\\pre\\FR\\secolulXX",
+          "includeSubfolders": false
         }
       ],
       "outputs": [
@@ -343,6 +343,84 @@
       "processingMode": "AnalyzeAndRecognize",
       "originalFiles": "nothing",
       "observedUiStatus": "Watching"
+    }
+  ],
+  "routingUpdatedAt": "2026-11-18",
+  "routingNotes": [
+    "Each OpenCV task watches only its own period folder; no task watches the shared OpenCV root.",
+    "The two legacy preFR tasks now watch pre/FR/secolulXVIII and pre/FR/secolulXX. The web FineReader preprocessing output stays in pre/FR and is staged only to the selected period OpenCV inbox when OCR is requested.",
+    "Server ScanTailor and Digi use the period-specific OpenCV inboxes. Existing PDF and desktop ScanTailor inputs remain separate."
+  ],
+  "license": {
+    "product": "ABBYY FineReader PDF 15 Corporate",
+    "hotFolderPagesPerRenewal": 5000,
+    "renewalPeriodDays": 30,
+    "remainingBeforeRoutingVerification": 4910,
+    "nextRenewalInDaysAtCheck": 21,
+    "verifiedFrom": "Hot Folder license status bar on the activated installation; no serial collected",
+    "verifiedDate": "2026-11-18"
+  },
+  "backup": {
+    "location": ".ops/ocr-hardening-20261118-183636/HotFolder-before",
+    "includesProcessedLists": true,
+    "xmlEncodingPreserved": "UTF-16 with BOM"
+  },
+  "periodIsolationVerification": [
+    {
+      "period": "secolulXVII",
+      "status": "done",
+      "code": 200,
+      "elapsedSeconds": 88,
+      "characters": 4972,
+      "searchablePdf": true,
+      "submitSeconds": 0.047,
+      "input": "pre/OpenCV/secolulXVII/cv_1e916c8d8ddb4e1eba592406b6cca3b0.png",
+      "textOutputs": [
+        "ocr/secolulXVII/cv_1e916c8d8ddb4e1eba592406b6cca3b0.txt"
+      ],
+      "singleCorrectOutput": true
+    },
+    {
+      "period": "secolulXVIII",
+      "status": "done",
+      "code": 200,
+      "elapsedSeconds": 97,
+      "characters": 3571,
+      "searchablePdf": true,
+      "submitSeconds": 0.031,
+      "input": "pre/OpenCV/secolulXVIII/cv_fa5b2f5246c74829bfc5eb2c060a4602.png",
+      "textOutputs": [
+        "ocr/secolulXVIII/cv_fa5b2f5246c74829bfc5eb2c060a4602.txt"
+      ],
+      "singleCorrectOutput": true
+    },
+    {
+      "period": "secolulXIX",
+      "status": "done",
+      "code": 200,
+      "elapsedSeconds": 96,
+      "characters": 2811,
+      "searchablePdf": false,
+      "submitSeconds": 0.016,
+      "input": "pre/OpenCV/secolulXIX/cv_90992b94f6d04b48b57a05b72bd48820.png",
+      "textOutputs": [
+        "ocr/secolulXIX/cyrillicRomanian/cv_90992b94f6d04b48b57a05b72bd48820.txt"
+      ],
+      "singleCorrectOutput": true
+    },
+    {
+      "period": "secolulXX",
+      "status": "done",
+      "code": 200,
+      "elapsedSeconds": 96,
+      "characters": 4891,
+      "searchablePdf": true,
+      "submitSeconds": 0.016,
+      "input": "pre/OpenCV/secolulXX/cv_0225be48a4454264a3cb12473461ec5a.png",
+      "textOutputs": [
+        "ocr/secolulXX/cyrillic/cv_0225be48a4454264a3cb12473461ec5a.txt"
+      ],
+      "singleCorrectOutput": true
     }
   ]
 }

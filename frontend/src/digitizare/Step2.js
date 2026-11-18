@@ -66,7 +66,7 @@ const Step2 = (props) => {
     setShowError(false);
     setShow(true);
     props.updateStore({
-      preprocessedFiles: [], s3PreprocessedFiles: [], ocrResults: [],
+      preprocessedFiles: [], s3PreprocessedFiles: [], ocrResults: [], ocrJob: null,
       ocrReviewRefs: [], searchablePdfs: [], transResults: [], savedToCloud: false,
       s3SourceFiles: props.getStore().s3SourceFiles.map(({ searchablePdfUrl, ...file }) => file),
     });
@@ -171,7 +171,7 @@ const Step2 = (props) => {
                 onChange={handleOptionChange}
               />
               <Form.Check
-                label="ScanTailor (pe server)"
+                label="ScanTailor"
                 name="group1"
                 type="radio"
                 id="radio3"

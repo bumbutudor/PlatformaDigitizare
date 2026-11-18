@@ -1,0 +1,151 @@
+{
+  "date": "2026-11-18",
+  "status": "deployed",
+  "legacyCredential": {
+    "matchingApiKeysRevoked": 1,
+    "remainingMatchingKeys": 0,
+    "verificationHttpStatus": 401,
+    "credentialRecorded": false
+  },
+  "ocrQueue": {
+    "submit": "POST /ocr/ returns HTTP 202 with id and a job-specific capability token",
+    "status": "GET /ocr/jobs/<id>/ with Authorization: Bearer <job token>",
+    "states": [
+      "queued",
+      "processing",
+      "done",
+      "error"
+    ],
+    "results": [
+      "ocrResults",
+      "searchablePdfs",
+      "ocrReviewRefs"
+    ],
+    "frontendPollingSeconds": 2.5,
+    "fileTimeoutSeconds": 300,
+    "queueWaitCountsAgainstFileDeadline": false,
+    "maximumFilesPerJob": 20,
+    "jobLifetimeHours": 48,
+    "worker": "python manage.py run_digi_worker",
+    "recovery": "Completed files are checkpointed in DigiJob.results; after worker restart only unfinished files are processed. Network retries resume the current browser job; after a terminal error a new request can be submitted.",
+    "engines": [
+      "FineReader Hot Folder",
+      "Tesseract"
+    ],
+    "errors": "Original server message and retry button remain visible; empty text is ocr_no_text, timeout is ocr_timeout."
+  },
+  "routing": {
+    "openCV": "backend/media/pre/OpenCV/<period>",
+    "filename": "cv_<random UUID>.png; atomically staged after preprocessing",
+    "digi": "backend/media/pre/OpenCV/secolulXX/digi_<job>_<index>.png",
+    "scanTailor": "The existing FINEREADER_SCANTAILOR_<century>_INPUT variables now point to each period inbox.",
+    "fineReaderPreprocess": "pre/FR root is no longer watched by recognition tasks. The worker stages its output to the selected period inbox. The two legacy preFR task inboxes are isolated per period.",
+    "verification": [
+      {
+        "period": "secolulXVII",
+        "status": "done",
+        "code": 200,
+        "elapsedSeconds": 88,
+        "characters": 4972,
+        "searchablePdf": true,
+        "submitSeconds": 0.047,
+        "input": "pre/OpenCV/secolulXVII/cv_1e916c8d8ddb4e1eba592406b6cca3b0.png",
+        "textOutputs": [
+          "ocr/secolulXVII/cv_1e916c8d8ddb4e1eba592406b6cca3b0.txt"
+        ],
+        "singleCorrectOutput": true
+      },
+      {
+        "period": "secolulXVIII",
+        "status": "done",
+        "code": 200,
+        "elapsedSeconds": 97,
+        "characters": 3571,
+        "searchablePdf": true,
+        "submitSeconds": 0.031,
+        "input": "pre/OpenCV/secolulXVIII/cv_fa5b2f5246c74829bfc5eb2c060a4602.png",
+        "textOutputs": [
+          "ocr/secolulXVIII/cv_fa5b2f5246c74829bfc5eb2c060a4602.txt"
+        ],
+        "singleCorrectOutput": true
+      },
+      {
+        "period": "secolulXIX",
+        "status": "done",
+        "code": 200,
+        "elapsedSeconds": 96,
+        "characters": 2811,
+        "searchablePdf": false,
+        "submitSeconds": 0.016,
+        "input": "pre/OpenCV/secolulXIX/cv_90992b94f6d04b48b57a05b72bd48820.png",
+        "textOutputs": [
+          "ocr/secolulXIX/cyrillicRomanian/cv_90992b94f6d04b48b57a05b72bd48820.txt"
+        ],
+        "singleCorrectOutput": true
+      },
+      {
+        "period": "secolulXX",
+        "status": "done",
+        "code": 200,
+        "elapsedSeconds": 96,
+        "characters": 4891,
+        "searchablePdf": true,
+        "submitSeconds": 0.016,
+        "input": "pre/OpenCV/secolulXX/cv_0225be48a4454264a3cb12473461ec5a.png",
+        "textOutputs": [
+          "ocr/secolulXX/cyrillic/cv_0225be48a4454264a3cb12473461ec5a.txt"
+        ],
+        "singleCorrectOutput": true
+      }
+    ]
+  },
+  "retention": {
+    "command": "backend/venv/Scripts/python.exe scripts/cleanup_media.py --apply",
+    "default": "Dry run without --apply. Generic generated media older than 7 days is archived.",
+    "expiredDigi": "Expired non-active job directories under .ops/digi-jobs/<uuid> and their digi_* media/outputs are eligible immediately after expiration; queued/processing and unexpired jobs remain protected.",
+    "protection": "Git-tracked files, saved document references and active job media references remain protected.",
+    "failedUploads": "Invalid submissions remove their own temporary upload directory, including partial .upload files; concurrent submissions never share temporary directories.",
+    "archive": ".ops/media-archive/<timestamp>/<workspace-relative path>",
+    "restore": "Use manifest.jsonl version 2. Restore each archived path to the same workspace-relative location after checking that the destination does not contain a newer file. No permanent deletion is performed by cleanup.",
+    "execution": {
+      "eligibleItems": 0,
+      "archivedItems": 0
+    }
+  },
+  "license": {
+    "hotFolderPages": 5000,
+    "renewalDays": 30,
+    "source": "Activated Hot Folder license status bar",
+    "serialNumberRecorded": false
+  },
+  "validation": {
+    "backend": "Full run: 92 tests (91 passed, 1 existing installed-CLI integration test skipped). Final timeout filename correction: 25 targeted tests passed, including an additional original-name regression test.",
+    "frontend": "55 application tests passed",
+    "cleanup": "3 tests passed, including restoring archived content and protecting reactivated jobs",
+    "frontendBuild": "npm run build-digitizare passed; public bundle SHA-256 matches local bundle",
+    "liveBrowser": "Public step 3 loads, no page errors",
+    "liveApi": "HTTP 202 in 16-47 ms; four real jobs completed in 88-97 seconds, each with exactly one TXT in its period folder",
+    "knownExistingChecks": [
+      "The legacy frontend tests/main.spec.js imports missing src/main.js and is excluded from application tests; npm test retains the existing legacy StepZilla lint limitation.",
+      "Django reports an existing missing static directory warning. makemigrations --check reports existing implicit-ID drift on 13 unrelated models; the new DigiJob migration is applied and no unrelated schema changes were generated."
+    ]
+  },
+  "deployment": {
+    "frontend": "https://digitizare.math.md/",
+    "migration": "access.0026_digi_job_ocr_queue",
+    "servicesRestarted": [
+      "Django",
+      "Digi/OCR worker",
+      "ABBYY Hot Folder"
+    ],
+    "windowsRestarted": false,
+    "backupDirectory": ".ops/ocr-hardening-20261118-183636",
+    "backupIncludes": [
+      "HotFolder-before",
+      "db-before.sqlite3",
+      "backend.env.before",
+      "bundle.remote-before.js"
+    ],
+    "mergeAuthorized": false
+  }
+}

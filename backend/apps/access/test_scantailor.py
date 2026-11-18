@@ -7,15 +7,16 @@ from unittest.mock import patch
 from unittest import skipUnless
 from xml.etree import ElementTree as ET
 
-from django.test import SimpleTestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from PIL import Image
 
 from . import scantailor as st
 from .health import check_scantailor
 from .ocr import local_ocr
+from .test_ocr_jobs import run_queued_ocr
 
 
-class ScanTailorTests(SimpleTestCase):
+class ScanTailorTests(TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="test-scantailor-")
         self.addCleanup(self.temporary.cleanup)
@@ -158,8 +159,9 @@ class ScanTailorTests(SimpleTestCase):
     def test_missing_hotfolder_returns_503_to_ocr_client(self):
         self.data.update(period="secolulXVII", alphabet="cyrillicRomanian", preprocessedFiles=self.run_job())
         with override_settings(FINEREADER_SCANTAILOR_INPUT_DIRS={}):
-            response = self.client.post("/ocr/", json.dumps(self.data), content_type="application/json")
-        self.assertEqual(response.status_code, 503)
+            response = run_queued_ocr(self.client, data=json.dumps(self.data), content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["code"], 503)
 
     def test_finereader_reads_processed_name_and_returns_matching_pdf(self):
         processed = self.run_job()

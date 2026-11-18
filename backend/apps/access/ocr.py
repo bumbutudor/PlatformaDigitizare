@@ -4,7 +4,8 @@ import time
 from .utils import load_txt
 import pytesseract
 from PIL import Image
-from .scantailor import processed_ocr_paths, stage_for_finereader
+from .scantailor import processed_ocr_paths, stage_for_finereader, media_file
+from .hotfolder import other_processed_paths
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,10 @@ def remove_ocr_unknown_markers(text):
 
 class OcrError(Exception):
     """OCR failure whose message is meant to be shown to the user."""
+
+
+class OcrTimeoutError(OcrError):
+    """A file exceeded the processing deadline."""
 
 
 class OcrNoTextError(OcrError):
@@ -90,9 +95,9 @@ FINEREADER_OUTPUT_PATHS = {
 # (task-ul de secol XIX, Epistolariu, scrie doar TXT).
 FINEREADER_PDF_PERIODS = {'secolulXX', 'secolulXVIII', 'secolulXVII'}
 
-# Cat asteptam rezultatul text al Hot Folder-ului, respectiv PDF-urile
-# cautabile (un singur termen pentru toate fisierele cererii, nu per fisier).
-FINEREADER_TIMEOUT_SECONDS = 120
+# Workerul apeleaza local_ocr separat pentru fiecare fisier, cu un termen
+# de 300 secunde care include asteptarea PDF-ului optional.
+FINEREADER_TIMEOUT_SECONDS = 300
 FINEREADER_TEXT_SETTLE_SECONDS = 2
 SEARCHABLE_PDF_TIMEOUT_SECONDS = 30
 POLL_SECONDS = 1
@@ -117,7 +122,7 @@ def wait_for_finereader_text(files, output_dir, timeout=None):
     if timeout is None:
         timeout = FINEREADER_TIMEOUT_SECONDS
     expected = [
-        (file["name"], os.path.join(output_dir, _base_name(file) + '.txt'))
+        (file.get("originalName") or file["name"], os.path.join(output_dir, _base_name(file) + '.txt'))
         for file in files
     ]
     deadline = time.monotonic() + timeout
@@ -134,7 +139,7 @@ def wait_for_finereader_text(files, output_dir, timeout=None):
             return [path for _, path in expected]
         if time.monotonic() >= deadline:
             print(f"[FineReader OCR] Timeout, lipsesc: {missing} in {output_dir}")
-            raise OcrError(
+            raise OcrTimeoutError(
                 f"FineReader nu a produs textul pentru {len(missing)} din "
                 f"{len(expected)} fișiere în {int(timeout)} de secunde "
                 f"({', '.join(missing)}). Verificați că Hot Folder rulează pe "
@@ -185,8 +190,9 @@ def collect_searchable_pdf_urls(files, media_root, ocr_path, api_base_url, timeo
     return urls
 
 
-def local_ocr(data, media_root):
+def local_ocr(data, media_root, timeout=None):
     try:
+        deadline = time.monotonic() + timeout if timeout is not None else None
         period = data.get('period')
         alphabet = data.get('alphabet')
         files = data['sourceFiles']
@@ -200,9 +206,11 @@ def local_ocr(data, media_root):
         # Verifică mai întâi dacă este selectat modelul Tesseract
         ocrOptions = data.get('ocrOptions', {})
         use_tesseract = ocrOptions.get("useTesseract", False) if ocrOptions else False
-        processed_paths = processed_ocr_paths(data, media_root)
+        processed_paths = processed_ocr_paths(data, media_root) or other_processed_paths(data, media_root)
         if processed_paths:
-            files = [{"name": path.name} for path in processed_paths]
+            files = [{"name": path.name,
+                      "originalName": source.get('originalName') or source['name']}
+                     for path, source in zip(processed_paths, data['sourceFiles'])]
             if not use_tesseract:
                 stage_for_finereader(processed_paths, period)
         
@@ -214,14 +222,20 @@ def local_ocr(data, media_root):
             os.makedirs(tesseract_output_dir, exist_ok=True)
             
             for index, file in enumerate(files):
-                file_path = str(processed_paths[index]) if processed_paths else os.path.join(media_root, file["name"])
+                file_path = str(processed_paths[index]) if processed_paths else str(media_file(file["name"], media_root))
                 print(f"[Tesseract OCR] Processing file: {file_path}")
-                ocr_result, pdf_path = tesseract_ocr(file_path, tesseract_output_dir)
+                remaining = max(0.01, deadline - time.monotonic()) if deadline else FINEREADER_TIMEOUT_SECONDS
+                try:
+                    ocr_result, pdf_path = tesseract_ocr(file_path, tesseract_output_dir, timeout=remaining)
+                except RuntimeError as exc:
+                    if 'timeout' in str(exc).lower():
+                        raise OcrTimeoutError(f'Tesseract a depășit limita de {int(timeout or FINEREADER_TIMEOUT_SECONDS)} de secunde pentru „{data["sourceFiles"][index].get("originalName") or file["name"]}”. Poți reîncerca.') from exc
+                    raise
                 ocr_results.append(ocr_result)
                 
                 # Generează URL pentru PDF searchable
                 if pdf_path and os.path.exists(pdf_path):
-                    base_name = os.path.splitext(file["name"])[0]
+                    base_name = _base_name(file)
                     pdf_url = f"{api_base_url}media{ocr_path}{base_name}.pdf"
                     searchable_pdfs.append(pdf_url)
                     print(f"[Tesseract OCR] PDF generated: {pdf_url}")
@@ -240,13 +254,15 @@ def local_ocr(data, media_root):
 
         ocr_path = FINEREADER_OUTPUT_PATHS[period]
         text_paths = wait_for_finereader_text(
-            files, _output_dir(media_root, ocr_path))
+            files, _output_dir(media_root, ocr_path),
+            timeout=max(0, deadline - time.monotonic()) if deadline else None)
         ocr_results = validate_ocr_results(
             [load_txt(text_path) for text_path in text_paths], data['sourceFiles'])
 
         if period in FINEREADER_PDF_PERIODS:
             searchable_pdfs = collect_searchable_pdf_urls(
-                files, media_root, ocr_path, api_base_url)
+                files, media_root, ocr_path, api_base_url,
+                timeout=min(SEARCHABLE_PDF_TIMEOUT_SECONDS, max(0, deadline - time.monotonic())) if deadline else None)
 
         return {"ocrResults": ocr_results, "searchablePdfs": searchable_pdfs}
 
@@ -256,7 +272,7 @@ def local_ocr(data, media_root):
         # frontend (altfel utilizatorul primea "success" cu rezultate goale).
         raise
 
-def tesseract_ocr(file_path, output_dir=None):
+def tesseract_ocr(file_path, output_dir=None, timeout=300):
     """
     Procesează o imagine folosind Tesseract OCR și returnează textul recunoscut + PDF searchable.
 
@@ -267,10 +283,11 @@ def tesseract_ocr(file_path, output_dir=None):
     :return: Tuple (text recunoscut, calea către PDF searchable)
     :rtype: tuple
     """
+    deadline = time.monotonic() + timeout
     image = Image.open(file_path)
     
     # Extrage textul
-    text = pytesseract.image_to_string(image, lang='RTS_from_Cyrillic')
+    text = pytesseract.image_to_string(image, lang='RTS_from_Cyrillic', timeout=max(0.01, deadline - time.monotonic()))
     modified_text = tesseract_ocr_postprocess(text)
     
     # Generează PDF searchable
@@ -278,7 +295,7 @@ def tesseract_ocr(file_path, output_dir=None):
     if output_dir:
         try:
             # Generează PDF cu text searchable
-            pdf_bytes = pytesseract.image_to_pdf_or_hocr(image, lang='RTS_from_Cyrillic', extension='pdf')
+            pdf_bytes = pytesseract.image_to_pdf_or_hocr(image, lang='RTS_from_Cyrillic', extension='pdf', timeout=max(0.01, deadline - time.monotonic()))
             
             # Salvează PDF-ul
             base_name = os.path.splitext(os.path.basename(file_path))[0]

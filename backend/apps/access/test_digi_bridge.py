@@ -75,7 +75,7 @@ class DigiBridgeTests(TestCase):
         b = bridge.stage(two, two.files[0], 0)
         self.assertNotEqual(a['name'], b['name'])
         self.assertEqual(a['originalName'], 'document cu spații.png')
-        self.assertTrue((self.root / 'media/pre/OpenCV' / a['name']).is_file())
+        self.assertTrue((self.root / 'media/pre/OpenCV/secolulXX' / a['name']).is_file())
 
     def test_handoff_is_scoped_and_expires(self):
         response = self.authorized_submit(mode='advanced')
@@ -101,6 +101,7 @@ class DigiBridgeTests(TestCase):
         }, HTTP_X_DIGI_KEY='s' * 64)
         self.assertEqual(response.status_code, 400)
         self.assertFalse(DigiJob.objects.exists())
+        self.assertEqual(list((self.root / 'private').glob('**/*')), [])
 
     @patch('apps.access.digi_bridge.requests.post')
     def test_empty_ocr_never_saves_a_draft(self, post):

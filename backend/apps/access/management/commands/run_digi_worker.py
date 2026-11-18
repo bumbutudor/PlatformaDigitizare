@@ -1,14 +1,15 @@
-"""A single restartable worker for persistent Digi jobs."""
+"""A single restartable worker for persistent Digi and step-3 OCR jobs."""
 import os
 import time
 from django.core.management.base import BaseCommand
 from django.db import close_old_connections
 from apps.access.models import DigiJob
 from apps.access.digi_bridge import private_root, process_job
+from apps.access.ocr_jobs import process_job as process_ocr_job
 
 
 class Command(BaseCommand):
-    help = 'Process the Digi queue; safe to restart and safe to launch twice.'
+    help = 'Process Digi and step-3 OCR jobs; safe to restart and safe to launch twice.'
 
     def add_arguments(self, parser):
         parser.add_argument('--once', action='store_true')
@@ -39,7 +40,10 @@ class Command(BaseCommand):
                 if job:
                     job.status = 'processing'
                     job.save(update_fields=['status', 'updated_at'])
-                    process_job(job)
+                    if job.mode == 'ocr':
+                        process_ocr_job(job)
+                    else:
+                        process_job(job)
                 elif options['once']:
                     return
                 else:

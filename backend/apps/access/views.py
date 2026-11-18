@@ -7,10 +7,11 @@ from django.views.decorators.cache import never_cache
 from .models import File
 from django.core.files.storage import FileSystemStorage
 from .utils import *
-from .ocr import local_ocr, remove_ocr_unknown_markers, validate_ocr_results, OcrNoTextError
+from .ocr import remove_ocr_unknown_markers, validate_ocr_results, OcrNoTextError
 from .health import get_health
+from .hotfolder import preprocess_opencv
 from .codex_correction import CodexCorrectionError, generate_correction_suggestions
-from .codex_ocr_review import create_ocr_review_refs, generate_ocr_review
+from .codex_ocr_review import generate_ocr_review
 from .codex_access import CodexAccessError, require_codex_access
 from .scantailor import ScanTailorError, preprocess_images
 from urllib.parse import quote
@@ -216,39 +217,14 @@ def preprocess(request):
         preprocessedFiles = []
         s3PreprocessedFiles = []
         if preprocess_with == 'OpenCV':
-            preprocess_opencv = data['preprocessOpenCV']
-            pre_path = '/pre/OpenCV/'
-            if preprocess_opencv['setResolution']:
-                resolution = int(preprocess_opencv['resolution'])
-                for file in files:
-                    uploaded_file_path = settings.MEDIA_ROOT + \
-                                         '/' + file["name"]
-                    processed_file_path = settings.MEDIA_ROOT + \
-                                          pre_path + file["name"]
-                    process_image_for_ocr(
-                        uploaded_file_path, processed_file_path, resolution)
-                    s3_url = s3_uploader.upload_file(
-                        processed_file_path, 'pre/OpenCV/' + file["name"])
-                    preprocessedFiles.append('pre/OpenCV/' + file["name"])
-                    s3PreprocessedFiles.append(s3_url)
-                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFiles,
-                                     "s3PreprocessedFiles": s3PreprocessedFiles})
-
-            else:
-                for file in files:
-                    uploaded_file_path = settings.MEDIA_ROOT + \
-                                         '/' + file["name"]
-                    processed_file_path = settings.MEDIA_ROOT + \
-                                          pre_path + file["name"]
-                    process_image_for_ocr(
-                        uploaded_file_path, processed_file_path)
-
-                    s3_url = s3_uploader.upload_file(
-                        processed_file_path, 'pre/OpenCV/' + file["name"])
-                    s3PreprocessedFiles.append(s3_url)
-                    preprocessedFiles.append('pre/OpenCV/' + file["name"])
-                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
-                                     "preprocessedFiles": preprocessedFiles})
+            try:
+                preprocessedFiles = preprocess_opencv(data, process_image_for_ocr)
+            except (ScanTailorError, ValueError, KeyError, TypeError) as exc:
+                return JsonResponse({"code": 400, "msg": str(exc)}, status=400)
+            s3PreprocessedFiles = [s3_uploader.upload_file(
+                os.path.join(settings.MEDIA_ROOT, path), path) for path in preprocessedFiles]
+            return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFiles,
+                                 "s3PreprocessedFiles": s3PreprocessedFiles})
 
         elif preprocess_with == 'FR':
             preprocess_fr = data['preprocessFR']
@@ -301,49 +277,6 @@ def preprocess(request):
             # TODO : Implement using Gimp
             pass
 
-    else:
-        return JsonResponse({"code": 500, "msg": "server error"})
-
-
-def ocr(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        try:
-            ocr_response = local_ocr(data, settings.MEDIA_ROOT)
-            raw_ocr_results = ocr_response.get("ocrResults", []) if isinstance(ocr_response, dict) else ocr_response
-            clean_ocr_results = validate_ocr_results(raw_ocr_results, data.get('sourceFiles'))
-        except OcrNoTextError as exc:
-            return JsonResponse({
-                "code": 422, "error": "ocr_no_text", "msg": str(exc), "files": exc.files,
-            }, status=422)
-        except ScanTailorError as exc:
-            return JsonResponse({"code": exc.status_code, "msg": str(exc)}, status=exc.status_code)
-        except Exception as e:
-            logging.getLogger(__name__).warning("OCR processing failed: %s", e)
-            return JsonResponse(
-                {"code": 500, "msg": f"Eroare la procesarea OCR: {e}"},
-                status=500,
-            )
-
-        ocr_review_refs = create_ocr_review_refs(data, len(clean_ocr_results))
-
-        # Handle both old format (list) and new format (dict with ocrResults and searchablePdfs)
-        if isinstance(ocr_response, dict):
-            return JsonResponse({
-                "code": 200, 
-                "msg": "success", 
-                "ocrResults": clean_ocr_results,
-                "searchablePdfs": ocr_response.get("searchablePdfs", []),
-                "ocrReviewRefs": ocr_review_refs,
-            })
-        else:
-            # Backwards compatibility
-            return JsonResponse({
-                "code": 200,
-                "msg": "success",
-                "ocrResults": clean_ocr_results,
-                "ocrReviewRefs": ocr_review_refs,
-            })
     else:
         return JsonResponse({"code": 500, "msg": "server error"})
 
