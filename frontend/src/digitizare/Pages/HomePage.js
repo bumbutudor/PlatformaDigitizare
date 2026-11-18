@@ -8,9 +8,15 @@ import Col from 'react-bootstrap/Col';
 import AboutPage from './AboutPage';
 import ToolsAndResourcesPage from './ToolsAndResourcesPage';
 import "@fancyapps/ui/dist/fancybox.css";
+import { handoffFromLocation } from '../../utils/DigiBridge';
 
 function HomePage() {
-const [key, setKey] = useState(window.location.hash ? window.location.hash : '#despre');
+    const [handoff] = useState(() => {
+        try { return { context: handoffFromLocation() }; }
+        catch (error) { return { error: error.message }; }
+    });
+    const [key, setKey] = useState(handoff.context || handoff.error ? '#aplicatie' :
+        window.location.hash === '#aplicatie' ? '#aplicatie' : '#despre');
     useEffect(() => {
         window.location.hash = key;
     }, [key]);
@@ -65,7 +71,7 @@ const [key, setKey] = useState(window.location.hash ? window.location.hash : '#d
                             />
 
                             <Tab eventKey="#aplicatie" title="Aplicație de digitizare">
-                                <DigitizationSteps />
+                                <DigitizationSteps digiContext={handoff.context} handoffError={handoff.error} />
                             </Tab>
                         </Tabs>
                     </Col>

@@ -17,6 +17,8 @@
 
 # no thx
 frontend/node_modules
+integrations/**/node_modules/
+integrations/**/js/dist/
 frontend/coverage
 frontend/src/digitizare/dist
 frontend/npm-debug.log

@@ -1,0 +1,13 @@
+digi-media-manager:
+  forum:
+    all_files: 'Toate fișierele încărcate'
+    current_files: 'Fișiere încărcate recent'
+    dropzone:
+      title: 'Trage fișiere aici'
+      subtitle: 'sau folosește butonul „Încarcă”'
+      transliterate_button: 'Transliterare'
+      add_to_composer_button: 'Continuă'
+      checkbox_text_original: 'Text original (chirilică)'
+      checkbox_text_transliterat: 'Text transliterat'
+      errors:
+        file_not_found: 'Fișierele necesare nu au fost găsite! Vă rugăm încercați mai târziu!'

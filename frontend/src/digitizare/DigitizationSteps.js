@@ -15,13 +15,14 @@ import ServiceStatus from "../utils/ServiceStatus";
 import ServiceStatusBadge from "../components/ServiceStatusBadge";
 import { apiUrl, getApiBaseUrl } from "../utils/ApiConfig";
 import { SCANTAILOR_DEFAULT_OPTIONS } from "../utils/ScanTailorConfig";
+import { readDigiSession, saveDigiSession, clearDigiSession, handoffFromLocation, digiRequest } from '../utils/DigiBridge';
 
 import "../css/main.css";
 
 export default class DigitizationSteps extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { importingDigi: true, digiError: '' };
     const api = getApiBaseUrl();
 
     this.sampleStore = {
@@ -36,7 +37,7 @@ export default class DigitizationSteps extends Component {
       savedToCloud: false,
       // uploadFolder: "C:\\Users\\bumbu\\OneDrive\\Desktop\\Projects\\PlatformaDigitizare\\backend\\media",
       uploadFolder: apiUrl("media/", api),
-      sourceFiles: [{ "name": "5.jpg", "size": 1535454, "type": "image/jpeg", "lastModifiedDate": "2021-05-27T15:49:52.594Z", "uploadedDate": "2022-05-17T19:15:44.681Z", "percent": 100, "id": "1652814944681-0", "status": "removed", "previewUrl": "blob:http://localhost:8080/3a701ff3-27a9-47ff-9ca3-fc2ce6554e10", "width": 1305, "height": 1333 }],
+      sourceFiles: [],
       s3SourceFiles: [],
       preprocessedFiles: [],
       s3PreprocessedFiles: [],
@@ -84,11 +85,32 @@ export default class DigitizationSteps extends Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     // Start polling backend service health so steps can disable actions when a
     // required service is offline.
     ServiceStatus.configure(this.sampleStore.api);
     ServiceStatus.start(20000);
+    try {
+      if (this.props.handoffError) throw new Error(this.props.handoffError);
+      const saved = readDigiSession();
+      const context = this.props.digiContext || handoffFromLocation() || (saved && saved.digiContext);
+      if (saved && saved.digiImported !== false && (!context || saved.digiContext.id === context.id)) {
+        this.sampleStore = { ...this.sampleStore, ...saved, api: this.sampleStore.api };
+      } else if (context) {
+        this.sampleStore.digiContext = context;
+        this.sampleStore.digiImported = false;
+        saveDigiSession(this.sampleStore);
+        const data = await digiRequest(this.sampleStore.api, 'digi/jobs/' + context.id + '/import/', context);
+        const hasPdf = data.sourceFiles.some(file => file.isPdf);
+        this.updateStore({ ...data, digiContext: context, digiImported: true, sourceFiles: data.sourceFiles,
+          hasPdfFiles: hasPdf, preprocessWith: hasPdf ? 'None' : '',
+          preprocessedFiles: hasPdf ? data.sourceFiles : [],
+          s3PreprocessedFiles: hasPdf ? data.s3SourceFiles.map(file => file.url) : [],
+        });
+        sessionStorage.setItem('step', data.sourceFiles.length ? (hasPdf ? '2' : '1') : '0');
+      }
+    } catch (error) { this.setState({ digiError: error.message }); }
+    this.setState({ importingDigi: false });
   }
 
   componentWillUnmount() {
@@ -100,13 +122,20 @@ export default class DigitizationSteps extends Component {
   }
 
   updateStore(update) {
+    if (['ocrResults', 'transResults', 'sourceFiles'].some(key => key in update &&
+        JSON.stringify(update[key]) !== JSON.stringify(this.sampleStore[key]))) {
+      update = { ...update, digiPublication: null };
+    }
     this.sampleStore = {
       ...this.sampleStore,
       ...update,
     };
+    saveDigiSession(this.sampleStore);
   }
 
   resetStore() {
+    clearDigiSession();
+    sessionStorage.removeItem('step');
     const api = getApiBaseUrl();
     this.sampleStore = {
       api,
@@ -118,7 +147,7 @@ export default class DigitizationSteps extends Component {
       savedToCloud: false,
       // uploadFolder: "C:\\Users\\bumbu\\OneDrive\\Desktop\\Projects\\PlatformaDigitizare\\backend\\media",
       uploadFolder: apiUrl("media/", api),
-      sourceFiles: [{ "name": "5.jpg", "size": 1535454, "type": "image/jpeg", "lastModifiedDate": "2021-05-27T15:49:52.594Z", "uploadedDate": "2022-05-17T19:15:44.681Z", "percent": 100, "id": "1652814944681-0", "status": "removed", "previewUrl": "blob:http://localhost:8080/3a701ff3-27a9-47ff-9ca3-fc2ce6554e10", "width": 1305, "height": 1333 }],
+      sourceFiles: [],
       s3SourceFiles: [],
       preprocessedFiles: [],
       s3PreprocessedFiles: [],
@@ -173,7 +202,11 @@ export default class DigitizationSteps extends Component {
 
 
   render() {
-    console.log(this.sampleStore);
+    if (this.state.importingDigi) return <p role="status">Se pregătesc documentele…</p>;
+    if (this.state.digiError) return <div role="alert" className="alert alert-danger">
+      {this.state.digiError} <button type="button" onClick={() => location.reload()}>Reîncearcă</button>{' '}
+      <a href="https://digi.emoldova.org/digitizare">Revino în Digi</a>
+    </div>;
     const steps = [
       {
         name: "1. Încarcă fișierele",

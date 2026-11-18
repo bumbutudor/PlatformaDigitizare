@@ -1,0 +1,66 @@
+{
+  "status": "deployed",
+  "date": "2026-11-18",
+  "purpose": "Restore Soviet-period OCR in Digi using Platforma Digitizare, with an advanced document handoff and confirmed saving into the originating user's drafts.",
+  "components": {
+    "flarum_extension": "integrations/digi-media-manager",
+    "django_bridge": "backend/apps/access/digi_bridge.py",
+    "django_worker": "python manage.py run_digi_worker",
+    "startup": "scripts/start_server.py starts the worker alongside the existing Django service",
+    "frontend_handoff": "frontend/src/utils/DigiBridge.js",
+    "frontend_save": "frontend/src/digitizare/Step7.js"
+  },
+  "behavior": [
+    "New Digi uploads no longer fan out into the ten historical remote OCR folders. Processing starts explicitly from the media manager.",
+    "Simple jobs use the existing Soviet XX FineReader Hot Folder output and period 0 transliteration.",
+    "Jobs and completed file results persist in SQLite; the worker resumes unfinished jobs after restart.",
+    "The advanced link carries a job-scoped capability in a URL fragment. The frontend removes it from history and keeps progress in sessionStorage for refresh recovery.",
+    "Standalone Platforma Digitizare users can connect a Digi account from the final step before saving.",
+    "Draft ownership is derived from the authenticated Digi session that created the job, never from a browser-supplied user ID.",
+    "Saving returns the confirmed draft ID and an owned-draft editor link. Retries reuse the same draft; corrected content updates it.",
+    "PDF sources receive download links. OCR with no recognized text returns an error.",
+    "Historical inputs and outputs were preserved. FineReader task configuration was not changed."
+  ],
+  "configuration": {
+    "backend_environment_variable": "DIGI_BRIDGE_KEY",
+    "cloudways_private_config": "storage/digitizare-bridge.json",
+    "cloudways_config_fields": ["key", "backend"],
+    "credential_policy": "The service key stays in private runtime configuration; browser handoffs use separate scoped capabilities.",
+    "handoff_lifetime_hours": 48,
+    "maximum_files_per_job": 20,
+    "maximum_upload_bytes_per_job": 104857600,
+    "maximum_new_jobs_per_user_per_hour": 30,
+    "ocr_timeout_seconds_per_file": 300,
+    "private_originals": ".ops/digi-jobs/<job-id>/"
+  },
+  "deployment": {
+    "django_migration": "access.0025_digi_job",
+    "flarum_migration": "2026_11_18_000001_create_digitization_jobs",
+    "cloudways_cli": "php8.1",
+    "php_note": "PHP 8.2 CLI is incompatible with the installed Carbon version; PHP 7.4 fails Composer requirements. PHP 8.1 was verified.",
+    "flarum_paths": ["packages/digi-media-manager", "vendor/block-cat/digi-media-manager"],
+    "flarum_build": "cd integrations/digi-media-manager/js && npm ci --ignore-scripts && npm run build",
+    "frontend_build": "cd frontend && npm run build-digitizare",
+    "frontend_destination": "/var/www/digitalizare",
+    "private_backup_directory": ".ops/digi-bridge-deploy-20261118-171500",
+    "cloudways_backup": "storage/digi-bridge-deploy-20261118-171500/before.tar.gz",
+    "rollback": "Restore the backed-up extension files and frontend assets, restore the previous backend code, then restart Django. Preserve job tables, documents and runtime records; a database rollback is not required to restore the prior interface."
+  },
+  "verification": {
+    "backend_tests": "82 tests, 1 skipped, successful",
+    "frontend_tests": "51 application tests passed",
+    "legacy_test_runner_limitations": "The pre-existing npm test task stops at legacy StepZilla lint, and tests/main.spec.js imports a missing legacy module. Application tests were run directly with Mocha, excluding that legacy file.",
+    "builds": "Both frontend bundles compiled successfully",
+    "flarum_checks": "PHP syntax passed; ownership, duplicate avoidance, corrected-draft updates and empty-result rejection passed using synthetic records rolled back after verification",
+    "simple_real_pipeline": "New synthetic JPG with spaces and diacritics plus a PDF: upload, OCR, transliteration, draft creation and duplicate retry succeeded in about 85 seconds",
+    "advanced_browser": "Import, capability removal, refresh recovery, OpenCV and OCR succeeded. The automation did not navigate to the transliteration button; no page errors were reported.",
+    "advanced_completion": "The already-completed OCR output was transliterated and saved through the real scoped callback with HTTP 200, without repeating OCR",
+    "test_documents": "Two private drafts labelled TEST were preserved; no public article was published",
+    "additional_testing": "Stopped further testing at the user's request"
+  },
+  "operational_limits": [
+    "The Windows machine, Django worker and FineReader Hot Folder must remain available; startup follows the existing user-login service arrangement.",
+    "FineReader still uses Hot Folder rather than Extended CLI export.",
+    "The existing shared OpenCV inbox also triggers other period tasks, which can increase processing time."
+  ]
+}

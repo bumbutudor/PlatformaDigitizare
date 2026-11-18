@@ -20,6 +20,13 @@ def main():
         startup = subprocess.STARTUPINFO()
         startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startup.wShowWindow = 0  # SW_HIDE: background helpers must not open consoles.
+        env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
+        subprocess.Popen(
+            [str(backend / "venv/Scripts/python.exe"), "manage.py", "run_digi_worker"],
+            cwd=backend, env=env, startupinfo=startup,
+            creationflags=subprocess.CREATE_NO_WINDOW,
+            stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+        )
         if not ctypes.windll.user32.FindWindowW("HotFolder15MainWindow", None):
             subprocess.Popen(
                 [r"C:\Program Files (x86)\ABBYY FineReader 15\HotFolder.exe"],

@@ -1,4 +1,20 @@
 from django.db import models
+import uuid
+
+
+class DigiJob(models.Model):
+    """Durable work submitted by the authenticated Digi integration."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    mode = models.CharField(max_length=16)
+    status = models.CharField(max_length=20, default='queued', db_index=True)
+    token_hash = models.CharField(max_length=64)
+    files = models.JSONField(default=list)
+    results = models.JSONField(default=list)
+    publication = models.JSONField(default=dict)
+    error = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField()
 # from multiselectfield import MultiSelectField
 
 # PERIOD_CHOICES = (('1', 'Secolul XX'), ('2', 'Secolul XIX'),

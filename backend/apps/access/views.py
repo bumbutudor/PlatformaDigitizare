@@ -388,48 +388,41 @@ def apply_additional_transliteration(text, translit_map):
     text = replace_k(text)
     return text
 
+def transliterate_texts(ocr_results, period, trans_options):
+    results = []
+    if period not in periodOptions:
+        raise ValueError("Perioada documentului nu este validă.")
+    for text in ocr_results:
+        response = requests.post(
+            "https://translitera.cc/ProcessServlet",
+            data={'cyrillicText': remove_ocr_unknown_markers(text),
+                  'period': periodOptions[period],
+                  'actualize': trans_options.get('actualizeWordForm', True)},
+            timeout=(10, 60))
+        response.raise_for_status()
+        value = response.text
+        if not value.strip() or value.lstrip().lower().startswith(('<!doctype html', '<html')):
+            raise ValueError("Serviciul de transliterare nu a returnat text valid. Reîncearcă.")
+        value = apply_additional_transliteration(value, transliteration_map)
+        if trans_options.get('useExceptionDictionary', True):
+            value = replace_all_exceptions(value)
+        results.append(value)
+    return results
+
+
 def transliterate(request):
-    if request.method == 'POST':
+    if request.method != 'POST':
+        return JsonResponse({'code': 405, 'msg': 'Metodă neacceptată.'}, status=405)
+    try:
         data = json.loads(request.body)
-        period = data['period']
-        alphabet = data['alphabet']
-        trans_options = data['transOptions']
-        ocr_results = data['ocrResults']
-        trans_results = []
+        texts = validate_ocr_results(data.get('ocrResults'), data.get('sourceFiles'))
+        results = transliterate_texts(texts, data['period'], data.get('transOptions', {}))
+        return JsonResponse({'code': 200, 'msg': 'success', 'transResults': results})
+    except (ValueError, KeyError, OcrNoTextError) as exc:
+        return JsonResponse({'code': 422, 'msg': str(exc)}, status=422)
+    except requests.RequestException:
+        return JsonResponse({'code': 503, 'msg': 'Serviciul de transliterare este temporar indisponibil. Reîncearcă.'}, status=503)
 
-        for ocr_result in ocr_results:
-            # Defensive fallback for sessions created before OCR cleanup was
-            # deployed or for clients that call this endpoint directly.
-            ocr_result = remove_ocr_unknown_markers(ocr_result)
-            payload = {
-                'cyrillicText': ocr_result,
-                'period': periodOptions[period],
-                'actualize': trans_options['actualizeWordForm']
-            }
-            try:
-                response = requests.post("https://translitera.cc/ProcessServlet", data=payload)
-                response.raise_for_status()  # Raise an error for bad status codes
-            except requests.RequestException as e:
-                return JsonResponse({"code": 500, "msg": f"Transliteration service error: {e}"})
-
-            trans_result = response.text
-
-            # Apply additional transliteration rules
-            trans_result = apply_additional_transliteration(trans_result, transliteration_map)
-            if trans_options.get('useExceptionDictionary', True):
-                trans_result = replace_all_exceptions(trans_result)
-            # Continue with existing processing
-            # if trans_options.get('removeHyphen', False):
-            #     text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(trans_result, vocabulary)
-            #     clean_text = replace_all_exceptions(text_no_hyphenation)
-            #     trans_result = clean_text  # Update trans_result for further processing
-            #
-            trans_results.append(trans_result)
-
-        return JsonResponse({"code": 200, "msg": "success", "transResults": trans_results})
-
-    else:
-        return JsonResponse({"code": 405, "msg": "Method not allowed"}, status=405)
 
 
 @never_cache
@@ -500,105 +493,3 @@ def codex_correct(request):
         "msg": "success",
         "suggestions": suggestions,
     })
-
-
-def publish(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        s3_source_files = data['s3SourceFiles']
-        s3_preprocessed_files = data['s3PreprocessedFiles']
-        period = data['period']
-        alphabet = data['alphabet']
-        trans_options = data['transOptions']
-        ocr_results = data['ocrResults']
-        trans_results = data['transResults']
-
-        # Check if s3_source_files is a list and concatenate into a single string
-        if isinstance(s3_source_files, list):
-            url_content = '\n'.join(f'[upl-image-preview url={url["url"]}]' for url in s3_source_files)
-        else:
-            url_content = f'[upl-image-preview url={s3_source_files}]'
-
-        # Check if s3_preprocessed_files is a list and concatenate into a single string
-        if isinstance(s3_preprocessed_files, list):
-            preprocessed_files_content = '\n'.join(f'[upl-image-preview url={url}]' for url in s3_preprocessed_files)
-        else:
-            preprocessed_files_content = s3_preprocessed_files
-
-        # Join ocr_results and trans_results with newline character
-        ocr_results_content = '\n'.join(ocr_results)
-        trans_results_content = '\n'.join(trans_results)
-
-        content = f'''{url_content}\n\n[chirilic]
-        {ocr_results_content}
-        [/chirilic]\n\n[transliterat]
-        {trans_results_content}[/transliterat]
-        
-        Informații adiționale:
-        Perioadă: {period}
-        Alfabet: {alphabet}
-        Opțiuni de transliterare: Object
-        Fișiere preprocesate: \n{preprocessed_files_content}
-        
-        '''
-
-        draft_data = {
-            "data": {
-                "type": "drafts",
-                "attributes": {
-                    "title": "Un document din secolul " + period,
-                    "content": content
-                },
-                "relationships": {
-                    "tags": {
-                        "data": []
-                    }
-                }
-            }
-        }
-
-        draft_endpoint = "https://digi.emoldova.org/api/drafts"
-
-        headers = {
-            'Host': 'digi.emoldova.org',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Content-Type': 'application/json; charset=utf-8',
-            'X-CSRF-Token': 'Y9kVHTyzihubcV3DHVxfbQlZZJijTAY3Rc9DWQhY',
-            'Connection': 'keep-alive',
-            'Referer': 'https://digi.emoldova.org/',
-            'Pragma': 'no-cache',
-            'Cache-Control': 'no-cache',
-            'TE': 'Trailers',
-            'Authorization': 'Token Eik9DFwbyxkZMptuFzfPdKHG2REm5syrzgDrcYGD',
-        }
-
-        try:
-            response = requests.post(
-                draft_endpoint, headers=headers, json=draft_data, timeout=30)
-        except requests.RequestException as e:
-            print(f"[publish] Serviciul de publicare este indisponibil: {e}")
-            return JsonResponse(
-                {"code": 503, "msg": f"Serviciul de publicare este indisponibil: {e}"},
-                status=503,
-            )
-
-        # Check the response
-        if response.status_code == 200 or response.status_code == 201:
-            print("Successfully created the article.")
-            try:
-                print(response.json())
-            except ValueError:
-                pass
-            return JsonResponse({"code": 200, "msg": "Successfully created the article."})
-        else:
-            print(f"Failed to create the article. Status code: {response.status_code}.")
-            try:
-                print(response.json())
-            except ValueError:
-                pass
-            return JsonResponse(
-                {"code": 500, "msg": f"Publicare eșuată (status {response.status_code})."},
-                status=500,
-            )
-    else:
-        return JsonResponse({"code": 500, "msg": "server error"})
