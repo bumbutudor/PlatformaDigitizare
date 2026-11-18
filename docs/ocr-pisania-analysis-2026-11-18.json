@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-18",
+  "source": {
+    "filename": "Pisania bisericii Invierea Domnului-trunchiat_Y5iKPRi.jpg",
+    "sha256": "0a9ceb8803fdd1df6f6986ddb025b65c7b9e3ce717dd6fdc50e5203ea09a6ddf",
+    "identicalLatestUpload": "Pisania bisericii Invierea Domnului-trunchiat_ZXYA1RG.jpg",
+    "pixels": [3369, 1257],
+    "dpiMetadata": 96,
+    "originalPreserved": true
+  },
+  "identification": {
+    "year": 1777,
+    "period": "secolulXVIII",
+    "monument": "Pisania bisericii Râșcanu, Visterniceni, Chișinău, astăzi Sfinții Împărați Constantin și Elena",
+    "evidence": "Aceeași inscripție, aceleași trei rânduri și aceleași forme ale literelor în fotografia din figura 6; ultimul rând menționează Constantin Râșcanu și anul 1777.",
+    "reference": "https://antim.upsc.md/wp-content/uploads/2022/07/Studiu-de-fundamentare-istorico-stiintific-Visterniceni.pdf#page=20",
+    "printedPage": 19,
+    "figure": 6,
+    "warning": "Datarea documentului nu demonstrează compatibilitatea cu modelul OCR bazat pe tiparul De Obște Geografie, 1795."
+  },
+  "imageFindings": [
+    "Trei rânduri de litere incizate, cu ligaturi, suprascrieri și prescurtări, diferite de fonturile de carte ale modelelor existente.",
+    "Tramă periodică densă de puncte, compatibilă cu fotografierea unei reproduceri tipărite; iluminare neuniformă, contrast slab la stânga și margine întunecată la dreapta.",
+    "OpenCV actual folosește blur și morfologie cu kernel 1x1, care nu elimină efectiv trama. Binarizarea păstrează mult zgomot.",
+    "Rezultatul ScanTailor existent, st_6c76fb1fac14413f8a08c38a3ef26b63_0001.png, este 5952x2528, alb-negru, 600 DPI. Inspecția vizuală arată pierderea unor trăsături la stânga și îngroșarea/unirea lor la dreapta.",
+    "DPI din metadate nu reprezintă detaliu nou în imagine. ABBYY avertizează și că anumite modele au fost antrenate la altă rezoluție."
+  ],
+  "experiments": {
+    "execution": "Local, fără încărcarea imaginii la servicii OCR externe și fără modificarea configurațiilor Hot Folder.",
+    "artifacts": ".ops/pisania-analysis/",
+    "script": ".ops/pisania-analysis/compare.py",
+    "abbyy": {
+      "models": ["XVII", "XVIII / Geografie", "XIX / Epistolariu", "XX"],
+      "variants": [
+        "Decupare (380,110)-(3180,1100), Gaussian sigma 2, reducere la 1000x354, gri, 300 DPI",
+        "Varianta gri cu normalizarea fundalului prin închidere morfologică eliptică 41x41 și divizare",
+        "Varianta normalizată cu prag adaptiv Gaussian 51, C=9",
+        "Primul rând din varianta gri normalizată, cu margine albă"
+      ],
+      "completed": 16,
+      "emptyAfterRemovingBomWhitespaceAndUnknownMarkers": 15,
+      "onlyNonempty": "Model XX, varianta gri fără normalizare: 24 caractere cu spații și newline, fără transcriere utilizabilă; logul raportează 87% caractere cu încredere scăzută (20/23).",
+      "diagnostic": "Pe original și pe varianta binară: There are no Text or Table areas on this page. Alte variante ajung la avertismente despre rezoluția modelului, dar nu produc text utilizabil."
+    },
+    "tesseract": {
+      "model": "RTS_from_Cyrillic, instalat local",
+      "variants": "Original, algoritmul OpenCV actual, gri cu trama atenuată, gri normalizat, prag global Otsu; separat trei rânduri și primul rând redus suplimentar.",
+      "psm": [3, 6, 7, 13],
+      "result": "Segmentarea automată dă zero sau aproape zero text; segmentarea forțată produce caractere eronate, fără transcriere utilizabilă.",
+      "limitation": "Nu există o transcriere diplomatică verificată pentru calcul CER/WER. Numărul de caractere nu este o măsură a calității."
+    }
+  },
+  "conclusions": [
+    "Pentru încadrare cronologică se selectează XVIII. Niciuna dintre variantele testate nu oferă OCR fiabil cu modelele instalate.",
+    "Fluxul actual este orientat către pagini tipărite. Acest rezultat nu demonstrează imposibilitatea OCR pentru toate inscripțiile în piatră.",
+    "Pentru un flux de inscripții: sursă fotografică fără tramă dacă există, corectarea fundalului în gri, păstrarea suprascrierilor, zone Text/rânduri definite explicit și model evaluat sau antrenat pe inscripții cu transcrieri verificate.",
+    "ScanTailor poate ajuta la geometrie și paginare, dar nu transformă un model de tipar într-un model pentru inscripții. Binarizarea agresivă este nefavorabilă în acest exemplu.",
+    "Respingerea rezultatelor goale este implementată și publicată în commit 9d43d8d. Detectarea textului nevid dar incorect rămâne o problemă separată; nu este rezolvată prin acel commit."
+  ],
+  "technicalReferences": [
+    "https://help.abbyy.com/en-us/finereader/15/user_guide/editareas/",
+    "https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html"
+  ]
+}
