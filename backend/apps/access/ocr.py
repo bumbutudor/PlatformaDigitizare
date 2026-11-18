@@ -33,6 +33,49 @@ class OcrError(Exception):
     """OCR failure whose message is meant to be shown to the user."""
 
 
+class OcrNoTextError(OcrError):
+    """The engine finished but did not recognize text in one or more files."""
+
+    def __init__(self, files):
+        self.files = files
+        if len(files) == 1:
+            target = f'în fișierul „{files[0]}”'
+        elif files:
+            target = 'în următoarele fișiere: ' + ', '.join(f'„{name}”' for name in files)
+        else:
+            target = 'în imaginile trimise'
+        super().__init__(
+            f'Modelul OCR nu a recunoscut niciun text {target}. '
+            'Încearcă alt model OCR sau ajustează preprocesarea imaginii.'
+        )
+
+
+def has_ocr_text(text):
+    if not isinstance(text, str):
+        return False
+    # BOM, whitespace, zero-width formatting and ABBYY's unknown-glyph marker
+    # alone are not recognized content. Keep punctuation and historic letters.
+    invisible = dict.fromkeys(map(ord, '\ufeff\u200b\u200c\u200d\u2060'))
+    return bool(remove_ocr_unknown_markers(text).translate(invisible).strip())
+
+
+def validate_ocr_results(results, source_files=None):
+    source_files = source_files or []
+    cleaned = [remove_ocr_unknown_markers(text).replace('\ufeff', '')
+               if isinstance(text, str) else '' for text in (results or [])]
+    empty = [i for i, text in enumerate(cleaned) if not has_ocr_text(text)]
+    if not cleaned:
+        empty = list(range(len(source_files)))
+    if not cleaned or empty:
+        names = []
+        for index in empty:
+            source = source_files[index] if index < len(source_files) else {}
+            name = source.get('originalName') or source.get('name') or f'Imaginea {index + 1}'
+            names.append(str(name).replace('\\', '/').rsplit('/', 1)[-1])
+        raise OcrNoTextError(names)
+    return cleaned
+
+
 # Folderul (relativ la MEDIA_ROOT) in care task-ul Hot Folder al fiecarei
 # perioade scrie rezultatele. Perioada decide folderul; alfabetul trimis de
 # interfata nu mai poate face ca cererea sa nu se potriveasca cu niciun model.
@@ -50,6 +93,7 @@ FINEREADER_PDF_PERIODS = {'secolulXX', 'secolulXVIII', 'secolulXVII'}
 # Cat asteptam rezultatul text al Hot Folder-ului, respectiv PDF-urile
 # cautabile (un singur termen pentru toate fisierele cererii, nu per fisier).
 FINEREADER_TIMEOUT_SECONDS = 120
+FINEREADER_TEXT_SETTLE_SECONDS = 2
 SEARCHABLE_PDF_TIMEOUT_SECONDS = 30
 POLL_SECONDS = 1
 
@@ -78,7 +122,14 @@ def wait_for_finereader_text(files, output_dir, timeout=None):
     ]
     deadline = time.monotonic() + timeout
     while True:
-        missing = [name for name, path in expected if not os.path.isfile(path)]
+        def ready(path):
+            try:
+                return os.path.isfile(path) and time.time() - os.path.getmtime(path) >= FINEREADER_TEXT_SETTLE_SECONDS
+            except OSError:
+                return False
+
+        # ABBYY may create an empty/BOM-only file before it finishes writing.
+        missing = [name for name, path in expected if not ready(path)]
         if not missing:
             return [path for _, path in expected]
         if time.monotonic() >= deadline:
@@ -176,6 +227,7 @@ def local_ocr(data, media_root):
                     print(f"[Tesseract OCR] PDF generated: {pdf_url}")
                 else:
                     searchable_pdfs.append(None)
+            ocr_results = validate_ocr_results(ocr_results, data['sourceFiles'])
             return {"ocrResults": ocr_results, "searchablePdfs": searchable_pdfs}
 
         if period not in FINEREADER_OUTPUT_PATHS:
@@ -189,7 +241,8 @@ def local_ocr(data, media_root):
         ocr_path = FINEREADER_OUTPUT_PATHS[period]
         text_paths = wait_for_finereader_text(
             files, _output_dir(media_root, ocr_path))
-        ocr_results = [load_txt(text_path) for text_path in text_paths]
+        ocr_results = validate_ocr_results(
+            [load_txt(text_path) for text_path in text_paths], data['sourceFiles'])
 
         if period in FINEREADER_PDF_PERIODS:
             searchable_pdfs = collect_searchable_pdf_urls(

@@ -12,7 +12,7 @@ import Spinner from "react-bootstrap/Spinner";
 import Alert from 'react-bootstrap/Alert';
 import ServiceGate from '../components/ServiceGate';
 import { SERVICES } from '../utils/ServiceStatus';
-import { cleanOcrResults } from '../utils/OcrText';
+import { cleanOcrResults, hasOcrText } from '../utils/OcrText';
 import { buildOcrRequest, ocrFailureMessage } from '../utils/OcrModels';
 import CodexCorrectionReview from '../components/CodexCorrectionReview';
 
@@ -113,9 +113,13 @@ export default class Step3 extends Component {
   }
 
   async handleOCRRequest() {
-    this.setState({ show: false });
-    this.setState({ showError: false, errorMessage: '' });
-    this.setState({ showLoader: true });
+    // A failed rerun must not leave old text, review references or PDF links
+    // available for the next step.
+    const s3SourceFiles = this.state.s3SourceFiles.map(({ searchablePdfUrl, ...file }) => file);
+    const cleared = { ocrResults: [], ocrReviewRefs: [], searchablePdfs: [], s3SourceFiles };
+    this.setState({ ...cleared, show: false, showNextStep: false,
+      showError: false, errorMessage: '', showLoader: true });
+    this.props.updateStore({ ...cleared, transResults: [], savedToCloud: false });
 
     const ocrEndpoint = "ocr/";
     // Derive the OCR engine from the current model and keep ScanTailor's
@@ -129,11 +133,10 @@ export default class Step3 extends Component {
 
     return this.API.post(ocrEndpoint, postData)
       .then((data) => {
-        console.log(data);
-        const hasResults = data && data.code === 200 && Array.isArray(data.ocrResults)
-          && data.ocrResults.length > 0;
+        const ocrResults = cleanOcrResults(data && data.ocrResults);
+        const complete = ocrResults.length > 0 && ocrResults.length === this.state.sourceFiles.length;
+        const hasResults = data && data.code === 200 && complete && ocrResults.every(hasOcrText);
         if (hasResults) {
-          const ocrResults = cleanOcrResults(data.ocrResults);
           const ocrReviewRefs = Array.isArray(data.ocrReviewRefs)
             ? data.ocrReviewRefs
             : [];
@@ -155,10 +158,16 @@ export default class Step3 extends Component {
           
           this.setState({ showNextStep: true });
         } else {
+          const emptyNames = complete ? this.state.sourceFiles
+            .filter((file, index) => !hasOcrText(ocrResults[index]))
+            .map(file => file.originalName || file.name) : [];
+          const fallback = emptyNames.length
+            ? `Modelul OCR nu a recunoscut niciun text pentru: ${emptyNames.join(', ')}. Încearcă alt model OCR sau ajustează preprocesarea imaginii.`
+            : 'Serverul nu a returnat rezultatele OCR.';
           // Re-enable "Start OCR" so the user can retry without reselecting.
           this.setState({
             showError: true,
-            errorMessage: ocrFailureMessage(data) || 'Serverul nu a returnat rezultatele OCR.',
+            errorMessage: ocrFailureMessage(data) || fallback,
             showNextStep: false,
             show: true,
           });
@@ -639,7 +648,7 @@ export default class Step3 extends Component {
               {this.state.showError && (
                 <Alert variant="danger">
                   <Alert.Heading>
-                    A apărut o eroare, incercati din nou...
+                    Recunoașterea textului nu a reușit
                   </Alert.Heading>
                   {this.state.errorMessage && (
                     <p className="mb-0">{this.state.errorMessage}</p>

@@ -8,7 +8,7 @@ from unittest.mock import patch
 from django.test import SimpleTestCase
 
 from . import ocr
-from .ocr import OcrError, local_ocr
+from .ocr import OcrError, OcrNoTextError, local_ocr
 
 
 class FineReaderOcrTests(SimpleTestCase):
@@ -27,10 +27,12 @@ class FineReaderOcrTests(SimpleTestCase):
             patcher.start()
             self.addCleanup(patcher.stop)
 
-    def write_output(self, relative_path, content="text", age_seconds=0):
+    def write_output(self, relative_path, content="text", age_seconds=None):
         path = Path(self.media_root, relative_path)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
+        if age_seconds is None:
+            age_seconds = 10 if path.suffix == '.txt' else 0
         if age_seconds:
             old = time.time() - age_seconds
             os.utime(path, (old, old))
@@ -97,6 +99,67 @@ class FineReaderOcrTests(SimpleTestCase):
         self.assertIn("Pisania_bisericii.jpg", message)
         self.assertNotIn("done.jpg", message)
         self.assertIn("Hot Folder", message)
+
+    def test_empty_text_is_not_success_even_if_a_pdf_exists(self):
+        for content in ('', '\ufeff', ' \r\n\t\f', '^ ^^', '\ufeff\u200b\u200c\u200d\u2060 ^\n'):
+            with self.subTest(content=content):
+                self.write_output('ocr/secolulXVIII/Pisania.txt', content)
+                self.write_output('ocr/secolulXVIII/Pisania.pdf', '%PDF', age_seconds=10)
+                with patch.object(ocr, 'collect_searchable_pdf_urls') as collect_pdf:
+                    with self.assertRaises(OcrNoTextError) as raised:
+                        local_ocr(self.request('secolulXVIII', 'cyrillicRomanian', ['Pisania.jpg']), self.media_root)
+                self.assertEqual(raised.exception.files, ['Pisania.jpg'])
+                self.assertIn('nu a recunoscut niciun text', str(raised.exception))
+                collect_pdf.assert_not_called()
+
+    def test_mixed_batch_names_only_images_without_recognized_text(self):
+        self.write_output('ocr/secolulXIX/cyrillicRomanian/good.txt', '\ufefftext')
+        self.write_output('ocr/secolulXIX/cyrillicRomanian/blank.txt', '\ufeff')
+        with self.assertRaises(OcrNoTextError) as raised:
+            local_ocr(self.request('secolulXIX', 'cyrillicRomanian', ['good.jpg', 'blank.jpg']), self.media_root)
+        self.assertEqual(raised.exception.files, ['blank.jpg'])
+        self.assertNotIn('good.jpg', str(raised.exception))
+
+    def test_bom_is_removed_but_recognized_text_and_line_breaks_are_preserved(self):
+        self.write_output('ocr/secolulXIX/cyrillicRomanian/page.txt', '\ufeffЇС\n123 ꙋ ^')
+        result = local_ocr(self.request('secolulXIX', 'cyrillicRomanian', ['page.jpg']), self.media_root)
+        self.assertEqual(result['ocrResults'], ['ЇС\n123 ꙋ '])
+
+    def test_waits_for_bom_only_file_that_is_still_being_written(self):
+        self.write_output('ocr/secolulXIX/cyrillicRomanian/page.txt', '\ufeff', age_seconds=0)
+        def finish_write(_):
+            self.write_output('ocr/secolulXIX/cyrillicRomanian/page.txt', '\ufefftext', age_seconds=10)
+        with patch.object(ocr, 'FINEREADER_TIMEOUT_SECONDS', 5), \
+                patch.object(ocr, 'FINEREADER_TEXT_SETTLE_SECONDS', 2), \
+                patch.object(ocr.time, 'sleep', side_effect=finish_write) as sleep:
+            result = local_ocr(self.request('secolulXIX', 'cyrillicRomanian', ['page.jpg']), self.media_root)
+        self.assertEqual(result['ocrResults'], ['text'])
+        sleep.assert_called_once()
+
+    @patch('apps.access.ocr.tesseract_ocr', return_value=('\n\f', None))
+    def test_tesseract_empty_result_has_the_same_error(self, _tesseract):
+        with self.assertRaises(OcrNoTextError) as raised:
+            local_ocr(self.request('secolulXIX', 'cyrillicRomanian', ['page.jpg'],
+                                  ocrOptions={'useTesseract': True}), self.media_root)
+        self.assertEqual(raised.exception.files, ['page.jpg'])
+
+    def test_empty_scantailor_result_names_the_uploaded_image(self):
+        processed = Path(self.media_root, 'st_unique.png')
+        self.write_output('ocr/secolulXIX/cyrillicRomanian/st_unique.txt', '\ufeff')
+        with patch.object(ocr, 'processed_ocr_paths', return_value=[processed]), \
+                patch.object(ocr, 'stage_for_finereader'), \
+                self.assertRaises(OcrNoTextError) as raised:
+            local_ocr(self.request('secolulXIX', 'cyrillicRomanian', ['Pisania.jpg']), self.media_root)
+        self.assertEqual(raised.exception.files, ['Pisania.jpg'])
+
+    def test_endpoint_rejects_a_real_bom_only_txt(self):
+        self.write_output('ocr/secolulXVIII/Pisania.txt', '\ufeff', age_seconds=10)
+        with self.settings(MEDIA_ROOT=self.media_root):
+            response = self.client.post('/ocr/', data=json.dumps(
+                self.request('secolulXVIII', 'cyrillicRomanian', ['Pisania.jpg'])
+            ), content_type='application/json')
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json()['files'], ['Pisania.jpg'])
 
     def test_missing_output_folder_is_a_timeout_not_a_crash(self):
         with self.assertRaises(OcrError):
@@ -220,6 +283,26 @@ class FineReaderOcrTests(SimpleTestCase):
 
 
 class OcrEndpointErrorTests(SimpleTestCase):
+    @patch('apps.access.views.create_ocr_review_refs')
+    @patch('apps.access.views.local_ocr')
+    def test_empty_results_have_a_user_message_and_no_success_artifacts(self, local, review):
+        for result in ({'ocrResults': ['\ufeff^\n'], 'searchablePdfs': ['old.pdf']}, ['\ufeff'], []):
+            with self.subTest(result=result):
+                local.return_value = result
+                response = self.client.post('/ocr/', data=json.dumps({
+                    'sourceFiles': [{'name': 'Pisania.jpg'}], 'period': 'secolulXVIII',
+                }), content_type='application/json')
+                body = response.json()
+                self.assertEqual(response.status_code, 422)
+                self.assertEqual(body['code'], 422)
+                self.assertEqual(body['error'], 'ocr_no_text')
+                self.assertIn('Modelul OCR nu a recunoscut niciun text', body['msg'])
+                self.assertIn('Pisania.jpg', body['msg'])
+                self.assertEqual(body['files'], ['Pisania.jpg'])
+                self.assertNotIn('ocrResults', body)
+                self.assertNotIn('searchablePdfs', body)
+                review.assert_not_called()
+
     def test_timeout_reaches_the_client_as_a_readable_message(self):
         with tempfile.TemporaryDirectory() as media_root, \
                 self.settings(MEDIA_ROOT=media_root), \

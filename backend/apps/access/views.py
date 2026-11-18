@@ -7,7 +7,7 @@ from django.views.decorators.cache import never_cache
 from .models import File
 from django.core.files.storage import FileSystemStorage
 from .utils import *
-from .ocr import local_ocr, remove_ocr_unknown_markers
+from .ocr import local_ocr, remove_ocr_unknown_markers, validate_ocr_results, OcrNoTextError
 from .health import get_health
 from .codex_correction import CodexCorrectionError, generate_correction_suggestions
 from .codex_ocr_review import create_ocr_review_refs, generate_ocr_review
@@ -310,6 +310,12 @@ def ocr(request):
         data = json.loads(request.body)
         try:
             ocr_response = local_ocr(data, settings.MEDIA_ROOT)
+            raw_ocr_results = ocr_response.get("ocrResults", []) if isinstance(ocr_response, dict) else ocr_response
+            clean_ocr_results = validate_ocr_results(raw_ocr_results, data.get('sourceFiles'))
+        except OcrNoTextError as exc:
+            return JsonResponse({
+                "code": 422, "error": "ocr_no_text", "msg": str(exc), "files": exc.files,
+            }, status=422)
         except ScanTailorError as exc:
             return JsonResponse({"code": exc.status_code, "msg": str(exc)}, status=exc.status_code)
         except Exception as e:
@@ -319,16 +325,6 @@ def ocr(request):
                 status=500,
             )
 
-        # FineReader uses the literal ASCII caret as a marker for an unknown
-        # glyph/artifact. It is not document content and must not reach the UI.
-        if isinstance(ocr_response, dict):
-            raw_ocr_results = ocr_response.get("ocrResults", [])
-        else:
-            raw_ocr_results = ocr_response
-        clean_ocr_results = [
-            remove_ocr_unknown_markers(text)
-            for text in raw_ocr_results
-        ]
         ocr_review_refs = create_ocr_review_refs(data, len(clean_ocr_results))
 
         # Handle both old format (list) and new format (dict with ocrResults and searchablePdfs)

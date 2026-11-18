@@ -237,6 +237,16 @@ Un rezultat intenționat absent a întors HTTP 500 după 120 s, cu numele
 fișierului în mesaj. Acestea verifică rutele, nu acuratețea modelelor; ABBYY
 poate exporta TXT gol când nu detectează zone de text într-o imagine.
 
+Rezultatele fără text (inclusiv un TXT care conține numai BOM, spații sau
+marcaje ABBYY pentru caractere necunoscute) sunt raportate de API prin HTTP 422,
+`error: "ocr_no_text"`, cu numele fișierelor afectate. Nu sunt returnate ca
+rezultate reușite sau PDF-uri căutabile. Interfața afișează mesajul modelului,
+permite reîncercarea și blochează pasul următor inclusiv pentru loturi în care
+doar unele imagini nu au text. Un rezultat vechi nu este păstrat după o
+reîncercare eșuată. TXT-urile FineReader trebuie să nu mai fie modificate timp
+de două secunde înainte de citire, pentru a evita verificarea unui fișier
+încă în curs de scriere.
+
 Verificare backend, din `backend` (PowerShell):
 
 ```powershell
