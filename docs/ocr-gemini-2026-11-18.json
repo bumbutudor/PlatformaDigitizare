@@ -1,6 +1,6 @@
 {
   "date": "2026-11-18",
-  "status": "deployed; awaiting GEMINI_API_KEY for a real provider call",
+  "status": "deployed; successful user-consented Gemini request observed",
   "timer": {
     "cause": "Step 3 alternated between Date.now minus server createdAt and elapsedSeconds from polling. Different wall clocks and response delays caused negative values and backward ticks.",
     "fix": "Seed elapsed time once from the server and advance using performance.now. Clamp to nonnegative, nondecreasing integer seconds. Resumed jobs fetch a fresh elapsed value before starting their clock.",
@@ -87,5 +87,14 @@
     "https://aistudio.google.com/docs/structured-output",
     "https://aistudio.google.com/api-reference/interactions-api/create-interaction"
   ],
-  "backupDirectory": ".ops/gemini-ocr-20261118-200706"
+  "backupDirectory": ".ops/gemini-ocr-20261118-200706",
+  "providerObservation": {
+    "source": "Existing user-consented request observed during cache deployment; no additional Gemini request was made for cache verification.",
+    "createdAtUtc": "2026-11-18 20:15:13.143733",
+    "finishedAtUtc": "2026-11-18 20:19:56.863684",
+    "status": "done",
+    "files": 1,
+    "recognizedCharacters": 111,
+    "documentContentRecorded": false
+  }
 }

@@ -1,4 +1,6 @@
 import json
+import tempfile
+from pathlib import Path
 from unittest.mock import patch
 from django.test import TestCase
 from .models import DigiJob
@@ -10,11 +12,25 @@ def run_queued_ocr(client, data, **kwargs):
     accepted = client.post('/ocr/', data=data, **kwargs)
     assert accepted.status_code == 202, accepted.content
     receipt = accepted.json()
-    ocr_jobs.process_job(DigiJob.objects.get(pk=receipt['id']))
+    # These legacy endpoint tests isolate result/error handling; test_ocr_cache covers staging/reuse.
+    def direct_result(data, runner):
+        result = runner(data)
+        return result if isinstance(result, dict) else {'ocrResults': result}
+    with patch('apps.access.ocr_jobs.ocr_cache.recognize', side_effect=direct_result):
+        ocr_jobs.process_job(DigiJob.objects.get(pk=receipt['id']))
     return client.get('/ocr/jobs/' + receipt['id'] + '/', HTTP_AUTHORIZATION='Bearer ' + receipt['token'])
 
 
 class OcrQueueTests(TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        override = self.settings(MEDIA_ROOT=temporary.name)
+        override.enable()
+        self.addCleanup(override.disable)
+        for name in ('page.png', 'a.png', 'b.png'):
+            Path(temporary.name, name).write_bytes(name.encode())
+
     def submit(self, **extra):
         return self.client.post('/ocr/', json.dumps({'sourceFiles': [{'name': 'page.png'}],
             'period': 'secolulXX', 'alphabet': 'cyrillic', **extra}), content_type='application/json')

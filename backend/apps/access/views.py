@@ -9,7 +9,8 @@ from django.core.files.storage import FileSystemStorage
 from .utils import *
 from .ocr import remove_ocr_unknown_markers, validate_ocr_results, OcrNoTextError
 from .health import get_health
-from .hotfolder import preprocess_opencv
+from .hotfolder import preprocess_opencv, PERIODS
+import uuid
 from .codex_correction import CodexCorrectionError, generate_correction_suggestions
 from .codex_ocr_review import generate_ocr_review
 from .codex_access import CodexAccessError, require_codex_access
@@ -141,6 +142,8 @@ def health(request):
 def upload(request):
     myfile = request.FILES['uploadedFiles']
     period = request.POST.get('period', 'secolulXX')  # Get period from request
+    if period not in PERIODS:
+        return JsonResponse({'code': 400, 'msg': 'Selectează o perioadă validă.'}, status=400)
     saveToCloud = False
     fs = FileSystemStorage()
     filename = fs.save(myfile.name, myfile)
@@ -148,31 +151,27 @@ def upload(request):
     uploaded_file_url = fs.url(filename)
     uploaded_file_path = settings.MEDIA_ROOT + '/' + filename
 
-    # Check if file is PDF - upload to period-specific folder
+    # Keep PDFs outside watched inboxes until the OCR worker checks its cache.
     if filename.lower().endswith('.pdf'):
-        # Create pdfs/period folder if not exists
-        pdf_folder = os.path.join(settings.MEDIA_ROOT, 'pdfs', period)
+        relative = 'pdfs/prepared/' + period + '/' + uuid.uuid4().hex + '/' + filename
+        pdf_folder = os.path.dirname(os.path.join(settings.MEDIA_ROOT, relative))
         os.makedirs(pdf_folder, exist_ok=True)
-        
-        # Move PDF to period-specific pdfs folder (replace if exists)
         pdf_path = os.path.join(pdf_folder, filename)
-        if os.path.exists(pdf_path):
-            os.remove(pdf_path)
         os.rename(uploaded_file_path, pdf_path)
         
         # Upload PDF to S3
-        s3_path_pdf = f'pdfs/{period}/{filename}'
+        s3_path_pdf = relative
         s3_url = s3_uploader.upload_file(pdf_path, s3_path_pdf)
         
         # Create DB record
-        File.objects.create(image=fs.url(f'pdfs/{period}/{filename}'))
+        File.objects.create(image=fs.url(relative))
         
         return JsonResponse({
             "code": 200, 
             "msg": "success", 
             "isPdf": True,
             "period": period,
-            "s3File": {"name": filename, "url": s3_url, "isPdf": True, "period": period}
+            "s3File": {"name": relative, "originalName": myfile.name, "url": s3_url, "isPdf": True, "period": period}
         })
 
     # Convert TIFF to PNG if required

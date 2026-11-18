@@ -35,9 +35,10 @@
     "errors": "Original server message and retry button remain visible; empty text is ocr_no_text, timeout is ocr_timeout."
   },
   "routing": {
-    "openCV": "backend/media/pre/OpenCV/<period>",
-    "filename": "cv_<random UUID>.png; atomically staged after preprocessing",
-    "digi": "backend/media/pre/OpenCV/secolulXX/digi_<job>_<index>.png",
+    "openCV": "Prepared in backend/media/pre/OpenCV/prepared/<period>; only cache misses reach backend/media/pre/OpenCV/<period>.",
+    "filename": "Prepared cv_<random UUID>.png; fresh ocr_<random UUID> names for actual Hot Folder recognition.",
+    "digi": "Prepared in backend/media/pre/OpenCV/prepared/secolulXX/digi_<job>_<index>.png; uses the same cache and deferred submission.",
+    "cacheDetails": "ocr-cache-2026-11-18.json; verification records below document the earlier direct-inbox routing before cache deployment.",
     "scanTailor": "The existing FINEREADER_SCANTAILOR_<century>_INPUT variables now point to each period inbox.",
     "fineReaderPreprocess": "pre/FR root is no longer watched by recognition tasks. The worker stages its output to the selected period inbox. The two legacy preFR task inboxes are isolated per period.",
     "verification": [

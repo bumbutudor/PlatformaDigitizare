@@ -41,6 +41,8 @@ export default class Step3 extends Component {
       jobStatus: '',
       elapsedSeconds: 0,
       completedFiles: 0,
+      cachedFiles: 0,
+      forceOcr: false,
       geminiOffer: null,
       ocrEngine: 'local',
       serviceBlock: { blocked: false },
@@ -94,6 +96,7 @@ export default class Step3 extends Component {
       onProgress: progress => this.setState({ jobStatus: progress.status,
         ocrEngine: progress.ocrEngine || 'local',
         completedFiles: progress.completedFiles || 0,
+        cachedFiles: progress.cachedFiles || 0,
         elapsedSeconds: elapsed() }),
     });
   }
@@ -159,6 +162,7 @@ export default class Step3 extends Component {
     this.setState({ ...cleared, show: false, showNextStep: false,
       showError: false, errorMessage: '', showLoader: true,
       jobStatus: 'queued', elapsedSeconds: 0, completedFiles: 0,
+      cachedFiles: 0,
       geminiOffer: null, ocrEngine: useGemini ? 'gemini' : 'local' });
     this.props.updateStore({ ...cleared, transResults: [], savedToCloud: false });
 
@@ -169,14 +173,19 @@ export default class Step3 extends Component {
       ...this.state,
       preprocessWith: this.props.getStore().preprocessWith,
       preprocessMode: this.props.getStore().preprocessMode,
+      preprocessOpenCV: this.props.getStore().preprocessOpenCV,
+      preprocessScanTailor: this.props.getStore().preprocessScanTailor,
+      preprocessFR: this.props.getStore().preprocessFR,
     }, this.props.getStore().api);
     // console.log(postData);
 
     const requestSignature = JSON.stringify([postData.period, postData.ocrModel,
-      postData.sourceFiles, postData.preprocessedFiles, postData.ocrOptions]);
+      postData.sourceFiles, postData.preprocessedFiles, postData.ocrOptions, postData.forceOcr,
+      postData.preprocessOpenCV, postData.preprocessScanTailor, postData.preprocessFR]);
     const pending = resumeJob && resumeJob.id ? resumeJob : this.props.getStore().ocrJob;
     const submitting = useGemini
-      ? this.API.post(`ocr/jobs/${encodeURIComponent(offer.id)}/gemini/`, { consent: true },
+      ? this.API.post(`ocr/jobs/${encodeURIComponent(offer.id)}/gemini/`,
+        { consent: true, ...(this.state.forceOcr ? { forceOcr: true } : {}) },
         { Authorization: `Bearer ${offer.token}` })
       : pending && pending.token && pending.requestSignature === requestSignature
       ? this.API.get(`ocr/jobs/${encodeURIComponent(pending.id)}/`, { Authorization: `Bearer ${pending.token}` })
@@ -211,7 +220,7 @@ export default class Step3 extends Component {
             this.props.updateStore({ s3SourceFiles: updatedSourceFiles });
           }
           
-          this.setState({ showNextStep: true, ocrEngine: data.ocrEngine || 'local' });
+          this.setState({ showNextStep: true, ocrEngine: data.ocrEngine || 'local', cachedFiles: data.cachedFiles || 0 });
         } else {
           const emptyNames = complete ? this.state.sourceFiles
             .filter((file, index) => !hasOcrText(ocrResults[index]))
@@ -673,6 +682,10 @@ export default class Step3 extends Component {
                 </>
               )}
 
+              <Form.Check className="mt-2" type="checkbox" id="force-ocr"
+                label="Refă OCR, fără a reutiliza rezultatul salvat"
+                checked={this.state.forceOcr}
+                onChange={event => this.setState({ forceOcr: event.target.checked, show: true })} />
               <div className="mt-2 mb-3 col-md-12 d-flex justify-content-center">
                 {this.state.period && this.state.show && !this.state.serviceBlock.blocked ? (
                   <Button
@@ -737,6 +750,10 @@ export default class Step3 extends Component {
               )}
               {this.state.showNextStep && this.state.ocrEngine === 'gemini' && (
                 <Alert variant="info">Textul a fost obținut cu ajutorul Gemini. Verifică transcrierea înainte de a continua.</Alert>
+              )}
+              {this.state.showNextStep && this.state.cachedFiles > 0 && (
+                <Alert variant="success">Rezultat reutilizat pentru {this.state.cachedFiles} din {this.state.sourceFiles.length} fișiere.
+                  {' '}Documentul și configurația OCR coincid cu o procesare anterioară.</Alert>
               )}
               <ServiceGate
                 requiredServices={[SERVICES.FINEREADER]}

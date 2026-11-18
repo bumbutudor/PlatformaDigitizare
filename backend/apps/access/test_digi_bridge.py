@@ -75,7 +75,9 @@ class DigiBridgeTests(TestCase):
         b = bridge.stage(two, two.files[0], 0)
         self.assertNotEqual(a['name'], b['name'])
         self.assertEqual(a['originalName'], 'document cu spații.png')
-        self.assertTrue((self.root / 'media/pre/OpenCV/secolulXX' / a['name']).is_file())
+        self.assertTrue((self.root / 'media' / a['name']).is_file())
+        self.assertTrue(a['name'].startswith('pre/OpenCV/prepared/secolulXX/'))
+        self.assertFalse((self.root / 'media/pre/OpenCV/secolulXX').exists())
 
     def test_handoff_is_scoped_and_expires(self):
         response = self.authorized_submit(mode='advanced')
@@ -131,21 +133,38 @@ class DigiBridgeTests(TestCase):
         self.assertTrue(DigiJob.objects.filter(pk=job.id).exists())
 
     @patch('apps.access.views.transliterate_texts', return_value=['Test'])
-    @patch('apps.access.digi_bridge.load_txt', return_value='Тест')
-    @patch('apps.access.digi_bridge.wait_for_finereader_text', return_value=['fake.txt'])
-    def test_worker_persists_completed_file_and_does_not_reprocess_on_resume(self, wait, load, transliterate):
+    @patch('apps.access.ocr_cache.engine_signature', return_value='fixture-model')
+    @patch('apps.access.digi_bridge.local_ocr')
+    def test_identical_digi_uploads_reuse_ocr_including_the_pdf(self, engine, signature, transliterate):
+        pdf = self.root / 'media/ocr/generated.pdf'
+        pdf.parent.mkdir(parents=True)
+        pdf.write_bytes(b'%PDF-1.4\nfixture')
+        def recognized(data, *args, **kwargs):
+            return {'ocrResults': ['text'], 'searchablePdfs': [data['api'] + 'media/ocr/generated.pdf']}
+        engine.side_effect = recognized
+        first = DigiJob.objects.get(pk=self.authorized_submit().json()['id'])
+        second = DigiJob.objects.get(pk=self.authorized_submit(name='renamed.png').json()['id'])
+        bridge.process_job(first)
+        bridge.process_job(second)
+        self.assertEqual(first.status, 'done')
+        self.assertEqual(second.status, 'done')
+        self.assertTrue(second.results[0]['cached'])
+        self.assertEqual(engine.call_count, 1)
+
+    @patch('apps.access.views.transliterate_texts', return_value=['Test'])
+    @patch('apps.access.digi_bridge.local_ocr', return_value={'ocrResults': ['Тест']})
+    def test_worker_persists_completed_file_and_does_not_reprocess_on_resume(self, engine, transliterate):
         job = DigiJob.objects.get(pk=self.authorized_submit().json()['id'])
         bridge.process_job(job)
         job.refresh_from_db()
         self.assertEqual(job.status, 'done')
         self.assertEqual(job.results[0]['id'], '42')
         bridge.process_job(job)
-        self.assertEqual(wait.call_count, 1)
+        self.assertEqual(engine.call_count, 1)
 
     @patch('apps.access.views.transliterate_texts')
-    @patch('apps.access.digi_bridge.load_txt', return_value='^^^')
-    @patch('apps.access.digi_bridge.wait_for_finereader_text', return_value=['fake.txt'])
-    def test_worker_reports_no_recognized_text_with_original_filename(self, wait, load, transliterate):
+    @patch('apps.access.digi_bridge.local_ocr', return_value={'ocrResults': ['^^^']})
+    def test_worker_reports_no_recognized_text_with_original_filename(self, engine, transliterate):
         job = DigiJob.objects.get(pk=self.authorized_submit().json()['id'])
         bridge.process_job(job)
         job.refresh_from_db()

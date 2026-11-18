@@ -12,6 +12,7 @@ import os
 import shutil
 import uuid
 import tempfile
+import time
 from datetime import timedelta
 from pathlib import Path
 
@@ -25,8 +26,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from .models import DigiJob
-from .ocr import OcrError, validate_ocr_results, wait_for_finereader_text
-from .utils import load_txt
+from .ocr import OcrError, validate_ocr_results, local_ocr
+from . import ocr_cache
 
 log = logging.getLogger(__name__)
 MAX_FILES = 20
@@ -159,15 +160,15 @@ def status(request, job_id):
 
 
 def stage(job, item, index, advanced=False):
-    """Publish a complete, uniquely named input to Hot Folder by atomic rename."""
+    """Prepare a unique input outside watched inboxes; OCR is submitted only on a cache miss."""
     original = private_root() / str(job.id) / item['stored']
     suffix = original.suffix.lower()
     name = f'digi_{job.id.hex}_{index}'
     is_pdf = suffix == '.pdf'
     if is_pdf:
-        relative = Path('pdfs/secolulXX') / (name + '.pdf')
+        relative = Path('pdfs/prepared/secolulXX') / (name + '.pdf')
     else:
-        relative = Path(name + '.png') if advanced else Path('pre/OpenCV/secolulXX') / (name + '.png')
+        relative = Path(name + '.png') if advanced else Path('pre/OpenCV/prepared/secolulXX') / (name + '.png')
     destination = Path(settings.MEDIA_ROOT) / relative
     destination.parent.mkdir(parents=True, exist_ok=True)
     if not destination.exists():
@@ -182,16 +183,19 @@ def stage(job, item, index, advanced=False):
                     for n in range(image.n_frames):
                         image.seek(n)
                         pages.append(image.convert('RGB'))
-                    relative = Path('pdfs/secolulXX') / (name + '.pdf')
+                    relative = Path('pdfs/prepared/secolulXX') / (name + '.pdf')
                     destination = Path(settings.MEDIA_ROOT) / relative
                     destination.parent.mkdir(parents=True, exist_ok=True)
                     temporary = destination.with_suffix('.pending')
-                    pages[0].save(temporary, 'PDF', save_all=True, append_images=pages[1:], resolution=300)
+                    pages[0].save(temporary, 'PDF', save_all=True, append_images=pages[1:], resolution=300,
+                                  title='Digitization input', creationDate=time.gmtime(0), modDate=time.gmtime(0))
+                    for page in pages:
+                        page.close()
                     is_pdf = True
                 else:
                     image.convert('RGB').save(temporary, 'PNG', dpi=image.info.get('dpi', (300, 300)))
         os.replace(temporary, destination)
-    return {'name': destination.name, 'originalName': item['name'], 'isPdf': is_pdf,
+    return {'name': relative.as_posix(), 'originalName': item['name'], 'isPdf': is_pdf,
             'period': 'secolulXX', 'url': item['url'], 'size': destination.stat().st_size}
 
 
@@ -203,11 +207,6 @@ def import_job(request, job_id):
         if job.mode != 'advanced':
             return error('Această cerere nu este pentru procesare avansată.')
         files = [stage(job, item, i, advanced=True) for i, item in enumerate(job.files)]
-        if any(file['isPdf'] for file in files):
-            # The existing wizard skips image preprocessing for mixed PDF batches.
-            for i, (item, staged) in enumerate(zip(job.files, files)):
-                if not staged['isPdf']:
-                    stage(job, item, i)
         response = JsonResponse({'code': 200, 'sourceFiles': files, 's3SourceFiles': files,
                                  'period': 'secolulXX', 'alphabet': 'cyrillic'})
         response['Cache-Control'] = 'no-store'
@@ -226,11 +225,14 @@ def process_job(job):
             if any(result['id'] == item['id'] for result in results):
                 continue
             staged = stage(job, item, i)
-            paths = wait_for_finereader_text(
-                [staged], str(Path(settings.MEDIA_ROOT) / 'ocr/secolulXX/cyrillic'), timeout=300)
-            text = validate_ocr_results([load_txt(paths[0])], [staged])[0]
+            data = {'sourceFiles': [staged], 'api': '/', 'period': 'secolulXX', 'alphabet': 'cyrillic',
+                    'ocrModel': 'secolulXX_1', 'ocrOptions': {'useTesseract': False},
+                    'preprocessWith': 'None', 'preprocessMode': 'web'}
+            recognized = ocr_cache.recognize(data, lambda request: local_ocr(request, settings.MEDIA_ROOT, timeout=300))
+            text = recognized['ocrResults'][0]
             transliterated = transliterate_texts([text], 'secolulXX', {'actualizeWordForm': True})[0]
-            results.append({'id': item['id'], 'name': item['name'], 'ocr': text, 'trans': transliterated})
+            results.append({'id': item['id'], 'name': item['name'], 'ocr': text, 'trans': transliterated,
+                            'cached': recognized.get('cached', False)})
             job.results = results
             job.save(update_fields=['results', 'updated_at'])
         job.status, job.error = 'done', ''

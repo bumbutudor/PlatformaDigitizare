@@ -1,0 +1,103 @@
+{
+  "date": "2026-11-18",
+  "status": "deployed",
+  "purpose": "Reuse successful OCR for identical document bytes and engine/preprocessing configuration without submitting duplicate pages to Hot Folder or calling Gemini again.",
+  "identity": {
+    "input": "SHA-256 of the actual engine input: preprocessed image/PDF for local OCR, original document selected by the Gemini adapter for consented fallback.",
+    "options": [
+      "period",
+      "alphabet",
+      "ocrModel",
+      "ocrOptions",
+      "preprocessWith",
+      "preprocessMode",
+      "preprocessOpenCV",
+      "preprocessScanTailor",
+      "preprocessFR"
+    ],
+    "engines": {
+      "fineReader": "Selected period/image-or-PDF HFT recognition, preprocessing and output settings, embedded/referenced models, and OCR adapter implementation. Runtime task timestamps/status are excluded. Unknown configurations bypass reuse.",
+      "tesseract": "Executable, RTS_from_Cyrillic.traineddata and OCR adapter implementation.",
+      "gemini": "Configured model and adapter implementation including transcription prompt. Explicit fallback consent remains required."
+    },
+    "excluded": [
+      "filename",
+      "job id",
+      "API origin",
+      "credentials"
+    ],
+    "engineUpgrade": "After a FineReader application upgrade, increment OCR_CACHE_REVISION to invalidate prior results."
+  },
+  "storage": {
+    "migration": "access.0027_ocr_cache_entry",
+    "table": "access_ocrcacheentry",
+    "retentionDays": 7,
+    "renewal": "A successful lookup renews expiration for seven days.",
+    "text": "Validated nonempty text only. Failed, timed-out, empty or mid-processing changed inputs/models are not cached.",
+    "pdf": "Independent immutable copies under backend/media/ocr/cache/<key>/<uuid>.pdf. Content hashes are checked at lookup. Missing/changed artifacts cause a fresh execution.",
+    "cleanup": "Unexpired cache PDFs and results referenced by live jobs are protected. Expired generated media is eligible for the existing reversible archive, never permanent deletion.",
+    "oldResults": "No import based on old TXT filenames: cache is populated by newly verified successful executions."
+  },
+  "routing": {
+    "openCVPrepared": "backend/media/pre/OpenCV/prepared/<period>/cv_<uuid>.png",
+    "pdfPrepared": "backend/media/pdfs/prepared/<period>/<uuid>/<filename>",
+    "digiPrepared": "backend/media/pre/OpenCV/prepared/secolulXX/digi_<job>_<index>.png or backend/media/pdfs/prepared/secolulXX/digi_<job>_<index>.pdf",
+    "cacheMiss": "Only the OCR worker copies a complete input to its period inbox, with a fresh ocr_<uuid> name. Existing same-name TXT outputs cannot satisfy that execution.",
+    "cacheHit": "No watched-inbox write. All-cached step-3 submissions return status done immediately; mixed or queued jobs reuse results per file in the single durable worker.",
+    "hotFolderConfigurationChanged": false,
+    "legacyDesktopLimit": "Files manually placed into the legacy watched media/out desktop ScanTailor folder can still trigger Hot Folder independently of the web cache."
+  },
+  "interface": {
+    "cachedFiles": "Response count and a visible result-reused notice in step 3.",
+    "forceOcr": "Refă OCR, fără a reutiliza rezultatul salvat. Forces a fresh execution and replaces the cache entry only after success.",
+    "digi": "Simple Digi jobs use the same OCR cache; transliteration runs on the returned text with current dictionaries."
+  },
+  "environment": {
+    "OCR_CACHE_ENABLED": "true by default",
+    "OCR_CACHE_DAYS": "7 by default",
+    "OCR_CACHE_REVISION": "ocr-cache-v1 by default; change to invalidate existing entries",
+    "FINEREADER_HOTFOLDER_CONFIG_DIR": "Defaults to the Windows user's ABBYY/FineReader/15/HotFolder directory"
+  },
+  "validation": {
+    "backend": "114 tests: 113 passed, 1 existing skip",
+    "frontend": "60 application tests passed",
+    "cleanup": "4 tests passed",
+    "build": "npm run build-digitizare succeeded",
+    "browser": {
+      "publicBundle": true,
+      "pageErrors": [],
+      "requests": [
+        {
+          "forceOcr": false
+        },
+        {
+          "forceOcr": true
+        }
+      ]
+    },
+    "liveDuplicate": {
+      "firstOcrSeconds": 70,
+      "repeatResponseSeconds": 0.047,
+      "renamedDuplicate": true,
+      "preparedBytesIdentical": true,
+      "cachedFiles": 1,
+      "textIdentical": true,
+      "characters": 4891,
+      "newHotFolderInputs": 1,
+      "textOutputs": 1,
+      "cachedSearchablePdfHttp": 200,
+      "cachedSearchablePdfBytes": 88252
+    },
+    "deployment": {
+      "publicBundleMatches": true,
+      "publicBackendHealthHttp": 200
+    }
+  },
+  "deployment": {
+    "backupDirectory": ".ops/ocr-cache-20261118-222000",
+    "migration": "access.0027_ocr_cache_entry applied",
+    "backend": "Restarted only after active user jobs completed; Hot Folder and AnyDesk left running.",
+    "frontend": "Public bundle hash equals the local npm build.",
+    "rollback": "Restore the backed-up frontend and previous application code, then restart backend/worker. The additive cache table can remain; no database restore or deletion is needed."
+  }
+}

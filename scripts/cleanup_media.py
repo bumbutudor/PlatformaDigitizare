@@ -43,6 +43,13 @@ def protected_paths(workspace):
                 protected.add((media / path).resolve())
         # Published/saved documents can contain arbitrary output references.
         documents = [row[0] or "" for row in connection.execute("SELECT digi_object FROM access_digidocument")]
+        tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        if 'access_ocrcacheentry' in tables:
+            now = dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+            for (value,) in connection.execute(
+                    'SELECT pdf_path FROM access_ocrcacheentry WHERE expires_at > ?', (now,)):
+                if value:
+                    protected.add((media / value).resolve())
     return protected, documents
 
 
@@ -52,8 +59,9 @@ def job_retention(workspace):
     with sqlite3.connect((workspace / 'backend/db.sqlite3').as_uri() + '?mode=ro', uri=True) as db:
         columns = {row[1] for row in db.execute('PRAGMA table_info(access_digijob)')}
         request_data = 'request_data' if 'request_data' in columns else "'{}'"
-        for job_id, status, expires, files, request in db.execute(
-                'SELECT id,status,expires_at,files,' + request_data + ' FROM access_digijob'):
+        result_data = 'results' if 'results' in columns else "'[]'"
+        for job_id, status, expires, files, request, results in db.execute(
+                'SELECT id,status,expires_at,files,' + request_data + ',' + result_data + ' FROM access_digijob'):
             identity = uuid.UUID(job_id).hex
             deadline = dt.datetime.fromisoformat(expires)
             if deadline.tzinfo is None:
@@ -62,7 +70,7 @@ def job_retention(workspace):
                 expired.add(identity)
             else:
                 live.add(identity)
-                references.extend((files or '', request or ''))
+                references.extend((files or '', request or '', results or ''))
     return expired, live, references
 
 

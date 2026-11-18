@@ -23,11 +23,11 @@ class HotFolderRoutingTests(SimpleTestCase):
             names = []
             for period in PERIODS:
                 def processor(source, output):
-                    self.assertEqual(list((root / 'pre/OpenCV' / period).iterdir()), [])
+                    self.assertFalse((root / 'pre/OpenCV' / period).exists())
                     Path(output).write_bytes(b'processed')
                 data = {'period': period, 'sourceFiles': [{'name': 'document cu spatii.png'}]}
                 relative = preprocess_opencv(data, processor)[0]
-                self.assertEqual(Path(relative).parent.as_posix(), 'pre/OpenCV/' + period)
+                self.assertEqual(Path(relative).parent.as_posix(), 'pre/OpenCV/prepared/' + period)
                 self.assertEqual((root / relative).read_bytes(), b'processed')
                 names.append(Path(relative).name)
             self.assertEqual(len(set(names)), 4)

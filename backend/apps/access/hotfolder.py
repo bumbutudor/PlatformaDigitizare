@@ -1,11 +1,12 @@
 """Period-specific Hot Folder inputs; publish only complete images."""
 import os
+import shutil
 import tempfile
 import uuid
 from pathlib import Path
 
 from django.conf import settings
-from .scantailor import ScanTailorInputError, media_file
+from .scantailor import ScanTailorInputError, ScanTailorUnavailable, media_file, processed_ocr_paths
 
 PERIODS = ('secolulXVII', 'secolulXVIII', 'secolulXIX', 'secolulXX')
 
@@ -17,7 +18,9 @@ def opencv_inbox(period):
 
 
 def preprocess_opencv(data, processor):
-    inbox = opencv_inbox(data.get('period'))
+    # Prepare outside watched inboxes. The OCR worker checks the cache before submission.
+    opencv_inbox(data.get('period'))  # Validate the period.
+    inbox = Path(settings.MEDIA_ROOT) / 'pre/OpenCV/prepared' / data['period']
     files = data.get('sourceFiles')
     if not isinstance(files, list) or not 1 <= len(files) <= 20:
         raise ScanTailorInputError('Selectează între 1 și 20 de imagini.')
@@ -63,3 +66,43 @@ def other_processed_paths(data, media_root):
             raise ScanTailorInputError('Calea imaginii preprocesate este invalidă.')
         paths.append(media_file(value, media_root))
     return paths
+
+
+def ocr_input_path(data, media_root=None):
+    root = media_root or settings.MEDIA_ROOT
+    processed = processed_ocr_paths(data, root) or other_processed_paths(data, root)
+    if processed:
+        return processed[0]
+    name = data['sourceFiles'][0]['name']
+    candidates = [name]
+    if name.lower().endswith('.pdf') and data.get('period') in PERIODS:
+        # Existing sessions uploaded PDFs directly to their period inbox.
+        candidates.append('pdfs/' + data['period'] + '/' + Path(name).name)
+    for candidate in candidates:
+        try:
+            return media_file(candidate, root)
+        except ScanTailorInputError:
+            continue
+    raise ScanTailorInputError('Fișierul pentru OCR nu mai este disponibil. Încarcă-l din nou.')
+
+
+def stage_ocr_input(source, period):
+    """Only cache misses reach an inbox; every execution gets a fresh output name."""
+    opencv_inbox(period)
+    if source.suffix.lower() == '.pdf':
+        inbox = Path(settings.MEDIA_ROOT) / 'pdfs' / period
+    else:
+        configured = settings.FINEREADER_SCANTAILOR_INPUT_DIRS.get(period)
+        if not configured:
+            raise ScanTailorUnavailable('Nu există un Hot Folder pentru perioada selectată.')
+        inbox = Path(configured)
+    inbox.mkdir(parents=True, exist_ok=True)
+    destination = inbox / ('ocr_' + uuid.uuid4().hex + source.suffix.lower())
+    temporary = destination.with_suffix('.pending')
+    try:
+        shutil.copyfile(source, temporary)
+        os.replace(temporary, destination)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+    return destination

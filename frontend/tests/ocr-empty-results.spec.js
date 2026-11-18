@@ -86,4 +86,19 @@ describe('Empty OCR results', () => {
     assert.deepStrictEqual(getStore().ocrResults, []);
     assert.deepStrictEqual(getStore().searchablePdfs, []);
   });
+
+  it('reports reused results and lets the user request a fresh recognition', async () => {
+    const { step } = setup();
+    let submitted;
+    step.API.post = async (url, body) => {
+      submitted = body;
+      return { code: 200, ocrResults: ['text'], cachedFiles: body.forceOcr ? 0 : 1 };
+    };
+    await step.handleOCRRequest();
+    assert.strictEqual(step.state.cachedFiles, 1);
+    step.setState({ forceOcr: true });
+    await step.handleOCRRequest();
+    assert.strictEqual(submitted.forceOcr, true);
+    assert.strictEqual(step.state.cachedFiles, 0);
+  });
 });

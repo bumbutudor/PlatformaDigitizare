@@ -239,6 +239,12 @@ GEMINI_OCR_ENABLED = os.getenv('GEMINI_OCR_ENABLED', 'true').lower() in ('true',
 GEMINI_OCR_MODEL = os.getenv('GEMINI_OCR_MODEL', 'gemini-4-hydrogen')
 GEMINI_OCR_MAX_BYTES = 14 * 1024 * 1024
 
+OCR_CACHE_ENABLED = os.getenv('OCR_CACHE_ENABLED', 'true').lower() in ('true', '1', 'yes')
+OCR_CACHE_DAYS = max(1, int(os.getenv('OCR_CACHE_DAYS', '7')))
+OCR_CACHE_REVISION = os.getenv('OCR_CACHE_REVISION', 'ocr-cache-v1')
+FINEREADER_HOTFOLDER_CONFIG_DIR = os.getenv('FINEREADER_HOTFOLDER_CONFIG_DIR', os.path.join(
+    os.getenv('LOCALAPPDATA', os.path.expanduser('~')), 'ABBYY', 'FineReader', '15', 'HotFolder'))
+
 # Local Codex CLI correction service. Corrections are returned for interactive
 # review only and are never persisted by the backend.
 CODEX_CLI_PATH = os.getenv('CODEX_CLI_PATH', default='codex')

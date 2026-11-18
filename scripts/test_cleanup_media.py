@@ -21,6 +21,7 @@ class DigiCleanupTests(unittest.TestCase):
         self.db = sqlite3.connect(self.root / 'backend/db.sqlite3')
         self.addCleanup(self.db.close)
         self.db.execute('CREATE TABLE access_digijob (id TEXT,status TEXT,expires_at TEXT,files TEXT,request_data TEXT)')
+        self.original_protection = cleanup.protected_paths
         protection = patch.object(cleanup, 'protected_paths', return_value=(set(), []))
         protection.start()
         self.addCleanup(protection.stop)
@@ -68,6 +69,20 @@ class DigiCleanupTests(unittest.TestCase):
         self.db.commit()
         self.assertEqual(cleanup.archive_candidates(self.root, selected)['archived'], 0)
         self.assertTrue(all(path.exists() for path in paths))
+
+    @patch.object(cleanup.subprocess, 'check_output', return_value=b'')
+    def test_unexpired_cache_pdfs_are_protected(self, git):
+        for statement in ('CREATE TABLE access_file (image TEXT)',
+                          'CREATE TABLE access_ocrmodel (model_file TEXT)',
+                          'CREATE TABLE access_digidocument (digi_object TEXT)',
+                          'CREATE TABLE access_ocrcacheentry (pdf_path TEXT, expires_at TEXT)'):
+            self.db.execute(statement)
+        relative = 'ocr/cache/key/result.pdf'
+        expires = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
+        self.db.execute('INSERT INTO access_ocrcacheentry VALUES (?,?)', (relative, expires))
+        self.db.commit()
+        protected, _ = self.original_protection(self.root)
+        self.assertIn((self.root / 'backend/media' / relative).resolve(), protected)
 
 
 if __name__ == '__main__':

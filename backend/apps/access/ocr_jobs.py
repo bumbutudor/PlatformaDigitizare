@@ -19,11 +19,13 @@ from .ocr import local_ocr, validate_ocr_results, OcrError, OcrNoTextError, OcrT
 from .scantailor import ScanTailorError
 from .codex_ocr_review import create_ocr_review_refs
 from . import gemini_ocr
+from . import ocr_cache
 
 log = logging.getLogger(__name__)
 FILE_TIMEOUT_SECONDS = 300
 REQUEST_FIELDS = ('sourceFiles', 's3SourceFiles', 'preprocessedFiles', 'period', 'alphabet',
-                  'preprocessWith', 'preprocessMode', 'ocrModel', 'ocrOptions')
+                  'preprocessWith', 'preprocessMode', 'ocrModel', 'ocrOptions', 'forceOcr',
+                  'preprocessOpenCV', 'preprocessScanTailor', 'preprocessFR')
 
 
 def job_response(job, token=None, http_status=200):
@@ -36,6 +38,7 @@ def job_response(job, token=None, http_status=200):
             'error': job.error_code, 'createdAt': job.created_at.isoformat(),
             'elapsedSeconds': max(0, int((end - job.created_at).total_seconds())),
             'completedFiles': len(job.results), 'totalFiles': len(job.files),
+            'cachedFiles': sum(bool(item.get('cached')) for item in job.results),
             'timeoutSecondsPerFile': FILE_TIMEOUT_SECONDS}
     body['ocrEngine'] = job.request_data.get('ocrEngine', 'local')
     if job.status == 'error':
@@ -61,6 +64,10 @@ def submit(request):
         data = json.loads(request.body)
         if not isinstance(data, dict):
             raise ValueError('Cererea OCR trebuie să fie un obiect JSON.')
+        if 'forceOcr' in data and not isinstance(data['forceOcr'], bool):
+            raise ValueError('Opțiunea de refacere OCR este invalidă.')
+        if data.get('ocrOptions') is not None and not isinstance(data['ocrOptions'], dict):
+            raise ValueError('Opțiunile OCR sunt invalide.')
         files = data.get('sourceFiles')
         if not isinstance(files, list) or not 1 <= len(files) <= 20:
             raise ValueError('Selectează între 1 și 20 de fișiere pentru OCR.')
@@ -75,7 +82,11 @@ def submit(request):
         # Use the actual API origin instead of persisting an arbitrary supplied URL.
         payload['api'] = request.build_absolute_uri('/')
         token = secrets.token_urlsafe(32)
+        cached = ocr_cache.cached_prefix(payload)
+        complete = len(cached) == len(files)
         job = DigiJob.objects.create(mode='ocr', files=files, request_data=payload,
+            results=cached, status='done' if complete else 'queued',
+            finished_at=timezone.now() if complete else None,
             token_hash=hashlib.sha256(token.encode()).hexdigest(),
             expires_at=timezone.now() + timedelta(hours=48))
         return job_response(job, token, 202)
@@ -116,15 +127,22 @@ def retry_gemini(request, job_id):
         data = None
     if not isinstance(data, dict) or data.get('consent') is not True:
         return JsonResponse({'code': 400, 'msg': 'Confirmă trimiterea documentelor către Google pentru OCR cu Gemini.'}, status=400)
+    force = data.get('forceOcr', parent.request_data.get('forceOcr', False))
+    if not isinstance(force, bool):
+        return JsonResponse({'code': 400, 'msg': 'Opțiunea de refacere OCR este invalidă.'}, status=400)
     if parent.status != 'error':
         return JsonResponse({'code': 409, 'msg': 'Așteaptă finalizarea cererii OCR curente.'}, status=409)
     if not gemini_ocr.available():
         return JsonResponse({'code': 503, 'msg': 'Recunoașterea cu Gemini nu este disponibilă momentan.'}, status=503)
     # A repeated POST after a lost response reuses this child, avoiding duplicate paid calls.
-    job, _ = DigiJob.objects.get_or_create(id=uuid.uuid5(parent.id, 'gemini-fallback'), defaults={
-        'mode': 'ocr', 'files': parent.files, 'results': parent.results,
-        'request_data': {**parent.request_data, 'ocrEngine': 'gemini',
-                         'fallbackOf': str(parent.id), 'geminiConsentAt': timezone.now().isoformat()},
+    payload = {**parent.request_data, 'ocrEngine': 'gemini', 'forceOcr': force,
+               'fallbackOf': str(parent.id), 'geminiConsentAt': timezone.now().isoformat()}
+    cached = ocr_cache.cached_prefix(payload, parent.results)
+    complete = len(cached) == len(parent.files)
+    job, _ = DigiJob.objects.get_or_create(id=uuid.uuid5(parent.id, 'gemini-fallback' + (':force' if force else '')), defaults={
+        'mode': 'ocr', 'files': parent.files, 'results': cached,
+        'status': 'done' if complete else 'queued', 'finished_at': timezone.now() if complete else None,
+        'request_data': payload,
         'token_hash': parent.token_hash, 'expires_at': parent.expires_at})
     return job_response(job, request.headers['Authorization'].removeprefix('Bearer '), 202)
 
@@ -144,14 +162,16 @@ def process_job(job):
                 if isinstance(data.get(field), list):
                     data[field] = data[field][index:index + 1]
             if data.get('ocrEngine') == 'gemini':
-                result = gemini_ocr.transcribe(data, timeout=FILE_TIMEOUT_SECONDS)
+                runner = lambda request: gemini_ocr.transcribe(request, timeout=FILE_TIMEOUT_SECONDS)
             else:
-                result = local_ocr(data, settings.MEDIA_ROOT, timeout=FILE_TIMEOUT_SECONDS)
+                runner = lambda request: local_ocr(request, settings.MEDIA_ROOT, timeout=FILE_TIMEOUT_SECONDS)
+            result = ocr_cache.recognize(data, runner)
             texts = validate_ocr_results(result.get('ocrResults') if isinstance(result, dict) else result, data['sourceFiles'])
             if len(texts) != 1:
                 raise OcrError('Motorul OCR nu a returnat un rezultat pentru fiecare fișier.')
             pdfs = result.get('searchablePdfs', []) if isinstance(result, dict) else []
-            job.results = list(job.results) + [{'ocr': texts[0], 'pdf': pdfs[0] if pdfs else None}]
+            job.results = list(job.results) + [{'ocr': texts[0], 'pdf': pdfs[0] if pdfs else None,
+                                                'cached': result.get('cached', False)}]
             job.save(update_fields=['results', 'updated_at'])
         job.status = 'done'
     except OcrNoTextError as exc:

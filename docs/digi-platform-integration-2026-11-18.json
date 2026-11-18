@@ -35,7 +35,8 @@
     "maximum_new_jobs_per_user_per_hour": 30,
     "ocr_timeout_seconds_per_file": 300,
     "private_originals": ".ops/digi-jobs/<job-id>/",
-    "simple_image_input": "backend/media/pre/OpenCV/secolulXX"
+    "simple_image_input": "Prepared in backend/media/pre/OpenCV/prepared/secolulXX; actual cache misses are staged with fresh names into backend/media/pre/OpenCV/secolulXX.",
+    "ocr_cache": "ocr-cache-2026-11-18.json"
   },
   "deployment": {
     "django_migration": "access.0026_digi_job_ocr_queue",
