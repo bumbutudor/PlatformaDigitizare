@@ -18,6 +18,7 @@ import Popover from "react-bootstrap/Popover";
 import StepsInfo from "../components/StepsInfo";
 import ServiceGate from '../components/ServiceGate';
 import { SERVICES } from '../utils/ServiceStatus';
+import { DIGI_ORIGIN, digiRequest } from '../utils/DigiBridge';
 
 export default class Step7 extends Component {
   constructor(props) {
@@ -40,6 +41,10 @@ export default class Step7 extends Component {
       inputID: 0,
       saving: false,
       serviceBlock: { blocked: false },
+      digiConnected: !!props.getStore().digiContext,
+      publishBusy: false,
+      publishError: '',
+      publication: props.getStore().digiPublication || null,
     };
     this.isValidated = this.isValidated.bind(this);
     this.API = new FetchWrapper(props.getStore().api);
@@ -55,9 +60,19 @@ export default class Step7 extends Component {
     );
   }
 
-  componentDidMount() { }
+  componentDidMount() {
+    this.receiveDigi = event => {
+      if (event.origin !== DIGI_ORIGIN || event.source !== this.digiWindow || !event.data || event.data.type !== 'digi-connected') return;
+      const context = event.data.context;
+      if (!context || !/^[a-f0-9-]{36}$/.test(context.id) || !/^[a-f0-9]{64}$/.test(context.token)) return;
+      this.props.updateStore({ digiContext: context, digiImported: true, digiPublication: null });
+      this.setState({ digiConnected: true, publishError: '', publication: null });
+      this.digiWindow.close();
+    };
+    window.addEventListener('message', this.receiveDigi);
+  }
 
-  componentWillUnmount() { }
+  componentWillUnmount() { window.removeEventListener('message', this.receiveDigi); }
 
   // This review screen had the 'Save' button, on clicking this is called
   isValidated() {
@@ -137,24 +152,21 @@ export default class Step7 extends Component {
     saveAs(blob, "Transliterat" + ".doc");
   }
 
-  async handlePublishRequest() {
+  async handlePublishRequest(event) {
     event.preventDefault();
-    const transEndpoint = 'publish/';
-    const postData = this.state;
-    this.API.post(transEndpoint, postData)
-      .then((data) => {
-        console.log(data.msg);
-        // If the request is successful, open the URL in a new tab.
-        if (data.code == 200) {
-          window.open('https://digi.emoldova.org/', '_blank');
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-      .finally(() => {
-        //this.setState({ showLoader: false });
-      });
+    const store = this.props.getStore();
+    if (!store.digiContext) {
+      this.digiWindow = window.open(DIGI_ORIGIN + '/digitizare?connect=1', 'digi-connect', 'width=850,height=650');
+      if (!this.digiWindow) this.setState({ publishError: 'Permite deschiderea ferestrei Digi pentru a conecta contul.' });
+      return;
+    }
+    this.setState({ publishBusy: true, publishError: '' });
+    try {
+      const data = await digiRequest(store.api, 'publish/', store.digiContext, { ...store, digiJobId: store.digiContext.id });
+      this.props.updateStore({ digiPublication: data });
+      this.setState({ publication: data });
+    } catch (error) { this.setState({ publishError: error.message }); }
+    finally { this.setState({ publishBusy: false }); }
   }
 
 
@@ -339,15 +351,20 @@ export default class Step7 extends Component {
                 Digitizează un document nou
               </button>
               {this.props.getStore().sourceFiles.length > 0 &&
-                <button className="btn btn-success" disabled={this.state.serviceBlock.blocked} onClick={this.handlePublishRequest.bind(this)}>
-                  Publică documentul digitizat
+                <button type="button" className="btn btn-success" disabled={this.state.publishBusy || !!this.state.publication} onClick={this.handlePublishRequest.bind(this)}>
+                  {this.state.publishBusy ? 'Se salvează…' : this.state.digiConnected ? 'Salvează ca ciornă în Digi' : 'Conectează contul Digi pentru salvare'}
                 </button>
               }
             </div>
-            <ServiceGate
-              requiredServices={[SERVICES.PUBLISH]}
-              onBlockChange={(block) => this.setState({ serviceBlock: block })}
-            />
+            <p>Documentul va fi salvat ca ciornă în contul tău de pe Digi, pentru verificare și publicare.</p>
+            {this.state.digiConnected && <button type="button" className="btn btn-link" onClick={() => {
+              this.digiWindow = window.open(DIGI_ORIGIN + '/digitizare?connect=1', 'digi-connect', 'width=850,height=650');
+            }}>Reconectează contul Digi</button>}
+            {this.state.publishError && <div role="alert" className="alert alert-danger">{this.state.publishError}</div>}
+            {this.state.publication && <div role="status" className="alert alert-success">
+              {this.state.publication.msg}{' '}
+              <a href={this.state.publication.url} target="_blank" rel="noopener noreferrer">Deschide documentul în Digi</a>
+            </div>}
 
           </form >
           {/* <div className="col-2 m-4">

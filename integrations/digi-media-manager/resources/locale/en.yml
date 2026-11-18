@@ -1,0 +1,13 @@
+digi-media-manager:
+  forum:
+    all_files: 'All files'
+    current_files: 'Current files'
+    dropzone:
+      title: 'Drag and drop here'
+      subtitle: 'or upload using the right-corner button'
+      transliterate_button: 'Transliterate'
+      add_to_composer_button: 'Continue'
+      checkbox_text_original: 'Original text (cyrillic)'
+      checkbox_text_transliterat: 'Transliterated text'
+      errors:
+        file_not_found: 'Needed files not found! Please try again later!'

@@ -27,6 +27,7 @@ from django.conf import settings
 
 from .codex_correction import _resolve_codex_command, _sanitized_environment
 from .codex_access import get_codex_access_key
+from .scantailor import ScanTailorError, cli_version
 
 
 # Stable identifiers used by both backend and frontend to map steps -> services.
@@ -35,6 +36,7 @@ SERVICE_TRANSLITERA = "translitera"
 SERVICE_PUBLISH = "publish"
 SERVICE_S3 = "s3"
 SERVICE_CODEX = "codex"
+SERVICE_SCANTAILOR = "scantailor"
 
 
 def _result(status, critical, latency_ms=None, message=""):
@@ -181,6 +183,15 @@ def check_codex():
         return _offline(False, "Codex CLI nu poate fi pornit", _elapsed_ms(start))
 
 
+def check_scantailor():
+    start = time.time()
+    try:
+        version = cli_version()
+        return _online(False, _elapsed_ms(start), f"CLI {version}")
+    except ScanTailorError as exc:
+        return _offline(False, str(exc), _elapsed_ms(start))
+
+
 # Registry of all checks. Order is preserved in the response.
 _CHECKS = {
     SERVICE_FINEREADER: check_finereader,
@@ -188,6 +199,7 @@ _CHECKS = {
     SERVICE_PUBLISH: check_publish,
     SERVICE_S3: check_s3,
     SERVICE_CODEX: check_codex,
+    SERVICE_SCANTAILOR: check_scantailor,
 }
 
 # Human-readable labels surfaced to the diagnostic panel.
@@ -197,6 +209,7 @@ SERVICE_LABELS = {
     SERVICE_PUBLISH: "Publicare",
     SERVICE_S3: "Stocare (S3)",
     SERVICE_CODEX: "Codex CLI (experimental)",
+    SERVICE_SCANTAILOR: "ScanTailor CLI",
 }
 
 # Simple in-process cache so frequent frontend polls don't re-probe every time.
@@ -215,12 +228,12 @@ def _run_all_checks():
                 result = future.result(timeout=timeout)
             except FutureTimeout:
                 result = _offline(
-                    name not in (SERVICE_CODEX,),
+                    name not in (SERVICE_CODEX, SERVICE_SCANTAILOR),
                     "Verificare expirată (timeout)",
                 )
             except Exception as e:  # noqa: BLE001
                 result = _offline(
-                    name not in (SERVICE_CODEX,), f"Eroare verificare: {e}"
+                    name not in (SERVICE_CODEX, SERVICE_SCANTAILOR), f"Eroare verificare: {e}"
                 )
             result["label"] = SERVICE_LABELS.get(name, name)
             services[name] = result

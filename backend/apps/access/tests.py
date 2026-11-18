@@ -4,7 +4,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from django.core import signing
-from django.test import SimpleTestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
+from .test_ocr_jobs import run_queued_ocr
 from PIL import Image
 
 from .codex_correction import (
@@ -25,7 +26,7 @@ from .codex_ocr_review import (
 from .ocr import remove_ocr_unknown_markers
 
 
-class OcrArtifactCleanupTests(SimpleTestCase):
+class OcrArtifactCleanupTests(TestCase):
     def test_removes_fine_reader_unknown_marker(self):
         self.assertEqual(remove_ocr_unknown_markers("^ЇС"), "ЇС")
 
@@ -35,16 +36,15 @@ class OcrArtifactCleanupTests(SimpleTestCase):
             "alui ЇС\na b c",
         )
 
-    @patch("apps.access.views.local_ocr")
+    @patch("apps.access.ocr_jobs.local_ocr")
     def test_ocr_endpoint_returns_clean_text_and_preserves_pdf_urls(self, local_ocr):
-        local_ocr.return_value = {
-            "ocrResults": ["^ЇС", "сꙋпт ^дестоиничїѧ"],
-            "searchablePdfs": ["first.pdf", None],
-        }
+        local_ocr.side_effect = [
+            {"ocrResults": ["^\u0407\u0421"], "searchablePdfs": ["first.pdf"]},
+            {"ocrResults": ["\u0441\ua64b\u043f\u0442 ^\u0434\u0435\u0441\u0442\u043e\u0438\u043d\u0438\u0447\u0457\u0467"], "searchablePdfs": [None]},
+        ]
 
-        response = self.client.post(
-            "/ocr/",
-            data=json.dumps({"period": "secolulXVII"}),
+        response = run_queued_ocr(self.client,
+            data=json.dumps({"period": "secolulXVII", "sourceFiles": [{"name": "first.jpg"}, {"name": "second.jpg"}]}),
             content_type="application/json",
         )
 
@@ -58,13 +58,12 @@ class OcrArtifactCleanupTests(SimpleTestCase):
             ["first.pdf", None],
         )
 
-    @patch("apps.access.views.local_ocr")
+    @patch("apps.access.ocr_jobs.local_ocr")
     def test_ocr_endpoint_cleans_legacy_list_response(self, local_ocr):
         local_ocr.return_value = ["^ЇС"]
 
-        response = self.client.post(
-            "/ocr/",
-            data=json.dumps({"period": "secolulXVII"}),
+        response = run_queued_ocr(self.client,
+            data=json.dumps({"period": "secolulXVII", "sourceFiles": [{"name": "page.jpg"}]}),
             content_type="application/json",
         )
 
@@ -97,7 +96,7 @@ class OcrArtifactCleanupTests(SimpleTestCase):
         )
 
 
-class OcrReviewReferenceTests(SimpleTestCase):
+class OcrReviewReferenceTests(TestCase):
     def setUp(self):
         self.media_dir = tempfile.TemporaryDirectory()
         self.settings_override = override_settings(MEDIA_ROOT=self.media_dir.name)
@@ -113,14 +112,13 @@ class OcrReviewReferenceTests(SimpleTestCase):
         Image.new("RGB", (32, 24), "white").save(path, format=image_format)
         return path
 
-    @patch("apps.access.views.local_ocr")
+    @patch("apps.access.ocr_jobs.local_ocr")
     def test_ocr_response_cleans_caret_and_signs_processed_image(self, local_ocr):
         processed = self.make_image("pre/OpenCV/page.jpg")
         self.make_image("page.jpg")
         local_ocr.return_value = {"ocrResults": ["^ЇС"], "searchablePdfs": []}
 
-        response = self.client.post(
-            "/ocr/",
+        response = run_queued_ocr(self.client,
             data=json.dumps({
                 "period": "secolulXVII",
                 "preprocessedFiles": ["/pre/OpenCV/page.jpg"],
@@ -137,14 +135,13 @@ class OcrReviewReferenceTests(SimpleTestCase):
         self.assertTrue(image_refs[0])
         self.assertEqual(resolve_ocr_review_ref(image_refs[0]), processed.resolve())
 
-    @patch("apps.access.views.local_ocr")
+    @patch("apps.access.ocr_jobs.local_ocr")
     def test_ocr_response_returns_null_review_ref_for_pdf(self, local_ocr):
         pdf_path = Path(self.media_dir.name) / "page.pdf"
         pdf_path.write_bytes(b"%PDF-1.4\n")
         local_ocr.return_value = ["text"]
 
-        response = self.client.post(
-            "/ocr/",
+        response = run_queued_ocr(self.client,
             data=json.dumps({
                 "period": "secolulXVII",
                 "preprocessedFiles": ["page.pdf"],
@@ -157,14 +154,13 @@ class OcrReviewReferenceTests(SimpleTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["ocrReviewRefs"], [None])
 
-    @patch("apps.access.views.local_ocr")
+    @patch("apps.access.ocr_jobs.local_ocr")
     def test_upload_canonical_name_wins_over_client_metadata_name(self, local_ocr):
         self.make_image("client-name.jpg")
         canonical = self.make_image("client-name_renamed.jpg")
         local_ocr.return_value = ["text"]
 
-        response = self.client.post(
-            "/ocr/",
+        response = run_queued_ocr(self.client,
             data=json.dumps({
                 "period": "secolulXVII",
                 # No preprocessing: the frontend mirrors stale client metadata.

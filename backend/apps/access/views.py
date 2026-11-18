@@ -7,14 +7,19 @@ from django.views.decorators.cache import never_cache
 from .models import File
 from django.core.files.storage import FileSystemStorage
 from .utils import *
-from .ocr import local_ocr, remove_ocr_unknown_markers
+from .ocr import remove_ocr_unknown_markers, validate_ocr_results, OcrNoTextError
 from .health import get_health
+from .hotfolder import preprocess_opencv, PERIODS
+import uuid
 from .codex_correction import CodexCorrectionError, generate_correction_suggestions
-from .codex_ocr_review import create_ocr_review_refs, generate_ocr_review
+from .codex_ocr_review import generate_ocr_review
 from .codex_access import CodexAccessError, require_codex_access
+from .scantailor import ScanTailorError, preprocess_images
+from urllib.parse import quote
 import os
 from django.conf import settings
 import json
+import logging
 import requests
 import time
 import mimetypes
@@ -137,6 +142,8 @@ def health(request):
 def upload(request):
     myfile = request.FILES['uploadedFiles']
     period = request.POST.get('period', 'secolulXX')  # Get period from request
+    if period not in PERIODS:
+        return JsonResponse({'code': 400, 'msg': 'Selectează o perioadă validă.'}, status=400)
     saveToCloud = False
     fs = FileSystemStorage()
     filename = fs.save(myfile.name, myfile)
@@ -144,31 +151,27 @@ def upload(request):
     uploaded_file_url = fs.url(filename)
     uploaded_file_path = settings.MEDIA_ROOT + '/' + filename
 
-    # Check if file is PDF - upload to period-specific folder
+    # Keep PDFs outside watched inboxes until the OCR worker checks its cache.
     if filename.lower().endswith('.pdf'):
-        # Create pdfs/period folder if not exists
-        pdf_folder = os.path.join(settings.MEDIA_ROOT, 'pdfs', period)
+        relative = 'pdfs/prepared/' + period + '/' + uuid.uuid4().hex + '/' + filename
+        pdf_folder = os.path.dirname(os.path.join(settings.MEDIA_ROOT, relative))
         os.makedirs(pdf_folder, exist_ok=True)
-        
-        # Move PDF to period-specific pdfs folder (replace if exists)
         pdf_path = os.path.join(pdf_folder, filename)
-        if os.path.exists(pdf_path):
-            os.remove(pdf_path)
         os.rename(uploaded_file_path, pdf_path)
         
         # Upload PDF to S3
-        s3_path_pdf = f'pdfs/{period}/{filename}'
+        s3_path_pdf = relative
         s3_url = s3_uploader.upload_file(pdf_path, s3_path_pdf)
         
         # Create DB record
-        File.objects.create(image=fs.url(f'pdfs/{period}/{filename}'))
+        File.objects.create(image=fs.url(relative))
         
         return JsonResponse({
             "code": 200, 
             "msg": "success", 
             "isPdf": True,
             "period": period,
-            "s3File": {"name": filename, "url": s3_url, "isPdf": True, "period": period}
+            "s3File": {"name": relative, "originalName": myfile.name, "url": s3_url, "isPdf": True, "period": period}
         })
 
     # Convert TIFF to PNG if required
@@ -190,7 +193,22 @@ def upload(request):
 def preprocess(request):
     # print(request.FILES['uploadedFile'])
     if request.method == 'POST':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return JsonResponse({"code": 400, "msg": "Cererea JSON este invalidă."}, status=400)
+        if not isinstance(data, dict):
+            return JsonResponse({"code": 400, "msg": "Cererea trebuie să fie un obiect JSON."}, status=400)
+        if data.get('preprocessWith') == 'ScanTailor' and data.get('preprocessMode', 'web') == 'web':
+            try:
+                processed = preprocess_images(data)
+            except ScanTailorError as exc:
+                return JsonResponse({"code": exc.status_code, "msg": str(exc)}, status=exc.status_code)
+            return JsonResponse({
+                "code": 200, "msg": "success", "preprocessedFiles": processed,
+                # Local URLs keep this engine independent of S3 availability.
+                "s3PreprocessedFiles": [settings.MEDIA_URL + quote(path, safe='/') for path in processed],
+            })
         preprocess_with = data['preprocessWith']
         files = data['sourceFiles']
         number_of_files = len(files)
@@ -198,39 +216,14 @@ def preprocess(request):
         preprocessedFiles = []
         s3PreprocessedFiles = []
         if preprocess_with == 'OpenCV':
-            preprocess_opencv = data['preprocessOpenCV']
-            pre_path = '/pre/OpenCV/'
-            if preprocess_opencv['setResolution']:
-                resolution = int(preprocess_opencv['resolution'])
-                for file in files:
-                    uploaded_file_path = settings.MEDIA_ROOT + \
-                                         '/' + file["name"]
-                    processed_file_path = settings.MEDIA_ROOT + \
-                                          pre_path + file["name"]
-                    process_image_for_ocr(
-                        uploaded_file_path, processed_file_path, resolution)
-                    s3_url = s3_uploader.upload_file(
-                        processed_file_path, 'pre/OpenCV/' + file["name"])
-                    preprocessedFiles.append('pre/OpenCV/' + file["name"])
-                    s3PreprocessedFiles.append(s3_url)
-                return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFiles,
-                                     "s3PreprocessedFiles": s3PreprocessedFiles})
-
-            else:
-                for file in files:
-                    uploaded_file_path = settings.MEDIA_ROOT + \
-                                         '/' + file["name"]
-                    processed_file_path = settings.MEDIA_ROOT + \
-                                          pre_path + file["name"]
-                    process_image_for_ocr(
-                        uploaded_file_path, processed_file_path)
-
-                    s3_url = s3_uploader.upload_file(
-                        processed_file_path, 'pre/OpenCV/' + file["name"])
-                    s3PreprocessedFiles.append(s3_url)
-                    preprocessedFiles.append('pre/OpenCV/' + file["name"])
-                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
-                                     "preprocessedFiles": preprocessedFiles})
+            try:
+                preprocessedFiles = preprocess_opencv(data, process_image_for_ocr)
+            except (ScanTailorError, ValueError, KeyError, TypeError) as exc:
+                return JsonResponse({"code": 400, "msg": str(exc)}, status=400)
+            s3PreprocessedFiles = [s3_uploader.upload_file(
+                os.path.join(settings.MEDIA_ROOT, path), path) for path in preprocessedFiles]
+            return JsonResponse({"code": 200, "msg": "success", "preprocessedFiles": preprocessedFiles,
+                                 "s3PreprocessedFiles": s3PreprocessedFiles})
 
         elif preprocess_with == 'FR':
             preprocess_fr = data['preprocessFR']
@@ -279,75 +272,10 @@ def preprocess(request):
                         preprocessedFiles.append('out/' + jpg_file)
                     return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
                                          "preprocessedFiles": preprocessedFiles})
-            elif data["preprocessMode"] == 'web':
-                pre_path = '/pre/ScanTailor/'
-                preprocess_scantailor = data['preprocessScanTailor']
-                for file in files:
-                    uploaded_file_path = settings.MEDIA_ROOT + \
-                                         '/' + file["name"]
-                    output_folder = settings.MEDIA_ROOT + pre_path
-                    command = preprocess_scantailor_cli(
-                        uploaded_file_path, preprocess_scantailor, output_folder)
-                    tiff_file = os.path.splitext(file["name"])[0] + '.tif'
-                    jpg_file = os.path.splitext(file["name"])[0] + '.jpg'
-
-                    os.system(command)
-                    tiff_to_jpg(output_folder + tiff_file)
-
-                    s3_url = s3_uploader.upload_file(
-                        output_folder + jpg_file, 'pre/ScanTailor/' + jpg_file)
-                    preprocessedFiles.append('pre/ScanTailor/' + jpg_file)
-                return JsonResponse({"code": 200, "msg": "success", "s3PreprocessedFiles": s3PreprocessedFiles,
-                                     "preprocessedFiles": preprocessedFiles})
         elif preprocess_with == 'Gimp':
             # TODO : Implement using Gimp
             pass
 
-    else:
-        return JsonResponse({"code": 500, "msg": "server error"})
-
-
-def ocr(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        try:
-            ocr_response = local_ocr(data, settings.MEDIA_ROOT)
-        except Exception as e:
-            print(f"[ocr] Eroare la procesarea OCR: {e}")
-            return JsonResponse(
-                {"code": 500, "msg": f"Eroare la procesarea OCR: {e}"},
-                status=500,
-            )
-
-        # FineReader uses the literal ASCII caret as a marker for an unknown
-        # glyph/artifact. It is not document content and must not reach the UI.
-        if isinstance(ocr_response, dict):
-            raw_ocr_results = ocr_response.get("ocrResults", [])
-        else:
-            raw_ocr_results = ocr_response
-        clean_ocr_results = [
-            remove_ocr_unknown_markers(text)
-            for text in raw_ocr_results
-        ]
-        ocr_review_refs = create_ocr_review_refs(data, len(clean_ocr_results))
-
-        # Handle both old format (list) and new format (dict with ocrResults and searchablePdfs)
-        if isinstance(ocr_response, dict):
-            return JsonResponse({
-                "code": 200, 
-                "msg": "success", 
-                "ocrResults": clean_ocr_results,
-                "searchablePdfs": ocr_response.get("searchablePdfs", []),
-                "ocrReviewRefs": ocr_review_refs,
-            })
-        else:
-            # Backwards compatibility
-            return JsonResponse({
-                "code": 200,
-                "msg": "success",
-                "ocrResults": clean_ocr_results,
-                "ocrReviewRefs": ocr_review_refs,
-            })
     else:
         return JsonResponse({"code": 500, "msg": "server error"})
 
@@ -392,48 +320,41 @@ def apply_additional_transliteration(text, translit_map):
     text = replace_k(text)
     return text
 
+def transliterate_texts(ocr_results, period, trans_options):
+    results = []
+    if period not in periodOptions:
+        raise ValueError("Perioada documentului nu este validă.")
+    for text in ocr_results:
+        response = requests.post(
+            "https://translitera.cc/ProcessServlet",
+            data={'cyrillicText': remove_ocr_unknown_markers(text),
+                  'period': periodOptions[period],
+                  'actualize': trans_options.get('actualizeWordForm', True)},
+            timeout=(10, 60))
+        response.raise_for_status()
+        value = response.text
+        if not value.strip() or value.lstrip().lower().startswith(('<!doctype html', '<html')):
+            raise ValueError("Serviciul de transliterare nu a returnat text valid. Reîncearcă.")
+        value = apply_additional_transliteration(value, transliteration_map)
+        if trans_options.get('useExceptionDictionary', True):
+            value = replace_all_exceptions(value)
+        results.append(value)
+    return results
+
+
 def transliterate(request):
-    if request.method == 'POST':
+    if request.method != 'POST':
+        return JsonResponse({'code': 405, 'msg': 'Metodă neacceptată.'}, status=405)
+    try:
         data = json.loads(request.body)
-        period = data['period']
-        alphabet = data['alphabet']
-        trans_options = data['transOptions']
-        ocr_results = data['ocrResults']
-        trans_results = []
+        texts = validate_ocr_results(data.get('ocrResults'), data.get('sourceFiles'))
+        results = transliterate_texts(texts, data['period'], data.get('transOptions', {}))
+        return JsonResponse({'code': 200, 'msg': 'success', 'transResults': results})
+    except (ValueError, KeyError, OcrNoTextError) as exc:
+        return JsonResponse({'code': 422, 'msg': str(exc)}, status=422)
+    except requests.RequestException:
+        return JsonResponse({'code': 503, 'msg': 'Serviciul de transliterare este temporar indisponibil. Reîncearcă.'}, status=503)
 
-        for ocr_result in ocr_results:
-            # Defensive fallback for sessions created before OCR cleanup was
-            # deployed or for clients that call this endpoint directly.
-            ocr_result = remove_ocr_unknown_markers(ocr_result)
-            payload = {
-                'cyrillicText': ocr_result,
-                'period': periodOptions[period],
-                'actualize': trans_options['actualizeWordForm']
-            }
-            try:
-                response = requests.post("https://translitera.cc/ProcessServlet", data=payload)
-                response.raise_for_status()  # Raise an error for bad status codes
-            except requests.RequestException as e:
-                return JsonResponse({"code": 500, "msg": f"Transliteration service error: {e}"})
-
-            trans_result = response.text
-
-            # Apply additional transliteration rules
-            trans_result = apply_additional_transliteration(trans_result, transliteration_map)
-            if trans_options.get('useExceptionDictionary', True):
-                trans_result = replace_all_exceptions(trans_result)
-            # Continue with existing processing
-            # if trans_options.get('removeHyphen', False):
-            #     text_no_hyphenation = remove_cratima_with_spacy_and_vocabulary(trans_result, vocabulary)
-            #     clean_text = replace_all_exceptions(text_no_hyphenation)
-            #     trans_result = clean_text  # Update trans_result for further processing
-            #
-            trans_results.append(trans_result)
-
-        return JsonResponse({"code": 200, "msg": "success", "transResults": trans_results})
-
-    else:
-        return JsonResponse({"code": 405, "msg": "Method not allowed"}, status=405)
 
 
 @never_cache
@@ -504,105 +425,3 @@ def codex_correct(request):
         "msg": "success",
         "suggestions": suggestions,
     })
-
-
-def publish(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        s3_source_files = data['s3SourceFiles']
-        s3_preprocessed_files = data['s3PreprocessedFiles']
-        period = data['period']
-        alphabet = data['alphabet']
-        trans_options = data['transOptions']
-        ocr_results = data['ocrResults']
-        trans_results = data['transResults']
-
-        # Check if s3_source_files is a list and concatenate into a single string
-        if isinstance(s3_source_files, list):
-            url_content = '\n'.join(f'[upl-image-preview url={url["url"]}]' for url in s3_source_files)
-        else:
-            url_content = f'[upl-image-preview url={s3_source_files}]'
-
-        # Check if s3_preprocessed_files is a list and concatenate into a single string
-        if isinstance(s3_preprocessed_files, list):
-            preprocessed_files_content = '\n'.join(f'[upl-image-preview url={url}]' for url in s3_preprocessed_files)
-        else:
-            preprocessed_files_content = s3_preprocessed_files
-
-        # Join ocr_results and trans_results with newline character
-        ocr_results_content = '\n'.join(ocr_results)
-        trans_results_content = '\n'.join(trans_results)
-
-        content = f'''{url_content}\n\n[chirilic]
-        {ocr_results_content}
-        [/chirilic]\n\n[transliterat]
-        {trans_results_content}[/transliterat]
-        
-        Informații adiționale:
-        Perioadă: {period}
-        Alfabet: {alphabet}
-        Opțiuni de transliterare: Object
-        Fișiere preprocesate: \n{preprocessed_files_content}
-        
-        '''
-
-        draft_data = {
-            "data": {
-                "type": "drafts",
-                "attributes": {
-                    "title": "Un document din secolul " + period,
-                    "content": content
-                },
-                "relationships": {
-                    "tags": {
-                        "data": []
-                    }
-                }
-            }
-        }
-
-        draft_endpoint = "https://digi.emoldova.org/api/drafts"
-
-        headers = {
-            'Host': 'digi.emoldova.org',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Content-Type': 'application/json; charset=utf-8',
-            'X-CSRF-Token': 'Y9kVHTyzihubcV3DHVxfbQlZZJijTAY3Rc9DWQhY',
-            'Connection': 'keep-alive',
-            'Referer': 'https://digi.emoldova.org/',
-            'Pragma': 'no-cache',
-            'Cache-Control': 'no-cache',
-            'TE': 'Trailers',
-            'Authorization': 'Token Eik9DFwbyxkZMptuFzfPdKHG2REm5syrzgDrcYGD',
-        }
-
-        try:
-            response = requests.post(
-                draft_endpoint, headers=headers, json=draft_data, timeout=30)
-        except requests.RequestException as e:
-            print(f"[publish] Serviciul de publicare este indisponibil: {e}")
-            return JsonResponse(
-                {"code": 503, "msg": f"Serviciul de publicare este indisponibil: {e}"},
-                status=503,
-            )
-
-        # Check the response
-        if response.status_code == 200 or response.status_code == 201:
-            print("Successfully created the article.")
-            try:
-                print(response.json())
-            except ValueError:
-                pass
-            return JsonResponse({"code": 200, "msg": "Successfully created the article."})
-        else:
-            print(f"Failed to create the article. Status code: {response.status_code}.")
-            try:
-                print(response.json())
-            except ValueError:
-                pass
-            return JsonResponse(
-                {"code": 500, "msg": f"Publicare eșuată (status {response.status_code})."},
-                status=500,
-            )
-    else:
-        return JsonResponse({"code": 500, "msg": "server error"})
