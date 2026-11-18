@@ -5,6 +5,7 @@ import json
 import logging
 import secrets
 import ntpath
+import uuid
 from datetime import timedelta
 
 from django.conf import settings
@@ -17,6 +18,7 @@ from .models import DigiJob
 from .ocr import local_ocr, validate_ocr_results, OcrError, OcrNoTextError, OcrTimeoutError
 from .scantailor import ScanTailorError
 from .codex_ocr_review import create_ocr_review_refs
+from . import gemini_ocr
 
 log = logging.getLogger(__name__)
 FILE_TIMEOUT_SECONDS = 300
@@ -35,6 +37,9 @@ def job_response(job, token=None, http_status=200):
             'elapsedSeconds': max(0, int((end - job.created_at).total_seconds())),
             'completedFiles': len(job.results), 'totalFiles': len(job.files),
             'timeoutSecondsPerFile': FILE_TIMEOUT_SECONDS}
+    body['ocrEngine'] = job.request_data.get('ocrEngine', 'local')
+    if job.status == 'error':
+        body['geminiFallback'] = {'available': gemini_ocr.available(), 'model': gemini_ocr.model_name()}
     if token:
         body['token'] = token
     if job.error_code == 'ocr_no_text':
@@ -78,18 +83,50 @@ def submit(request):
         return JsonResponse({'code': 400, 'msg': str(exc)}, status=400)
 
 
-@require_http_methods(['GET'])
-def status(request, job_id):
+def authorized_job(request, job_id):
     try:
         job = DigiJob.objects.get(pk=job_id, mode='ocr')
     except DigiJob.DoesNotExist:
-        return JsonResponse({'code': 404, 'msg': 'Cererea OCR nu există.'}, status=404)
+        return None, JsonResponse({'code': 404, 'msg': 'Cererea OCR nu există.'}, status=404)
     token = request.headers.get('Authorization', '').removeprefix('Bearer ')
     if not token or not hmac.compare_digest(hashlib.sha256(token.encode()).hexdigest(), job.token_hash):
-        return JsonResponse({'code': 403, 'msg': 'Acces neautorizat la cererea OCR.'}, status=403)
+        return None, JsonResponse({'code': 403, 'msg': 'Acces neautorizat la cererea OCR.'}, status=403)
     if job.expires_at <= timezone.now():
-        return JsonResponse({'code': 410, 'msg': 'Cererea OCR a expirat. Reia recunoașterea.'}, status=410)
+        return None, JsonResponse({'code': 410, 'msg': 'Cererea OCR a expirat. Reia recunoașterea.'}, status=410)
+    return job, None
+
+
+@require_http_methods(['GET'])
+def status(request, job_id):
+    job, error = authorized_job(request, job_id)
+    if error is not None:
+        return error
     return job_response(job)
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def retry_gemini(request, job_id):
+    parent, error = authorized_job(request, job_id)
+    if error is not None:
+        return error
+    try:
+        data = json.loads(request.body)
+    except (ValueError, UnicodeDecodeError):
+        data = None
+    if not isinstance(data, dict) or data.get('consent') is not True:
+        return JsonResponse({'code': 400, 'msg': 'Confirmă trimiterea documentelor către Google pentru OCR cu Gemini.'}, status=400)
+    if parent.status != 'error':
+        return JsonResponse({'code': 409, 'msg': 'Așteaptă finalizarea cererii OCR curente.'}, status=409)
+    if not gemini_ocr.available():
+        return JsonResponse({'code': 503, 'msg': 'Recunoașterea cu Gemini nu este disponibilă momentan.'}, status=503)
+    # A repeated POST after a lost response reuses this child, avoiding duplicate paid calls.
+    job, _ = DigiJob.objects.get_or_create(id=uuid.uuid5(parent.id, 'gemini-fallback'), defaults={
+        'mode': 'ocr', 'files': parent.files, 'results': parent.results,
+        'request_data': {**parent.request_data, 'ocrEngine': 'gemini',
+                         'fallbackOf': str(parent.id), 'geminiConsentAt': timezone.now().isoformat()},
+        'token_hash': parent.token_hash, 'expires_at': parent.expires_at})
+    return job_response(job, request.headers['Authorization'].removeprefix('Bearer '), 202)
 
 
 def process_job(job):
@@ -106,7 +143,10 @@ def process_job(job):
             for field in ('sourceFiles', 's3SourceFiles', 'preprocessedFiles'):
                 if isinstance(data.get(field), list):
                     data[field] = data[field][index:index + 1]
-            result = local_ocr(data, settings.MEDIA_ROOT, timeout=FILE_TIMEOUT_SECONDS)
+            if data.get('ocrEngine') == 'gemini':
+                result = gemini_ocr.transcribe(data, timeout=FILE_TIMEOUT_SECONDS)
+            else:
+                result = local_ocr(data, settings.MEDIA_ROOT, timeout=FILE_TIMEOUT_SECONDS)
             texts = validate_ocr_results(result.get('ocrResults') if isinstance(result, dict) else result, data['sourceFiles'])
             if len(texts) != 1:
                 raise OcrError('Motorul OCR nu a returnat un rezultat pentru fiecare fișier.')
@@ -118,6 +158,8 @@ def process_job(job):
         job.status, job.error, job.error_code = 'error', str(exc), 'ocr_no_text'
     except OcrTimeoutError as exc:
         job.status, job.error, job.error_code = 'error', str(exc), 'ocr_timeout'
+    except gemini_ocr.GeminiOcrError as exc:
+        job.status, job.error, job.error_code = 'error', str(exc), 'gemini_failed'
     except ScanTailorError as exc:
         job.status, job.error = 'error', str(exc)
         job.error_code = 'ocr_input' if exc.status_code == 400 else 'ocr_unavailable'

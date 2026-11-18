@@ -233,6 +233,12 @@ FINEREADER_SCANTAILOR_INPUT_DIRS = {
     for century in ('XVII', 'XVIII', 'XIX', 'XX')
 }
 
+# Optional OCR fallback; documents are sent only after explicit browser consent.
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+GEMINI_OCR_ENABLED = os.getenv('GEMINI_OCR_ENABLED', 'true').lower() in ('true', '1', 'yes')
+GEMINI_OCR_MODEL = os.getenv('GEMINI_OCR_MODEL', 'gemini-4-hydrogen')
+GEMINI_OCR_MAX_BYTES = 14 * 1024 * 1024
+
 # Local Codex CLI correction service. Corrections are returned for interactive
 # review only and are never persisted by the backend.
 CODEX_CLI_PATH = os.getenv('CODEX_CLI_PATH', default='codex')

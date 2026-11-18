@@ -1,5 +1,17 @@
 const aborted = () => Object.assign(new Error('Urmărirea OCR a fost oprită.'), { name: 'AbortError' });
 
+// Seed once with server elapsed time, then use one monotonic browser clock.
+// Never subtract a server timestamp from the user's wall clock.
+export const createOcrElapsedClock = (initialSeconds, now = () => performance.now()) => {
+  const initial = Number.isFinite(initialSeconds) ? Math.max(0, Math.floor(initialSeconds)) : 0;
+  const started = now();
+  let last = initial;
+  return () => {
+    last = Math.max(last, initial + Math.floor(Math.max(0, now() - started) / 1000));
+    return last;
+  };
+};
+
 export const waitForOcrPoll = (milliseconds, signal) => new Promise((resolve, reject) => {
   if (signal && signal.aborted) { reject(aborted()); return; }
   const cancel = () => { clearTimeout(timer); reject(aborted()); };

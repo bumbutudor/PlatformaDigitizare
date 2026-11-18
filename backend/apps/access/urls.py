@@ -18,6 +18,7 @@ urlpatterns = [
     path('preprocess/', preprocess),
     path('ocr/', ocr_jobs.submit),
     path('ocr/jobs/<uuid:job_id>/', ocr_jobs.status),
+    path('ocr/jobs/<uuid:job_id>/gemini/', ocr_jobs.retry_gemini),
     path('transliterate/', transliterate),
     path('codex-correct/', codex_correct),
     path('publish/', digi_bridge.publish),

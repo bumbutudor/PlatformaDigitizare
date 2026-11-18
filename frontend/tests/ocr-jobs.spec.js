@@ -1,5 +1,26 @@
 import assert from 'assert';
-import { pollOcrJob } from '../src/utils/OcrJobs';
+import { pollOcrJob, createOcrElapsedClock } from '../src/utils/OcrJobs';
+
+describe('OCR elapsed time', () => {
+  it('advances from server elapsed time using one monotonic clock', () => {
+    let now = 10000;
+    const elapsed = createOcrElapsedClock(6, () => now);
+    assert.strictEqual(elapsed(), 6);
+    now += 1100;
+    assert.strictEqual(elapsed(), 7);
+    now += 13000;
+    assert.strictEqual(elapsed(), 20);
+    now -= 1000;
+    assert.strictEqual(elapsed(), 20);
+  });
+
+  it('never begins with negative, invalid or fractional seconds', () => {
+    [-10, NaN, undefined, Infinity].forEach(value => {
+      assert.strictEqual(createOcrElapsedClock(value, () => 0)(), 0);
+    });
+    assert.strictEqual(createOcrElapsedClock(6.9, () => 0)(), 6);
+  });
+});
 
 describe('Asynchronous OCR jobs', () => {
   const job = { id: 'job-1', token: 'job-capability', status: 'queued', code: 202 };
