@@ -18,7 +18,7 @@
     "engines": {
       "fineReader": "Selected period/image-or-PDF HFT recognition, preprocessing and output settings, embedded/referenced models, and OCR adapter implementation. Runtime task timestamps/status are excluded. Unknown configurations bypass reuse.",
       "tesseract": "Executable, RTS_from_Cyrillic.traineddata and OCR adapter implementation.",
-      "gemini": "Configured model and adapter implementation including transcription prompt. Explicit fallback consent remains required."
+      "gemini": "Configured model, thinking level and adapter implementation including transcription prompt. Explicit fallback consent remains required."
     },
     "excluded": [
       "filename",

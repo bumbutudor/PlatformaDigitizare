@@ -237,6 +237,7 @@ FINEREADER_SCANTAILOR_INPUT_DIRS = {
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 GEMINI_OCR_ENABLED = os.getenv('GEMINI_OCR_ENABLED', 'true').lower() in ('true', '1', 'yes')
 GEMINI_OCR_MODEL = os.getenv('GEMINI_OCR_MODEL', 'gemini-4-hydrogen')
+GEMINI_OCR_THINKING_LEVEL = os.getenv('GEMINI_OCR_THINKING_LEVEL', 'medium')
 GEMINI_OCR_MAX_BYTES = 14 * 1024 * 1024
 
 OCR_CACHE_ENABLED = os.getenv('OCR_CACHE_ENABLED', 'true').lower() in ('true', '1', 'yes')

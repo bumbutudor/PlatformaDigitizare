@@ -48,6 +48,13 @@ def model_name():
     return getattr(settings, 'GEMINI_OCR_MODEL', 'gemini-4-hydrogen').removeprefix('models/')
 
 
+def thinking_level():
+    level = str(getattr(settings, 'GEMINI_OCR_THINKING_LEVEL', 'medium')).strip().lower()
+    if level not in ('low', 'medium', 'high', 'xhigh'):
+        raise GeminiOcrError('Nivelul de analiză Gemini configurat pe server este invalid.')
+    return level
+
+
 def source_path(data, index=0):
     """Prefer the original scan; all candidates must resolve within local media."""
     source = data['sourceFiles'][index]
@@ -107,7 +114,7 @@ def transcribe(data, timeout=300):
     payload = {'model': model_name(), 'input': [
         {'type': 'text', 'text': PROMPT}, document_part(source_path(data))],
         'store': False,
-        'generation_config': {'max_output_tokens': 65536, 'thinking_level': 'high'},
+        'generation_config': {'max_output_tokens': 65536, 'thinking_level': thinking_level()},
         'response_format': {'type': 'text', 'mime_type': 'application/json', 'schema': SCHEMA}}
     try:
         response = requests.post(API_URL, json=payload, headers={

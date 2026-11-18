@@ -11,13 +11,13 @@ from PIL import Image
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from . import gemini_ocr, ocr_jobs
+from . import gemini_ocr, ocr_jobs, ocr_cache
 from .models import DigiJob
 from .ocr import OcrNoTextError, OcrTimeoutError
 
 
 @override_settings(GEMINI_API_KEY='test-key-never-publish', GEMINI_OCR_ENABLED=True,
-                   GEMINI_OCR_MODEL='gemini-4-hydrogen')
+                   GEMINI_OCR_MODEL='gemini-4-hydrogen', GEMINI_OCR_THINKING_LEVEL='medium')
 class GeminiOcrTests(TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -54,6 +54,13 @@ class GeminiOcrTests(TestCase):
         self.assertFalse(payload['store'])
         self.assertNotIn('tools', payload)
         self.assertNotIn('test-key-never-publish', json.dumps(payload))
+        self.assertEqual(payload['generation_config']['thinking_level'], 'medium')
+
+    def test_thinking_level_separates_cached_results(self):
+        data = {**self.data, 'ocrEngine': 'gemini'}
+        medium = ocr_cache.identity(data)[1]
+        with override_settings(GEMINI_OCR_THINKING_LEVEL='high'):
+            self.assertNotEqual(ocr_cache.identity(data)[1], medium)
 
     @patch('apps.access.gemini_ocr.requests.post')
     def test_unreadable_or_incomplete_text_is_not_a_success(self, post):

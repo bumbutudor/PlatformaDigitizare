@@ -71,7 +71,8 @@ def _hotfolder_digest(path, size, modified):
 def engine_signature(data, path):
     from . import gemini_ocr, ocr
     if data.get('ocrEngine') == 'gemini':
-        return 'gemini:' + gemini_ocr.model_name() + ':' + model_file_digest(Path(gemini_ocr.__file__))
+        return ':'.join(('gemini', gemini_ocr.model_name(), gemini_ocr.thinking_level(),
+                         model_file_digest(Path(gemini_ocr.__file__))))
     implementation = model_file_digest(Path(ocr.__file__))
     if (data.get('ocrOptions') or {}).get('useTesseract'):
         import pytesseract
