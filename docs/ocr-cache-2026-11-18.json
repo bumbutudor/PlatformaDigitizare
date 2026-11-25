@@ -48,7 +48,9 @@
     "legacyDesktopLimit": "Files manually placed into the legacy watched media/out desktop ScanTailor folder can still trigger Hot Folder independently of the web cache."
   },
   "interface": {
-    "cachedFiles": "Response count and a visible result-reused notice in step 3.",
+    "cachedFiles": "Response count remains internal; the result-reused notice is hidden in step 3.",
+    "presentationUpdated": "2026-11-25",
+    "cachedResultLoading": "Successful cached results show Se încarcă textul... for at least five seconds from request start. Time already spent waiting counts toward this minimum; leaving the step cancels the wait. Errors and fresh OCR results have no artificial delay.",
     "forceOcr": "Refă OCR, fără a reutiliza rezultatul salvat. Forces a fresh execution and replaces the cache entry only after success.",
     "digi": "Simple Digi jobs use the same OCR cache; transliteration runs on the returned text with current dictionaries."
   },
@@ -91,6 +93,21 @@
     "deployment": {
       "publicBundleMatches": true,
       "publicBackendHealthHttp": 200
+    },
+    "presentationUpdate20261125": {
+      "frontendChecks": "12 OCR result, polling and timer tests passed",
+      "build": "npm run build-digitizare succeeded",
+      "browser": {
+        "pageErrors": [],
+        "ocrRequests": 1,
+        "loadingSeconds": 5.344,
+        "cacheMessageHidden": true,
+        "resultRevealedAfterLoading": true
+      },
+      "deployment": {
+        "publicBundleMatches": true
+      },
+      "backupDirectory": ".ops/ocr-cache-loading-20261125-072124"
     }
   },
   "deployment": {

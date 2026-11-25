@@ -87,14 +87,23 @@ describe('Empty OCR results', () => {
     assert.deepStrictEqual(getStore().searchablePdfs, []);
   });
 
-  it('reports reused results and lets the user request a fresh recognition', async () => {
+  it('loads cached results before revealing them and allows fresh recognition', async function () {
+    this.timeout(7000);
     const { step } = setup();
     let submitted;
     step.API.post = async (url, body) => {
       submitted = body;
       return { code: 200, ocrResults: ['text'], cachedFiles: body.forceOcr ? 0 : 1 };
     };
-    await step.handleOCRRequest();
+    const pending = step.handleOCRRequest();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.strictEqual(step.state.showLoader, true);
+    assert.strictEqual(step.state.jobStatus, 'loading');
+    assert.strictEqual(step.state.showNextStep, false);
+    assert.deepStrictEqual(step.state.ocrResults, []);
+    await pending;
+    assert.strictEqual(step.state.showLoader, false);
+    assert.strictEqual(step.state.showNextStep, true);
     assert.strictEqual(step.state.cachedFiles, 1);
     step.setState({ forceOcr: true });
     await step.handleOCRRequest();

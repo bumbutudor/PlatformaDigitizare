@@ -15,7 +15,7 @@ import { SERVICES } from '../utils/ServiceStatus';
 import { cleanOcrResults, hasOcrText } from '../utils/OcrText';
 import { buildOcrRequest, ocrFailureMessage } from '../utils/OcrModels';
 import CodexCorrectionReview from '../components/CodexCorrectionReview';
-import { pollOcrJob, createOcrElapsedClock } from '../utils/OcrJobs';
+import { pollOcrJob, createOcrElapsedClock, waitForOcrPoll } from '../utils/OcrJobs';
 
 // OCR
 export default class Step3 extends Component {
@@ -86,7 +86,6 @@ export default class Step3 extends Component {
     if (!data || !data.id || !data.token) return data; // Older backend compatibility during deployment.
     this.props.updateStore({ ocrJob: { ...data, requestSignature } });
     if (this._ocrUnmounted) return data;
-    this._ocrController = new AbortController();
     const elapsed = createOcrElapsedClock(data.elapsedSeconds);
     clearInterval(this._ocrTimer);
     this.setState({ elapsedSeconds: elapsed() });
@@ -155,6 +154,8 @@ export default class Step3 extends Component {
     if (this.state.showLoader) return;
     const offer = this.state.geminiOffer;
     if (useGemini && (!offer || !offer.available)) return;
+    const requestStarted = performance.now();
+    this._ocrController = new AbortController();
     // A failed rerun must not leave old text, review references or PDF links
     // available for the next step.
     const s3SourceFiles = this.state.s3SourceFiles.map(({ searchablePdfUrl, ...file }) => file);
@@ -193,13 +194,20 @@ export default class Step3 extends Component {
       : this.API.post(ocrEndpoint, postData);
     return submitting
       .then(data => this.awaitOcrJob(data, requestSignature))
-      .then((data) => {
+      .then(async (data) => {
         if (this._ocrUnmounted) return;
         const receipt = this.props.getStore().ocrJob;
-        this.props.updateStore({ ocrJob: null });
         const ocrResults = cleanOcrResults(data && data.ocrResults);
         const complete = ocrResults.length > 0 && ocrResults.length === this.state.sourceFiles.length;
         const hasResults = data && data.code === 200 && complete && ocrResults.every(hasOcrText);
+        // Give instant cache hits a short loading transition, counting time already spent waiting.
+        const loadingRemaining = 5000 - (performance.now() - requestStarted);
+        if (hasResults && data.cachedFiles > 0 && loadingRemaining > 0) {
+          this.setState({ jobStatus: 'loading' });
+          await waitForOcrPoll(loadingRemaining, this._ocrController.signal);
+          if (this._ocrUnmounted) return;
+        }
+        this.props.updateStore({ ocrJob: null });
         if (hasResults) {
           const ocrReviewRefs = Array.isArray(data.ocrReviewRefs)
             ? data.ocrReviewRefs
@@ -699,7 +707,7 @@ export default class Step3 extends Component {
                     {this.state.showLoader ? (
                       <>
                         <Spinner animation="border" />
-                        Are loc recunoașterea caracterelor...
+                        {this.state.jobStatus === 'loading' ? 'Se încarcă textul...' : 'Are loc recunoașterea caracterelor...'}
                       </>
                     ) : (
                       <>Start OCR</>
@@ -721,7 +729,7 @@ export default class Step3 extends Component {
               </div>
               {this.state.showLoader && (
                 <Alert variant="info" role="status">
-                  <strong>{this.state.jobStatus === 'processing'
+                  <strong>{this.state.jobStatus === 'loading' ? 'Se încarcă textul...' : this.state.jobStatus === 'processing'
                     ? (this.state.ocrEngine === 'gemini' ? 'Gemini recunoaște textul...' : 'Se recunoaște textul...')
                     : 'Cererea OCR așteaptă în coadă...'}</strong>
                   <div>Fișiere finalizate: {this.state.completedFiles} / {this.state.sourceFiles.length}</div>
@@ -750,10 +758,6 @@ export default class Step3 extends Component {
               )}
               {this.state.showNextStep && this.state.ocrEngine === 'gemini' && (
                 <Alert variant="info">Textul a fost obținut cu ajutorul Gemini. Verifică transcrierea înainte de a continua.</Alert>
-              )}
-              {this.state.showNextStep && this.state.cachedFiles > 0 && (
-                <Alert variant="success">Rezultat reutilizat pentru {this.state.cachedFiles} din {this.state.sourceFiles.length} fișiere.
-                  {' '}Documentul și configurația OCR coincid cu o procesare anterioară.</Alert>
               )}
               <ServiceGate
                 requiredServices={[SERVICES.FINEREADER]}
