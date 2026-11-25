@@ -11,9 +11,14 @@
 .idea/
 .tmp-chrome-*/
 /ngrok.txt
+/.ops/
+# Local licensed-software installer; never publish it with the project.
+/ABBYY_FineReader_PDF_15.exe
 
 # no thx
 frontend/node_modules
+integrations/**/node_modules/
+integrations/**/js/dist/
 frontend/coverage
 frontend/src/digitizare/dist
 frontend/npm-debug.log

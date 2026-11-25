@@ -217,6 +217,35 @@ HEALTH_CACHE_TTL = int(os.getenv('HEALTH_CACHE_TTL', default='12'))
 # Per-service network timeout (seconds) for health probes.
 HEALTH_PROBE_TIMEOUT = float(os.getenv('HEALTH_PROBE_TIMEOUT', default='5'))
 
+# Headless ScanTailor classic / compatible CLI. The GUI executable is not used.
+SCANTAILOR_CLI_PATH = os.getenv('SCANTAILOR_CLI_PATH', default='scantailor-cli')
+SCANTAILOR_ENABLED = os.getenv('SCANTAILOR_ENABLED', default='true').lower() in ('1', 'true', 'yes')
+SCANTAILOR_TIMEOUT = int(os.getenv('SCANTAILOR_TIMEOUT', default='120'))
+SCANTAILOR_MAX_FILES = int(os.getenv('SCANTAILOR_MAX_FILES', default='10'))
+SCANTAILOR_MAX_IMAGE_BYTES = 30 * 1024 * 1024
+SCANTAILOR_MAX_INPUT_PIXELS = 40_000_000
+SCANTAILOR_MAX_OUTPUT_PIXELS = 60_000_000
+
+# One input folder per model; ScanTailor, OpenCV and the Digi worker share these routes.
+FINEREADER_SCANTAILOR_INPUT_DIRS = {
+    'secolul' + century: os.getenv('FINEREADER_SCANTAILOR_' + century + '_INPUT',
+                                  os.path.join(MEDIA_ROOT, 'pre', 'OpenCV', 'secolul' + century))
+    for century in ('XVII', 'XVIII', 'XIX', 'XX')
+}
+
+# Optional OCR fallback; documents are sent only after explicit browser consent.
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+GEMINI_OCR_ENABLED = os.getenv('GEMINI_OCR_ENABLED', 'true').lower() in ('true', '1', 'yes')
+GEMINI_OCR_MODEL = os.getenv('GEMINI_OCR_MODEL', 'gemini-4-hydrogen')
+GEMINI_OCR_THINKING_LEVEL = os.getenv('GEMINI_OCR_THINKING_LEVEL', 'medium')
+GEMINI_OCR_MAX_BYTES = 14 * 1024 * 1024
+
+OCR_CACHE_ENABLED = os.getenv('OCR_CACHE_ENABLED', 'true').lower() in ('true', '1', 'yes')
+OCR_CACHE_DAYS = max(1, int(os.getenv('OCR_CACHE_DAYS', '7')))
+OCR_CACHE_REVISION = os.getenv('OCR_CACHE_REVISION', 'ocr-cache-v1')
+FINEREADER_HOTFOLDER_CONFIG_DIR = os.getenv('FINEREADER_HOTFOLDER_CONFIG_DIR', os.path.join(
+    os.getenv('LOCALAPPDATA', os.path.expanduser('~')), 'ABBYY', 'FineReader', '15', 'HotFolder'))
+
 # Local Codex CLI correction service. Corrections are returned for interactive
 # review only and are never persisted by the backend.
 CODEX_CLI_PATH = os.getenv('CODEX_CLI_PATH', default='codex')

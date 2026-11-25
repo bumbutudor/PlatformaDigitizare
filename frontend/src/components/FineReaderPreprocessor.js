@@ -6,8 +6,6 @@ import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
 import RangeSlider from "react-bootstrap-range-slider";
 import Form from "react-bootstrap/Form";
-import Col from "react-bootstrap/esm/Col";
-import Row from "react-bootstrap/esm/Row";
 
 
 const FineReaderPreprocessor = (props) => {

@@ -1,4 +1,35 @@
 from django.db import models
+import uuid
+
+
+class DigiJob(models.Model):
+    """Durable work submitted by the authenticated Digi integration."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    mode = models.CharField(max_length=16)
+    status = models.CharField(max_length=20, default='queued', db_index=True)
+    token_hash = models.CharField(max_length=64)
+    files = models.JSONField(default=list)
+    results = models.JSONField(default=list)
+    publication = models.JSONField(default=dict)
+    error = models.TextField(blank=True)
+    request_data = models.JSONField(default=dict)
+    error_code = models.CharField(max_length=32, blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField()
+
+
+class OcrCacheEntry(models.Model):
+    """Validated machine output keyed by document bytes and recognition configuration."""
+    key = models.CharField(max_length=64, primary_key=True)
+    text = models.TextField()
+    pdf_path = models.CharField(max_length=1024, blank=True)
+    pdf_digest = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField()
+    expires_at = models.DateTimeField(db_index=True)
 # from multiselectfield import MultiSelectField
 
 # PERIOD_CHOICES = (('1', 'Secolul XX'), ('2', 'Secolul XIX'),

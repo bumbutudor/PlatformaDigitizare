@@ -121,28 +121,6 @@ def remove_noise_and_smooth(file_name):
     return or_image
 
 
-def preprocess_scantailor_cli(input_file, options, output):
-    dpi = str(options['resolution'])
-    threshold = str(options['threshold'])
-    color_mode = options['colorMode']
-    white_margins = str(options['whiteMargins']).lower()
-    despeckle = options['despeckle']
-    orientation = " --orientation=" + options['orientation']
-    if options['orientation'] == 'none':
-        orientation = ''
-    content_detection = options['contentDetection']
-    normalize_illumination = str(options['normalizeIllumination']).lower()
-
-    # command = "scantailor-cli --dpi=" + dpi + " --normalize-illumination=" + normalize_illumination + " --content-detection=" + content_detection + orientation + " --despeckle=" + \
-    #     despeckle + " --white-margins=" + white_margins + " --color-mode=" + color_mode + \
-    #     " --threshold=" + threshold + " --output-dpi=" + \
-    #     dpi + " " + input_file + " " + output
-
-    command = "scantailor-cli --dpi= " + dpi + input_file + " " + output
-
-    return command
-
-
 def tiff_to_jpg(input_file):
     read = cv2.imread(input_file)
     outfile = input_file.split('.')[0] + '.jpg'

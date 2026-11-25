@@ -16,6 +16,7 @@ export const SERVICES = {
   PUBLISH: "publish",
   S3: "s3",
   CODEX: "codex",
+  SCANTAILOR: "scantailor",
   BACKEND: "backend", // synthetic - represents the Django server itself
 };
 
@@ -26,6 +27,7 @@ const FALLBACK_LABELS = {
   publish: "Publicare",
   s3: "Stocare (S3)",
   codex: "Codex CLI (experimental)",
+  scantailor: "ScanTailor CLI",
   backend: "Server (backend)",
 };
 

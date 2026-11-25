@@ -1,0 +1,105 @@
+{
+  "date": "2026-11-18",
+  "scope": "Verificarea instalării FineReader, a modelelor și a fluxului OCR după restartul Windows.",
+  "finereader": {
+    "previousVersion": "15.0.113.3886",
+    "installedVersion": "15.0.116.6782",
+    "release": 8,
+    "edition": "Corporate",
+    "activationConfirmedByUser": true,
+    "restartPerformed": true,
+    "officialLicenseParameterRefresh": "successful",
+    "ocrEditorAvailable": true,
+    "hotFolderAvailable": true,
+    "extendedCli": {
+      "automaticExportWorking": false,
+      "testedAfterRestart": true,
+      "testedAfterLicenseRefresh": true,
+      "testInput": "Imagine sintetică locală, cu text englezesc lizibil.",
+      "commandTemplate": "FineCmd.exe <input.png> /lang English /out <result.txt> /report <report.xml>",
+      "observedOperations": [
+        "TaskAutomation.OpenImagesOperation",
+        "TaskAutomation.RecognizeOperation",
+        "TaskAutomation.DocumentSynthesisOperation"
+      ],
+      "outputTxtCreated": false,
+      "conclusion": "Recunoașterea rulează, dar raportul nu conține etapa de export și fișierul TXT nu este creat. Instalarea activă nu oferă încă export CLI funcțional.",
+      "entitlement": "Trebuie confirmat explicit dreptul Extended CLI. Parametrii afișați confirmă Corporate, OCR Editor și Hot Folder, fără o opțiune CLI explicită.",
+      "customModelGuiCliParity": "Nu poate fi validată până când exportul automat CLI funcționează.",
+      "reference": "https://support.abbyy.com/hc/en-us/articles/360021686880-Conversion-comparison-results-are-not-saved-when-using-command-line-in-FineReader-PDF"
+    }
+  },
+  "preservation": {
+    "preUpgradeBackupVerified": true,
+    "validHotFolderConfigurations": 12,
+    "modelAndProjectFilesComparedToBackup": 120,
+    "allComparedFilesUnchanged": true,
+    "backupAndLicenseFilesKeptLocal": true
+  },
+  "hotFolderReferenceTest": {
+    "input": "Aceeași imagine preprocesată, verificată înainte și după restart; test exclusiv local.",
+    "results": [
+      {"period": "secolulXVII", "recognizedCharacters": 5001, "txtIdenticalBeforeAndAfterRestart": true},
+      {"period": "secolulXVIII", "recognizedCharacters": 3919, "txtIdenticalBeforeAndAfterRestart": true},
+      {"period": "secolulXIX", "recognizedCharacters": 2876, "txtIdenticalBeforeAndAfterRestart": true},
+      {"period": "secolulXX", "recognizedCharacters": 4892, "txtIdenticalBeforeAndAfterRestart": true}
+    ],
+    "comparison": "Fișiere TXT identice octet cu octet pentru toate cele patru modele.",
+    "qualityLimit": "Testul confirmă păstrarea comportamentului pe imaginea de referință, nu acuratețea pe orice document. Mostra brută 401.jpg a produs text gol; calitatea intrării și adecvarea modelului rămân relevante.",
+    "finalTaskState": "Toate cele 12 task-uri erau Watching la inspecția finală."
+  },
+  "webVerification": {
+    "site": "https://digitizare.math.md/",
+    "uploadedInputs": "Numai pagini sintetice generate pentru test. Documentele reale existente au fost testate exclusiv local.",
+    "secolulXX": {
+      "uploadHttpStatus": 200,
+      "openCvPreprocessHttpStatus": 200,
+      "ocrHttpStatus": 200,
+      "recognizedTextVisible": true,
+      "pdfDownloadVerified": true,
+      "browserTxtDownload": "OCR.txt",
+      "downloadedTextMatchesOcr": true
+    },
+    "secolulXIX": {
+      "model": "Epistolariul românesc, 1841",
+      "uploadHttpStatus": 200,
+      "openCvPreprocessHttpStatus": 200,
+      "ocrHttpStatus": 200,
+      "recognizedTextVisible": true,
+      "qualityAssessment": "Verificare funcțională a rutei; textul sintetic nu constituie o evaluare a acurateței modelului istoric."
+    },
+    "emptyPage": {
+      "period": "secolulXVIII",
+      "httpStatus": 422,
+      "errorCode": "ocr_no_text",
+      "messageVisible": true,
+      "filenameIncludedInMessage": true,
+      "retryEnabled": true,
+      "successNavigationNotShown": true
+    },
+    "chromeLocalNetworkPermission": "Profilul temporar de test a necesitat permisiunea local-network-access pentru site, deoarece DNS-ul Tailscale rezolvă backend-ul la o adresă locală. Profilul utilizatorului și setările de producție nu au fost modificate.",
+    "observedOcrWaitSeconds": {"minimum": 20.6, "maximum": 116.3},
+    "timingContext": "Teste suprapuse; cele patru modele urmăresc același folder OpenCV, iar preluarea este periodică."
+  },
+  "restartDiagnosis": {
+    "timeZone": "Europe/Bucharest",
+    "restartRequestedAt": "13:51:44",
+    "nextRecordedWindowsBootAt": "15:36:10",
+    "anyDeskConnectedAt": "15:36:24",
+    "windowsRecordedUncleanShutdown": true,
+    "administratorDiagnosticsRead": true,
+    "exactCauseEstablished": false,
+    "assessment": "Prima repornire nu s-a încheiat normal. După intervenția fizică, AnyDesk a revenit automat în aproximativ 14 secunde de la pornirea Windows. Jurnalele disponibile nu identifică motivul blocajului inițial.",
+    "additionalRestartAttempted": false
+  },
+  "cleanup": {
+    "generatedTestFilesArchivedLocally": 141,
+    "archiveHashesVerified": true,
+    "permanentDeletions": 0,
+    "originalSamplesAndUploadedOriginalsPreserved": true
+  },
+  "remaining": [
+    "Confirmarea sau activarea dreptului Extended CLI la ABBYY, urmată de testarea exportului și a modelelor personalizate.",
+    "Verificarea fiabilității restartului într-un test controlat, cu acces fizic disponibil."
+  ]
+}

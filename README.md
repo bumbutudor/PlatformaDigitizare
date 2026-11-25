@@ -108,3 +108,152 @@ Pentru a invalida toate sesiunile și a genera o cheie nouă:
 Dacă `CODEX_ACCESS_KEY` este definită în `.env` sau în environment, rotația se
 face acolo, urmată de repornirea backend-ului; comanda `--rotate` va refuza să
 creeze o cheie concurentă în fișier.
+
+## ScanTailor pe server, în pasul 2
+
+Implementarea a fost verificată pe Windows cu `C:\ScanTailor\scantailor-cli.exe`,
+versiunea **0.9.11.1**. Executabilul se găsește prin PATH sau se configurează în
+`backend/.env`: `SCANTAILOR_CLI_PATH=C:\ScanTailor\scantailor-cli.exe`.
+`SCANTAILOR_ENABLED=false` dezactivează acest motor. Diagnosticul `/health/`
+afișează disponibilitatea și versiunea CLI.
+
+Formularul permite DPI sursă și rezultat separate, culoare, orientare,
+îndreptare automată/unghi manual, încadrare, detectarea conținutului, margini în
+mm, aliniere, eliminarea punctelor, grosimea textului, uniformizarea iluminării
+și corectarea curburii. Se încarcă o pagină per imagine; împărțirea unei imagini
+în două pagini și PDF-urile nu sunt acceptate de acest adaptor. Rezultatele sunt
+PNG fără pierderi, în directoare distincte pentru fiecare cerere.
+
+### Diferențe CLI/UI reproduse pe această mașină
+
+- `--deskew=auto` produce în realitate `mode="manual"`, unghi zero. Omiterea
+  argumentului păstrează modul automat; pe `samples/5.jpg` a detectat −1°.
+- Toate valorile `--despeckle` testate produc `despeckleLevel=""` în proiectul
+  salvat; `--dewarping=auto` rămâne `off`, iar `--depth-perception=1.5` rămâne 2.
+- `--orientation=none` este documentat în help, dar este respins de parser.
+- Culoarea trebuie specificată explicit prin CLI și când se citește un proiect;
+  altfel executabilul testat o resetează la alb-negru.
+
+Adaptorul generează intern un proiect `.ScanTailor` cu setările de output în
+formatul UI și îl procesează cu CLI. Nu transmite opțiunile defectuoase de
+despeckle/dewarping/depth, omite deskew pentru modul automat și orientation
+pentru lipsa rotirii. Culoarea și geometria sunt transmise explicit, împreună cu
+etapele 1–6. Nu se acceptă proiecte XML arbitrare de la client.
+
+Testele cu executabilul real recitesc proiectul salvat de CLI pentru a verifica
+modul de îndreptare, unghiul, marginea, alinierea, DPI, culoarea, grosimea textului,
+despeckle și dewarping. Aceste verificări nu demonstrează identitate pixel cu
+pixel cu un export UI sau cu Advanced/Universal; ajustările manuale ale zonelor
+și ale grilei de dewarping din UI nu sunt implementate în formular.
+
+Istoric relevant: [autorul Advanced despre CLI-ul nefuncțional în 2017](https://github.com/4lex4/scantailor-advanced/issues/1),
+[implementarea îndreptării în CLI clasic](https://github.com/scantailor/scantailor/blob/master/ConsoleBatch.cpp).
+Raportul despre filtrele implicite greșite din 0.9.12.2 nu s-a reprodus în
+executabilul local 0.9.11.1, care a executat toate cele șase etape și fără aceste
+două argumente. Le păstrăm explicite pentru predictibilitate.
+
+Limitele implicite sunt 10 imagini/cerere, 30 MB/imagine, 40 milioane pixeli la
+intrare, 60 milioane pixeli estimați/la ieșire și 120 secunde/cerere. Un singur
+job rulează per proces Django; cererile concurente primesc 429 și pot fi reluate.
+`SCANTAILOR_TIMEOUT` și `SCANTAILOR_MAX_FILES` sunt configurabile.
+
+### ABBYY Hot Folder: configurația verificată la 18 noiembrie 2026
+
+Configurația completă, cu căi absolute și numele fișierelor `.hft`, este în
+[snapshot-ul JSON](docs/hotfolder-windows-2026-11-18.json). Cele 12 task-uri
+sunt programate `everyMinute` și păstrează sursele (`postProcessAction=nothing`).
+Starea din fișierul `.hft` poate diferi de starea afișată în aplicație.
+
+Căile de mai jos sunt relative la
+`C:\Users\tudor\Desktop\PlatformaDigitizare\backend\media\`.
+
+| Task | Intrare | Ieșire | Formate |
+|---|---|---|---|
+| FR_Preprocessing | `media` (fără subfoldere) | `pre\FR` | JPG, numai preprocesare |
+| SecXX_preFR | `pre\FR` | `ocr\secolulXX\cyrillic` | TXT, DOCX, PDF căutabil |
+| SecXX_PDF | `pdfs\secolulXX` | `ocr\secolulXX\cyrillic` | TXT, DOCX, PDF căutabil |
+| SecXX_OpenCV | `pre\OpenCV` | `ocr\secolulXX\cyrillic` | TXT, DOCX, PDF căutabil |
+| SecXVIII_Geografie_ScanTailor | `out` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
+| SecXVIII_Geografie_preFR | `pre\FR` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
+| SecXVIII_Geografie_OpenCV | `pre\OpenCV` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
+| SecXVIII_Geografie_PDF | `pdfs\secolulXVIII` | `ocr\secolulXVIII` | TXT, DOCX, PDF căutabil |
+| SecXVII_PDF | `pdfs\secolulXVII` | `ocr\secolulXVII` | TXT, DOCX, PDF căutabil |
+| SecXVII_OpenCV | `pre\OpenCV` | `ocr\secolulXVII` | TXT, DOCX, PDF căutabil |
+| SecXIX_Epistolariu_OpenCV | `pre\OpenCV` | `ocr\secolulXIX\cyrillicRomanian` | Numai TXT |
+| SecXIX_Epistolariu_PDF | `pdfs\secolulXIX` | `ocr\secolulXIX\cyrillicRomanian` | Numai TXT |
+
+În tabel, intrarea `media` înseamnă rădăcina însăși. Toate task-urile OCR includ
+subfolderele; task-ul de preprocesare nu le include, evitând reintroducerea
+rezultatelor în același circuit. `pre\FR` are OCR numai pentru XVIII și XX;
+pentru XVII și XIX se folosește OpenCV sau ScanTailor.
+
+Imaginile ScanTailor sunt copiate atomic, cu nume unice, în `out` pentru XVIII
+și `pre\OpenCV` pentru XVII/XIX/XX. Pe această mașină, `.env` configurează
+`FINEREADER_SCANTAILOR_XVII_INPUT` către `pre\OpenCV`; valoarea implicită din
+cod rămâne goală pentru serverele fără un astfel de task. Folderul OpenCV este
+comun celor patru modele, deci fiecare imagine este recunoscută de patru ori.
+Această configurație este provizorie și poate mări timpul de răspuns.
+
+Căile se pot modifica prin `FINEREADER_SCANTAILOR_XVII_INPUT`,
+`FINEREADER_SCANTAILOR_XVIII_INPUT`, `FINEREADER_SCANTAILOR_XIX_INPUT` și
+`FINEREADER_SCANTAILOR_XX_INPUT`. Variabilele nu creează task-uri ABBYY.
+Tesseract primește direct PNG-ul procesat când este selectat.
+
+Task-ul Windows `Digitizare Server` execută `scripts/start_server.py` la
+conectarea utilizatorului `tudor`, pornind Hot Folder și Django. A fost testată
+pornirea efectivă a backend-ului prin acest task. Fără autentificarea Windows,
+Hot Folder nu poate procesa; autentificarea automată nu este configurată.
+Sleep-ul este dezactivat la alimentarea din priză.
+
+### Arhivare și publicare
+
+`Digitizare Archive Old Media` rulează zilnic la 03:00 și recuperează execuțiile
+ratate când sesiunea este disponibilă. Rulează
+`scripts/cleanup_media.py --apply --days 7`. Scriptul mută rezultatele vechi din
+`ocr`, `pre`, `out`, `pdfs` în `.ops/media-archive/<data>/`, păstrând structura
+și un manifest JSONL. Nu șterge permanent și nu golește arhiva. Exclude
+fișierele referite în baza de date, fișierele urmărite în Git, modelele,
+arhivele și materialele video.
+Fără `--apply`, afișează doar numărul și volumul fișierelor eligibile.
+
+Arhivarea inițială a păstrat 13.077 fișiere (608.613.324 octeți) în
+`.ops/media-archive/20261117-203352-233273`. Cele 14 configurații `.hft` vechi
+pline cu zerouri au fost mutate în `.ops/hotfolder-20261117/invalid-configs`;
+configurațiile și istoricul complet anterior sunt în backup-urile alăturate.
+
+Frontend-ul se construiește cu `npm run build-digitizare` din `frontend`.
+Comanda așteaptă terminarea webpack și copierea tuturor fișierelor în `docs`.
+Publicarea folosește sesiunea WinSCP locală `tudor@digitizare.math.md`, către
+`/var/www/digitalizare`. Se copiază `index.html`, `main.js`, `runtime-config.js`
+și `dist/bundle.js`. Versiunea anterioară este păstrată în `.ops/frontend-before`.
+Fișierele publicate au fost comparate cu build-ul local și sunt identice.
+
+Verificări pe API-ul public la 18 noiembrie: pagina `samples/5.jpg`, cu spații
+în numele încărcat, a produs text și PDF prin XX/OpenCV (aproximativ 72 s).
+Aceeași imagine preprocesată a produs text prin XIX/Epistolariu, XVII și XVIII.
+Conversia ei într-un PDF de o pagină a verificat task-urile PDF XVIII (49 s,
+text și PDF) și XIX (28 s, text). Preprocesarea FineReader a întors JPG.
+Un rezultat intenționat absent a întors HTTP 500 după 120 s, cu numele
+fișierului în mesaj. Acestea verifică rutele, nu acuratețea modelelor; ABBYY
+poate exporta TXT gol când nu detectează zone de text într-o imagine.
+
+Rezultatele fără text (inclusiv un TXT care conține numai BOM, spații sau
+marcaje ABBYY pentru caractere necunoscute) sunt raportate de API prin HTTP 422,
+`error: "ocr_no_text"`, cu numele fișierelor afectate. Nu sunt returnate ca
+rezultate reușite sau PDF-uri căutabile. Interfața afișează mesajul modelului,
+permite reîncercarea și blochează pasul următor inclusiv pentru loturi în care
+doar unele imagini nu au text. Un rezultat vechi nu este păstrat după o
+reîncercare eșuată. TXT-urile FineReader trebuie să nu mai fie modificate timp
+de două secunde înainte de citire, pentru a evita verificarea unui fișier
+încă în curs de scriere.
+
+Verificare backend, din `backend` (PowerShell):
+
+```powershell
+$env:SCANTAILOR_INTEGRATION = '1'
+.\venv\Scripts\python.exe manage.py test apps.access.tests apps.access.test_ocr apps.access.test_scantailor --noinput
+```
+
+Fără variabila `SCANTAILOR_INTEGRATION`, testul care pornește executabilul este
+omis; celelalte teste folosesc directoare temporare și nu trimit fișiere către
+Hot Folder-ul real.
